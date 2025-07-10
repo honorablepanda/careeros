@@ -1,10 +1,7 @@
-import React from 'react';
-import { render } from '@testing-library/react';
-import Page from '../src/app/page';
+import { render, screen } from '@testing-library/react';
+import Home from '../src/app/page';
 
-describe('Page', () => {
-  it('should render successfully', () => {
-    const { baseElement } = render(<Page />);
-    expect(baseElement).toBeTruthy();
-  });
+test('renders welcome text', () => {
+  render(<Home />);
+  expect(screen.getByText(/welcome/i)).toBeInTheDocument();
 });

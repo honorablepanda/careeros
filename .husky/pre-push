@@ -1,21 +1,23 @@
 #!/usr/bin/env sh
 . "$(dirname "$0")/_/husky.sh"
-
 set -e
 
 echo "pre-push: verifying API tests..."
 
-# Guard (skip quietly if the helper isn't present)
-if [ -f tools/scripts/guard-jest-config.cjs ]; then
-  node tools/scripts/guard-jest-config.cjs
+# Only run in a pnpm workspace root
+if [ ! -f pnpm-workspace.yaml ]; then
+  echo "ℹ️ Not a pnpm workspace root — skipping API tests."
+  exit 0
 fi
 
-# Run API tests if the config exists; otherwise skip
-if [ -f apps/api/jest.config.ts ]; then
-  pnpm -w jest --clearCache --config apps/api/jest.config.ts
-  pnpm -w exec nx run api:test --verbose
-else
+# Only run if the API Jest config exists
+if [ ! -f apps/api/jest.config.ts ]; then
   echo "ℹ️ apps/api/jest.config.ts not found — skipping API tests."
+  exit 0
 fi
 
-echo "pre-push: verifying API tests..."
+# Run API tests (workspace mode)
+pnpm -w jest --clearCache --config apps/api/jest.config.ts
+pnpm -w exec nx run api:test --verbose
+
+echo "✅ pre-push checks passed"

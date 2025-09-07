@@ -7,7 +7,8 @@
   "scripts": {
     "prepare": "husky install",
     "test:api": "pnpm -w jest --clearCache --config apps/api/jest.config.ts && pnpm -w exec nx run api:test --verbose",
-    "test:api:guarded": "node tools/scripts/guard-jest-config.cjs && pnpm run test:api"
+    "test:api:guarded": "node tools/scripts/guard-jest-config.cjs && pnpm run test:api",
+    "test": "echo No root tests; use pnpm run test:api"
   },
   "devDependencies": {
     "husky": "^8.0.0"

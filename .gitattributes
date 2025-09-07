@@ -1,10 +1,6 @@
 * text=auto
-
-# Keep shell scripts LF so Husky/sh don’t choke on Windows
 *.sh text eol=lf
 .husky/* text eol=lf
-
-# Common text files as LF (prevents churn in PRs)
 *.ts   text eol=lf
 *.tsx  text eol=lf
 *.js   text eol=lf

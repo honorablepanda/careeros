@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname "$0")/_/husky.sh"
+
+set -e
+
+echo "pre-push: verifying API tests..."
+
+# Guard (skip quietly if the helper isn't present)
+if [ -f tools/scripts/guard-jest-config.cjs ]; then
+  node tools/scripts/guard-jest-config.cjs
+fi
+
+# Run API tests if the config exists; otherwise skip
+if [ -f apps/api/jest.config.ts ]; then
+  pnpm -w jest --clearCache --config apps/api/jest.config.ts
+  pnpm -w exec nx run api:test --verbose
+else
+  echo "ℹ️ apps/api/jest.config.ts not found — skipping API tests."
+fi
+
+echo "pre-push: verifying API tests..."

@@ -17,7 +17,7 @@ describe('AppService', () => {
 
   it('should return an array of users', async () => {
     const mockUsers = [{ id: '1', email: 'test@example.com', name: 'Test User', createdAt: new Date() }];
-    jest.spyOn(prismaService.user, 'findMany').mockResolvedValue(mockUsers);
+    jest.spyOn(prismaService.application, 'findMany').mockResolvedValue(mockUsers);
 
     expect(await service.getUsers()).toEqual(mockUsers);
   });

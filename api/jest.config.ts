@@ -1,12 +1,17 @@
 const { pathsToModuleNameMapper } = require('ts-jest');
 const { compilerOptions } = require('../tsconfig.base.json');
-export default {
-  displayName: 'api',
-  preset: '../jest.preset.js',
+
+/** @type {import('jest').Config} */
+module.exports = {
+  rootDir: '.',
   testEnvironment: 'node',
-  transform: {
-    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
-  },
-  moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../coverage/api',
+  preset: 'ts-jest',
+  transformIgnorePatterns: ['node_modules/(?!(?:@trpc|tslib)/)'],
+  setupFilesAfterEnv: ['<rootDir>/test/jest.setup.ts'],
+  moduleNameMapper: Object.assign(
+    {},
+    pathsToModuleNameMapper(compilerOptions.paths || {}, { prefix: '<rootDir>/../' }),
+    { '^@prisma/client$': '<rootDir>/test/prisma.mock.ts' }
+  ),
+  roots: ['<rootDir>/src', '<rootDir>/test'],
 };

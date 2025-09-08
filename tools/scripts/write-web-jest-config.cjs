@@ -1,4 +1,7 @@
-const nextJest = require('next/jest');
+const fs = require('fs');
+const path = require('path');
+
+const out = `const nextJest = require('next/jest');
 
 const createJestConfig = nextJest({
   dir: './',
@@ -19,3 +22,8 @@ const config = {
 };
 
 module.exports = createJestConfig(config);
+`;
+
+const p = path.join(process.cwd(), 'web', 'jest.config.ts');
+fs.writeFileSync(p, out, 'utf8');
+console.log('✓ wrote web/jest.config.ts');

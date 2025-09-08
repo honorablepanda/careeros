@@ -6,7 +6,9 @@
     "prepare": "husky",
     "test:api": "pnpm -w jest --clearCache --config api/jest.config.ts && pnpm -w exec nx run api:test --verbose",
     "test:api:guarded": "node tools/scripts/guard-jest-config.cjs && pnpm run test:api",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "test:web": "pnpm -w exec nx run web:test --skip-nx-cache --verbose",
+    "test": "pnpm run test:api && pnpm run test:web"
   },
   "private": true,
   "devDependencies": {

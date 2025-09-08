@@ -1,0 +1,24 @@
+name: ci
+on:
+  push: { branches: [ "**" ] }
+  pull_request: { branches: [ "**" ] }
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'pnpm' }
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
+      - name: Install dependencies
+        run: pnpm -w install --frozen-lockfile
+      - name: Type check
+        run: pnpm -w tsc -b
+      - name: Unit tests (API)
+        run: pnpm run test:api:guarded
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      - name: E2E tests
+        run: pnpm run test:e2e
+        env: { NODE_ENV: test }

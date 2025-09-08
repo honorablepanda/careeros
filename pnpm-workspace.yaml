@@ -1,0 +1,10 @@
+packages:
+  - api
+  - api-e2e
+  - web
+  - web-e2e
+  - shared/*
+  - tools/*
+
+onlyBuiltDependencies:
+  - '@prisma/client'

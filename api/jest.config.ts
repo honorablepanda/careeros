@@ -1,3 +1,5 @@
+const { pathsToModuleNameMapper } = require('ts-jest');
+const { compilerOptions } = require('../../tsconfig.base.json');
 export default {
   displayName: 'api',
   preset: '../jest.preset.js',

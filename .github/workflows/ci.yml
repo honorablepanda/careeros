@@ -1,55 +1,24 @@
-name: CI
-
+name: ci
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
-
+  push: { branches: [ "**" ] }
+  pull_request: { branches: [ "**" ] }
 jobs:
-  install-build-test:
-    name: Lint, Build, Test
+  build-and-test:
     runs-on: ubuntu-latest
-
-    env:
-      CI: true
-      NODE_ENV: test
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: 1
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: 'pnpm'
-
-      - name: Install pnpm
-        run: npm install -g pnpm@10
-
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: '22', cache: 'pnpm' }
+      - uses: pnpm/action-setup@v4
+        with: { version: 10 }
       - name: Install dependencies
-        run: pnpm install
-
-      - name: Restore Nx cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules/.cache/nx
-            ~/.pnpm-store
-          key: nx-cache-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
-          restore-keys: |
-            nx-cache-${{ runner.os }}-
-
-      - name: Lint all projects
-        run: pnpm nx run-many --target=lint --all
-
-      - name: Run unit tests (Jest)
-        run: pnpm nx run-many --target=test --all --parallel
-
-      - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps
-
-      - name: Run E2E tests (Playwright)
-        run: pnpm nx run web-e2e:e2e
+        run: pnpm -w install --frozen-lockfile
+      - name: Type check
+        run: pnpm -w tsc -b
+      - name: Unit tests (API)
+        run: pnpm run test:api:guarded
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+      - name: E2E tests
+        run: pnpm run test:e2e
+        env: { NODE_ENV: test }

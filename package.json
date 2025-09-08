@@ -2,7 +2,12 @@
   "name": "@careeros/source",
   "version": "0.0.0",
   "license": "MIT",
-  "scripts": {},
+  "scripts": {
+    "prepare": "husky",
+    "test:api": "pnpm -w jest --clearCache --config api\\jest.config.ts && pnpm -w exec nx run api:test --verbose",
+    "test:api:guarded": "node tools/scripts/guard-jest-config.cjs && pnpm run test:api",
+    "test:e2e": "playwright test"
+  },
   "private": true,
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

@@ -1,0 +1,19 @@
+{
+  "name": "@careeros/api",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "prisma": "prisma",
+    "prisma:migrate": "prisma migrate dev --schema ../../prisma/schema.prisma",
+    "prisma:generate": "prisma generate --schema ../../prisma/schema.prisma",
+    "prisma:format": "prisma format --schema ../../prisma/schema.prisma",
+    "prisma:validate": "prisma validate --schema ../../prisma/schema.prisma",
+    "prisma:reset": "prisma migrate reset --schema ../../prisma/schema.prisma --force"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.15.0"
+  },
+  "devDependencies": {
+    "prisma": "^6.15.0"
+  }
+}

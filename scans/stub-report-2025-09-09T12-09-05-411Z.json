@@ -1,0 +1,711 @@
+{
+  "when": "2025-09-09T12:09:05.421Z",
+  "summary": {
+    "total": 100,
+    "stubs": 99,
+    "real": 1
+  },
+  "rows": [
+    {
+      "module": "auth",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\auth.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "auth",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\auth.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "auth",
+      "kind": "e2e",
+      "path": "web\\specs\\auth.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "auth",
+      "kind": "page",
+      "path": "web\\src\\app\\auth\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "auth",
+      "kind": "types",
+      "path": "shared\\types\\src\\auth.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "onboarding",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\onboarding.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "onboarding",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\onboarding.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "onboarding",
+      "kind": "e2e",
+      "path": "web\\specs\\onboarding.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "onboarding",
+      "kind": "page",
+      "path": "web\\src\\app\\onboarding\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "onboarding",
+      "kind": "types",
+      "path": "shared\\types\\src\\onboarding.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "dashboard",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\dashboard.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "dashboard",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\dashboard.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "dashboard",
+      "kind": "e2e",
+      "path": "web\\specs\\dashboard.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "dashboard",
+      "kind": "page",
+      "path": "web\\src\\app\\dashboard\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "dashboard",
+      "kind": "types",
+      "path": "shared\\types\\src\\dashboard.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "tracker",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\tracker.ts",
+      "status": "STUB",
+      "reason": "placeholder test"
+    },
+    {
+      "module": "tracker",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\tracker.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "tracker",
+      "kind": "e2e",
+      "path": "web\\specs\\tracker.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "tracker",
+      "kind": "page",
+      "path": "web\\src\\app\\tracker\\page.tsx",
+      "status": "REAL",
+      "reason": ""
+    },
+    {
+      "module": "tracker",
+      "kind": "types",
+      "path": "shared\\types\\src\\tracker.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "resume",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\resume.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "resume",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\resume.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "resume",
+      "kind": "e2e",
+      "path": "web\\specs\\resume.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "resume",
+      "kind": "page",
+      "path": "web\\src\\app\\resume\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "resume",
+      "kind": "types",
+      "path": "shared\\types\\src\\resume.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "settings",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\settings.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "settings",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\settings.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "settings",
+      "kind": "e2e",
+      "path": "web\\specs\\settings.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "settings",
+      "kind": "page",
+      "path": "web\\src\\app\\settings\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "settings",
+      "kind": "types",
+      "path": "shared\\types\\src\\settings.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "profile",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\profile.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "profile",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\profile.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "profile",
+      "kind": "e2e",
+      "path": "web\\specs\\profile.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "profile",
+      "kind": "page",
+      "path": "web\\src\\app\\profile\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "profile",
+      "kind": "types",
+      "path": "shared\\types\\src\\profile.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "goals",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\goals.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "goals",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\goals.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "goals",
+      "kind": "e2e",
+      "path": "web\\specs\\goals.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "goals",
+      "kind": "page",
+      "path": "web\\src\\app\\goals\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "goals",
+      "kind": "types",
+      "path": "shared\\types\\src\\goals.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "planner",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\planner.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "planner",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\planner.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "planner",
+      "kind": "e2e",
+      "path": "web\\specs\\planner.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "planner",
+      "kind": "page",
+      "path": "web\\src\\app\\planner\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "planner",
+      "kind": "types",
+      "path": "shared\\types\\src\\planner.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "calendar",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\calendar.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "calendar",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\calendar.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "calendar",
+      "kind": "e2e",
+      "path": "web\\specs\\calendar.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "calendar",
+      "kind": "page",
+      "path": "web\\src\\app\\calendar\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "calendar",
+      "kind": "types",
+      "path": "shared\\types\\src\\calendar.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "roadmap",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\roadmap.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "roadmap",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\roadmap.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "roadmap",
+      "kind": "e2e",
+      "path": "web\\specs\\roadmap.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "roadmap",
+      "kind": "page",
+      "path": "web\\src\\app\\roadmap\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "roadmap",
+      "kind": "types",
+      "path": "shared\\types\\src\\roadmap.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "interviews",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\interviews.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "interviews",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\interviews.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "interviews",
+      "kind": "e2e",
+      "path": "web\\specs\\interviews.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "interviews",
+      "kind": "page",
+      "path": "web\\src\\app\\interviews\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "interviews",
+      "kind": "types",
+      "path": "shared\\types\\src\\interviews.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "activity",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\activity.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "activity",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\activity.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "activity",
+      "kind": "e2e",
+      "path": "web\\specs\\activity.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "activity",
+      "kind": "page",
+      "path": "web\\src\\app\\activity\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "activity",
+      "kind": "types",
+      "path": "shared\\types\\src\\activity.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "notifications",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\notifications.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "notifications",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\notifications.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "notifications",
+      "kind": "e2e",
+      "path": "web\\specs\\notifications.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "notifications",
+      "kind": "page",
+      "path": "web\\src\\app\\notifications\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "notifications",
+      "kind": "types",
+      "path": "shared\\types\\src\\notifications.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "summary",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\summary.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "summary",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\summary.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "summary",
+      "kind": "e2e",
+      "path": "web\\specs\\summary.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "summary",
+      "kind": "page",
+      "path": "web\\src\\app\\summary\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "summary",
+      "kind": "types",
+      "path": "shared\\types\\src\\summary.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "skills",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\skills.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "skills",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\skills.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "skills",
+      "kind": "e2e",
+      "path": "web\\specs\\skills.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "skills",
+      "kind": "page",
+      "path": "web\\src\\app\\skills\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "skills",
+      "kind": "types",
+      "path": "shared\\types\\src\\skills.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "insights",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\insights.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "insights",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\insights.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "insights",
+      "kind": "e2e",
+      "path": "web\\specs\\insights.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "insights",
+      "kind": "page",
+      "path": "web\\src\\app\\insights\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "insights",
+      "kind": "types",
+      "path": "shared\\types\\src\\insights.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "metrics",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\metrics.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "metrics",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\metrics.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "metrics",
+      "kind": "e2e",
+      "path": "web\\specs\\metrics.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "metrics",
+      "kind": "page",
+      "path": "web\\src\\app\\metrics\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "metrics",
+      "kind": "types",
+      "path": "shared\\types\\src\\metrics.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "achievements",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\achievements.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "achievements",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\achievements.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "achievements",
+      "kind": "e2e",
+      "path": "web\\specs\\achievements.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "achievements",
+      "kind": "page",
+      "path": "web\\src\\app\\achievements\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "achievements",
+      "kind": "types",
+      "path": "shared\\types\\src\\achievements.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "networking",
+      "kind": "router",
+      "path": "apps\\api\\src\\router\\networking.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "networking",
+      "kind": "router-test",
+      "path": "apps\\api\\src\\router\\__tests__\\networking.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "networking",
+      "kind": "e2e",
+      "path": "web\\specs\\networking.e2e.spec.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "networking",
+      "kind": "page",
+      "path": "web\\src\\app\\networking\\page.tsx",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    },
+    {
+      "module": "networking",
+      "kind": "types",
+      "path": "shared\\types\\src\\networking.ts",
+      "status": "STUB",
+      "reason": "STUB:PHASE3 header"
+    }
+  ],
+  "failAfter": null
+}

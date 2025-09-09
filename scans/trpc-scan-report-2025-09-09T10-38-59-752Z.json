@@ -1,0 +1,74 @@
+{
+  "meta": {
+    "when": "2025-09-09T10:38:59.750Z",
+    "root": "C:/Users/kashi/Desktop/COS/careeros",
+    "webRoot": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web",
+    "webSrc": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\src"
+  },
+  "files": {
+    "trackerPage": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\src\\app\\tracker\\page.tsx",
+    "trackerSpec": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\specs\\tracker.spec.tsx",
+    "jestConfig": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\jest.config.ts",
+    "tsconfigBase": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\tsconfig.base.json"
+  },
+  "jest": {
+    "moduleNameMapper": "// Point ALL @careeros/trpc imports (and subpaths) to the shared TS mock\n    '^@careeros/trpc(?:/.*)?$': '<rootDir>/test/trpc.mock.ts',\n    // Next-style alias for \"@/...\"\n    '^@/(.*)$': '<rootDir>/src/$1',",
+    "hasAtAlias": true,
+    "configPath": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\jest.config.ts"
+  },
+  "tsconfig": {
+    "basePath": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\tsconfig.base.json",
+    "aliases": {
+      "@careeros/prisma": [
+        "shared/prisma/src/index.ts"
+      ],
+      "@careeros/trpc": [
+        "shared/trpc/src/index.ts"
+      ],
+      "@careeros/types": [
+        "shared/types/src/index.ts"
+      ]
+    }
+  },
+  "tracker": {
+    "pagePath": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\src\\app\\tracker\\page.tsx",
+    "imports": [
+      "react",
+      "next/link",
+      "@careeros/trpc",
+      "@careeros/types"
+    ],
+    "trpcImports": [
+      {
+        "binding": "{ trpc }",
+        "module": "@careeros/trpc"
+      }
+    ],
+    "specPath": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\specs\\tracker.spec.tsx",
+    "specMocks": []
+  },
+  "resolution": {
+    "careerosTrpcResolvedTo": null,
+    "issues": [
+      {
+        "type": "missing-mocks",
+        "message": "Spec is not mocking trpc for the exact import path(s) used by the page.",
+        "missingFor": [
+          "@careeros/trpc"
+        ]
+      }
+    ],
+    "suggestions": [
+      {
+        "type": "add-jest-mock",
+        "message": "At the top of specs/tracker.spec.tsx, add a jest.mock for '@careeros/trpc'.",
+        "code": "jest.mock('@careeros/trpc', () => { const trpc = { tracker: { getApplications: { useQuery: () => ({ data: [] }) }, createApplication: { useMutation: () => ({ mutate: jest.fn() }) }, updateApplication: { useMutation: () => ({ mutate: jest.fn() }) }, deleteApplication: { useMutation: () => ({ mutate: jest.fn() }) } } }; return { __esModule: true, trpc, default: { trpc } }; }, );"
+      },
+      {
+        "type": "resolve-careeros-trpc",
+        "message": "@careeros/trpc does not resolve from the web project root. If your page imports this path, either add a workspace alias or mock it virtually in Jest.",
+        "exampleVirtualMock": "jest.mock('@careeros/trpc', () => ({ __esModule: true, trpc: { tracker: {/* ... */} }, default: { trpc: { /* ... */ } } }), { virtual: true });"
+      }
+    ]
+  }
+}

@@ -1,11 +1,9 @@
 // web/jest.config.ts
-// Jest config for the Web project
-
 import type { Config } from 'jest';
 
 const config: Config = {
   displayName: 'web',
-  preset: '../jest.preset.js', // adjust if your preset lives elsewhere
+  preset: '../jest.preset.js', // adjust if your preset is elsewhere
   testEnvironment: 'jsdom',
 
   transform: {
@@ -13,8 +11,7 @@ const config: Config = {
       'ts-jest',
       {
         tsconfig: '<rootDir>/tsconfig.spec.json',
-        // Move isolatedModules into tsconfig.spec.json to silence the deprecation warning
-        // isolatedModules: true,
+        // keep isolatedModules in tsconfig.spec.json (not here) to avoid deprecation warning
       },
     ],
   },
@@ -22,15 +19,13 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'html'],
 
   moduleNameMapper: {
-    // Keep your existing mapping for @careeros/trpc to a file mock if you add one later
-    '^@careeros/trpc$': '<rootDir>/test/trpc.mock.js',
-    '^@careeros/trpc/.*$': '<rootDir>/test/trpc.mock.js',
-
-    // Add Next-style alias for "@/..." imports into web/src
+    // Point ALL @careeros/trpc imports (and subpaths) to the shared TS mock
+    '^@careeros/trpc(?:/.*)?$': '<rootDir>/test/trpc.mock.ts',
+    // Next-style alias for "@/..."
     '^@/(.*)$': '<rootDir>/src/$1',
   },
 
-  // Load jest-dom matchers so expect(...).toBeInTheDocument() works
+  // Loads @testing-library/jest-dom matchers, etc.
   setupFilesAfterEnv: ['<rootDir>/test/setupTests.ts'],
 
   coverageDirectory: '<rootDir>/coverage',

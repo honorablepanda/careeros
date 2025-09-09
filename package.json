@@ -2,15 +2,19 @@
   "name": "@careeros/source",
   "version": "0.0.0",
   "license": "MIT",
+  "private": true,
   "scripts": {
     "prepare": "husky",
-    "test:api": "pnpm -w jest --clearCache --config api/jest.config.ts && pnpm -w exec nx run api:test --verbose",
-    "test:api:guarded": "node tools/scripts/guard-jest-config.cjs && pnpm run test:api",
-    "test:e2e": "playwright test",
     "test:web": "pnpm -w exec nx run web:test --skip-nx-cache --verbose",
-    "test": "pnpm run test:api && pnpm run test:web"
+    "test": "pnpm run test:web",
+    "scan:final": "node tools/scripts/run-final-scan.cjs",
+    "scan:modules": "python tools/scripts/scan_phase3_modules.py",
+    "scan:stubs": "node tools/scripts/scan-stubs.cjs",
+    "fix:phase3:tracker": "node tools/scripts/fix-phase3-tracker.cjs",
+    "fix:phase3:all": "node tools/scripts/fix-phase3-all.cjs",
+    "mark:stubs": "node tools/scripts/mark-existing-stubs.cjs",
+    "orchestrate:phase3": "node tools/scripts/orchestrate-phase3.cjs"
   },
-  "private": true,
   "devDependencies": {
     "@eslint/compat": "^1.1.1",
     "@eslint/eslintrc": "^2.1.1",
@@ -76,11 +80,13 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@prisma/client": "^6.15.0",
+    "@trpc/server": "11.5.1",
     "axios": "^1.6.0",
     "next": "~15.2.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.8.0"
+    "rxjs": "^7.8.0",
+    "zod": "4.1.5"
   }
 }

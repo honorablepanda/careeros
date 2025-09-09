@@ -1,0 +1,21 @@
+Module,Router,Unit Test,E2E Test,Page,Types,Types Exported,Registered in appRouter
+auth,True,True,True,True,True,True,True
+onboarding,True,True,True,True,True,True,True
+dashboard,True,True,True,True,True,True,True
+tracker,True,True,True,True,True,True,True
+resume,True,True,True,True,True,True,True
+settings,True,True,True,True,True,True,True
+profile,True,True,True,True,True,True,True
+goals,True,True,True,True,True,True,True
+planner,True,True,True,True,True,True,True
+calendar,True,True,True,True,True,True,True
+roadmap,True,True,True,True,True,True,True
+interviews,True,True,True,True,True,True,True
+activity,True,True,True,True,True,True,True
+notifications,True,True,True,True,True,True,True
+summary,True,True,True,True,True,True,True
+skills,True,True,True,True,True,True,True
+insights,True,True,True,True,True,True,True
+metrics,True,True,True,True,True,True,True
+achievements,True,True,True,True,True,True,True
+networking,True,True,True,True,True,True,True

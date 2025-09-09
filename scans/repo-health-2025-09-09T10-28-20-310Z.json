@@ -1,0 +1,152 @@
+{
+  "meta": {
+    "when": "2025-09-09T10:28:20.310Z",
+    "root": "C:/Users/kashi/Desktop/COS/careeros",
+    "cwd": "C:\\Users\\kashi\\Desktop\\COS\\careeros"
+  },
+  "locations": {
+    "prismaSchema": null,
+    "apiPackageJson": null,
+    "webRoot": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web",
+    "webJestConfig": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\jest.config.ts",
+    "webTsSpec": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\tsconfig.spec.json",
+    "webSetupTests": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\test\\setupTests.ts",
+    "webTrpcMock": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\test\\trpc.mock.ts",
+    "trackerSpec": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\specs\\tracker.spec.tsx",
+    "indexSpec": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\specs\\index.spec.tsx",
+    "orchestrator": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\tools\\scripts\\orchestrate-tracker-setup.cjs",
+    "trpcScan": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\tools\\scripts\\scan-trpc-web.cjs",
+    "nxJson": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\nx.json",
+    "ciWorkflow": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\.github\\workflows\\ci.yml",
+    "playwrightConfig": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\playwright.config.ts"
+  },
+  "checks": [
+    {
+      "ok": false,
+      "code": "PRISMA_SCHEMA_PRESENT",
+      "message": "Prisma schema not found",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_ROOT_PRESENT",
+      "message": "Web root: web",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_JEST_MAPPER_PRESENT",
+      "message": "web Jest moduleNameMapper present",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_JEST_TRPC_MAPPED",
+      "message": "@careeros/trpc mapped to a mock file",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_JEST_AT_ALIAS",
+      "message": "^@/(.*)$ alias present",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_TS_SPEC_JSX",
+      "message": "tsconfig.spec.json jsx=react-jsx",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_TS_SPEC_JESTDOM_TYPES",
+      "message": "jest-dom types present",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_TS_SPEC_ISO",
+      "message": "isolatedModules=true",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_SETUP_TESTS",
+      "message": "setupTests present at web\\test\\setupTests.ts",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_TRPC_MOCK",
+      "message": "tRPC mock present at web\\test\\trpc.mock.ts",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_TRACKER_SPEC_PRESENT",
+      "message": "tracker spec at web\\specs\\tracker.spec.tsx",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "WEB_INDEX_SPEC_PRESENT",
+      "message": "index spec at web\\specs\\index.spec.tsx",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "SCRIPT_ORCHESTRATOR_PRESENT",
+      "message": "orchestrator present at tools\\scripts\\orchestrate-tracker-setup.cjs",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "SCRIPT_TRPC_SCAN_PRESENT",
+      "message": "trpc scan present at tools\\scripts\\scan-trpc-web.cjs",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "NX_JSON_PRESENT",
+      "message": "nx.json present",
+      "details": {}
+    },
+    {
+      "ok": true,
+      "code": "CI_WORKFLOW_PRESENT",
+      "message": "CI workflow present at .github\\workflows\\ci.yml",
+      "details": {}
+    }
+  ],
+  "issues": [
+    {
+      "severity": "error",
+      "code": "PRISMA_SCHEMA_PRESENT",
+      "message": "Prisma schema not found",
+      "details": {}
+    },
+    {
+      "severity": "error",
+      "code": "API_PACKAGE_JSON_MISSING",
+      "message": "apps/api/package.json not found.",
+      "details": {}
+    }
+  ],
+  "suggestions": [
+    {
+      "code": "RUN_API_PRISMA_VALIDATE",
+      "message": "Run Prisma sanity once to verify migrations & client",
+      "example": "pnpm -F ./apps/api run prisma:validate && pnpm -F ./apps/api run prisma:generate"
+    },
+    {
+      "code": "RUN_TESTS_WEB",
+      "message": "Run web tests to verify mock wiring",
+      "example": "pnpm run test:web"
+    },
+    {
+      "code": "ADD_CI",
+      "message": "Add CI step for web tests",
+      "example": "pnpm run test:web"
+    }
+  ]
+}

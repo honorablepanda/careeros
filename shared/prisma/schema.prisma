@@ -14,3 +14,27 @@ model User {
   name      String?
   createdAt DateTime @default(now())
 }
+
+enum ApplicationStatus {
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+}
+
+model Application {
+  id            String            @id @default(cuid())
+  title         String
+  company       String
+  status        ApplicationStatus @default(APPLIED)
+  url           String?
+  tags          String[]          @default([])
+  deadline      DateTime?
+  notes         String?
+  resumeVersion String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  userId        String
+
+  @@index([userId])
+}

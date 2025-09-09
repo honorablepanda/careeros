@@ -1,0 +1,20 @@
+{
+  "when": "2025-09-09T12-05-27-780Z",
+  "webDir": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web",
+  "jest": {
+    "configPath": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\jest.config.ts",
+    "moduleNameMapper": "// web/jest.config.ts\nimport type { Config } from 'jest';\n\nconst config: Config = {\n  displayName: 'web',\n  preset: '../jest.preset.js', // adjust if your preset is elsewhere\n  testEnvironment: 'jsdom',\n\n  transform: {\n    '^.+\\\\.[tj]sx?$': [\n      'ts-jest',\n      {\n        tsconfig: '<rootDir>/tsconfig.spec.json',\n        // keep isolatedModules in tsconfig.spec.json (not here) to avoid deprecation warning\n      },\n    ],\n  },\n\n  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'html'],\n\n  moduleNameMapper: {\n    // Point ALL @careeros/trpc imports (and subpaths) to the shared TS mock\n    '^@careeros/trpc(?:/.*)?$': '<rootDir>/test/trpc.mock.ts',\n    // Next-style alias for \"@/...\"\n    '^@/(.*)$': '<rootDir>/src/$1',\n  },\n\n  // Loads @testing-library/jest-dom matchers, etc.\n  setupFilesAfterEnv: ['<rootDir>/test/setupTests.ts'],\n\n  coverageDirectory: '<rootDir>/coverage',\n};\n\nexport default config;\n",
+    "mapperHasTrpc": true
+  },
+  "specsAnalyzed": 22,
+  "importedModules": [
+    "../src/app/page",
+    "../src/app/tracker/page",
+    "@testing-library/react",
+    "react"
+  ],
+  "mockedModules": [],
+  "resolution": {
+    "issues": []
+  }
+}

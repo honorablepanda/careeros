@@ -2,3 +2,4 @@
 *.ts diff=typescript
 *.tsx diff=typescript
 *.js diff=javascript
+.husky/* text eol=lf

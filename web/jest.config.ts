@@ -1,21 +1,39 @@
-const nextJest = require('next/jest');
+// web/jest.config.ts
+// Jest config for the Web project
 
-const createJestConfig = nextJest({
-  dir: './',
-});
+import type { Config } from 'jest';
 
-/** @type {import('jest').Config} */
-const config = {
+const config: Config = {
+  displayName: 'web',
+  preset: '../jest.preset.js', // adjust if your preset lives elsewhere
   testEnvironment: 'jsdom',
-  setupFilesAfterEnv: ['<rootDir>/test/jest.setup.ts'],
-  testMatch: ['**/?(*.)+(spec|test).[jt]s?(x)'],
-  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
-  transformIgnorePatterns: ['node_modules/(?!(?:@testing-library|@babel|nanoid)/)'],
 
-  // Keep the suite exiting on Windows until we track the open handle
-  forceExit: true,
-  detectOpenHandles: false,
-  reporters: ['default'],
+  transform: {
+    '^.+\\.[tj]sx?$': [
+      'ts-jest',
+      {
+        tsconfig: '<rootDir>/tsconfig.spec.json',
+        // Move isolatedModules into tsconfig.spec.json to silence the deprecation warning
+        // isolatedModules: true,
+      },
+    ],
+  },
+
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'html'],
+
+  moduleNameMapper: {
+    // Keep your existing mapping for @careeros/trpc to a file mock if you add one later
+    '^@careeros/trpc$': '<rootDir>/test/trpc.mock.js',
+    '^@careeros/trpc/.*$': '<rootDir>/test/trpc.mock.js',
+
+    // Add Next-style alias for "@/..." imports into web/src
+    '^@/(.*)$': '<rootDir>/src/$1',
+  },
+
+  // Load jest-dom matchers so expect(...).toBeInTheDocument() works
+  setupFilesAfterEnv: ['<rootDir>/test/setupTests.ts'],
+
+  coverageDirectory: '<rootDir>/coverage',
 };
 
-module.exports = createJestConfig(config);
+export default config;

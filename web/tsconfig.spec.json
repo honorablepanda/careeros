@@ -4,8 +4,9 @@
     "outDir": "../dist/out-tsc",
     "module": "commonjs",
     "moduleResolution": "node10",
-    "jsx": "react",
-    "types": ["jest", "node"]
+    "jsx": "react-jsx",
+    "types": ["jest", "node", "@testing-library/jest-dom"],
+    "isolatedModules": true
   },
   "include": [
     "jest.config.ts",

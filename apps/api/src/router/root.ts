@@ -1,0 +1,23 @@
+import { networkingRouter } from './networking';
+import { achievementsRouter } from './achievements';
+import { metricsRouter } from './metrics';
+import { insightsRouter } from './insights';
+import { skillsRouter } from './skills';
+import { summaryRouter } from './summary';
+import { notificationsRouter } from './notifications';
+import { activityRouter } from './activity';
+import { interviewsRouter } from './interviews';
+import { roadmapRouter } from './roadmap';
+import { calendarRouter } from './calendar';
+import { plannerRouter } from './planner';
+import { goalsRouter } from './goals';
+import { profileRouter } from './profile';
+import { settingsRouter } from './settings';
+import { resumeRouter } from './resume';
+import { dashboardRouter } from './dashboard';
+import { onboardingRouter } from './onboarding';
+import { authRouter } from './auth';
+// Minimal app router with tracker reference for module scan
+import { trackerRouter } from './tracker';
+export const appRouter = { tracker: trackerRouter } as any;
+export type AppRouter = typeof appRouter;

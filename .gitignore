@@ -66,3 +66,4 @@ docker-data/
 
 # Local scripts/temp (not for commit)
 tools/scripts/automate-stabilize-pr.sh
+.github/workflows/*.bak

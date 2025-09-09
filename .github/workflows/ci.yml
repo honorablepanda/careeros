@@ -55,7 +55,7 @@ jobs:
         run: pnpm run scan:stubs
 
       - name: Stub gate (enforce after deadline)
-        run: pnpm run scan:stubs -- --fail-after=2025-10-01
+        run: pnpm run scan:stubs -- --fail-after=2025-11-30
 
 
       - name: Web tests

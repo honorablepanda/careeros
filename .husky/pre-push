@@ -1,5 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-pnpm run scan:final || exit 1
-pnpm run test:web || exit 1
+set -e
+pnpm run scan:final
+pnpm run test:web

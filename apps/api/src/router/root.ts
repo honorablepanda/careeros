@@ -23,7 +23,9 @@ import { achievementsRouter } from './achievements';
 import { networkingRouter } from './networking';
 
 export const appRouter = router({
-    system: systemRouter,
+        applications: applicationsRouter,
+demo: DemoRouter,
+system: systemRouter,
 auth: authRouter,
   onboarding: onboardingRouter,
   dashboard: dashboardRouter,

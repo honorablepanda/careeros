@@ -32,7 +32,7 @@
       "web/.swcrc"
     ],
     "issueCounts": {
-      "jest": 1,
+      "jest": 0,
       "tsconfig": 0,
       "swcrc": 0,
       "nx": 0
@@ -91,12 +91,7 @@
     },
     {
       "file": "web/jest.config.ts",
-      "issues": [
-        {
-          "code": "JEST_TRANSFORM_KEY_UNQUOTED",
-          "message": "transform key appears unquoted; regex keys must be strings like \"'^.+\\\\.(t|j)sx?$' : [...]\". Offending line: // keep isolatedModules in tsconfig.spec.json (not here) to avoid deprecation warning"
-        }
-      ],
+      "issues": [],
       "notes": [
         "No transformIgnorePatterns found (may be fine).",
         "pathsToModuleNameMapper not detected (alias mapping may be missing).",

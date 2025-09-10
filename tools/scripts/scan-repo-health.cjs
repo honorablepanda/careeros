@@ -3,25 +3,13 @@
  * scan-repo-health.cjs
  * Scans the workspace for common build/test issues and logs results.
  *
- * What it checks:
- *  - Jest configs (JS/TS) across repo
- *    • Syntax errors (by attempting to require JS configs)
- *    • transform key correctness (regex keys must be quoted)
- *    • transformIgnorePatterns (superjson whitelist)
- *    • pathsToModuleNameMapper usage (alias mapping)
- *  - Nx project.json for apps/api test target & referenced jest config path
- *  - tsconfig.*.json (compilerOptions.target)
- *  - .swcrc files (jsc.target and swcrc conflicts)
- *
  * Outputs:
  *  - tools/logs/repo-health-report.txt
  *  - tools/logs/repo-health-report.json
  *
  * Usage:
- *  node tools/scripts/scan-repo-health.cjs
  *  node tools/scripts/scan-repo-health.cjs --log-dir tools/logs --verbose
  */
-
 const fs = require('fs');
 const path = require('path');
 
@@ -35,50 +23,30 @@ function getFlag(name, def = null) {
 const LOG_DIR = getFlag('--log-dir', path.join('tools', 'logs'));
 const VERBOSE = !!getFlag('--verbose', false);
 
-function ensureDir(p) {
-  fs.mkdirSync(p, { recursive: true });
-}
+function ensureDir(p) { fs.mkdirSync(p, { recursive: true }); }
 ensureDir(LOG_DIR);
 
 const textLog = [];
-const jsonLog = {
-  summary: {},
-  jest: [],
-  tsconfig: [],
-  swcrc: [],
-  nx: [],
-  errors: [],
-};
-
-function log(line) {
-  textLog.push(line);
-  if (VERBOSE) console.log(line);
-}
+const jsonLog = { summary: {}, jest: [], tsconfig: [], swcrc: [], nx: [], errors: [] };
+function log(line){ textLog.push(line); if (VERBOSE) console.log(line); }
 
 function listFiles(root, matchFn) {
   const out = [];
-  function walk(dir) {
+  (function walk(dir) {
     if (!fs.existsSync(dir)) return;
     for (const entry of fs.readdirSync(dir)) {
+      if (['node_modules', '.git', 'dist', 'coverage'].includes(entry)) continue;
       const p = path.join(dir, entry);
-      if (entry === 'node_modules' || entry === '.git' || entry === 'dist' || entry === 'coverage') continue;
       const st = fs.statSync(p);
-      if (st.isDirectory()) walk(p);
-      else if (matchFn(p)) out.push(p);
+      st.isDirectory() ? walk(p) : matchFn(p) && out.push(p);
     }
-  }
-  walk(root);
+  })(root);
   return out;
 }
 
 function tryRequire(file) {
-  try {
-    // Avoid caching between runs
-    delete require.cache[require.resolve(file)];
-    return { ok: true, value: require(file) };
-  } catch (e) {
-    return { ok: false, error: e };
-  }
+  try { delete require.cache[require.resolve(file)]; return { ok: true, value: require(file) }; }
+  catch (e) { return { ok: false, error: e }; }
 }
 
 function analyzeJestConfigFile(file) {
@@ -86,34 +54,35 @@ function analyzeJestConfigFile(file) {
   const content = fs.readFileSync(file, 'utf8');
   const record = { file: rel, issues: [], notes: [] };
 
-  // 1) Basic transform key quoted check (heuristic)
-  // Look for "transform: { ... }" and ensure the first property inside doesn't start with ^ or / unquoted.
-  const transformBlock = content.match(/transform\s*:\s*{([\s\S]*?)}/m);
-  if (transformBlock) {
-    const inner = transformBlock[1];
-    // any line that starts with optional whitespace and then ^ or / (without starting quote) is suspicious
-    const badLine = inner.split('\n').find(line => /^\s*(\^|\/)/.test(line.trim()));
+  // 1) Heuristic: unquoted transform keys — ignore comment lines
+  const tBlock = content.match(/transform\s*:\s*{([\s\S]*?)}/m);
+  if (tBlock) {
+    const inner = tBlock[1];
+    const badLine = inner.split('\n').find(line => {
+      const t = line.trim();
+      if (!t || t.startsWith('//')) return false;
+      // If the key starts with ^ or / and is not quoted, warn
+      return /^(\^|\/)/.test(t);
+    });
     if (badLine) {
       record.issues.push({
         code: 'JEST_TRANSFORM_KEY_UNQUOTED',
-        message:
-          'transform key appears unquoted; regex keys must be strings like ' +
-          `"'^.+\\\\.(t|j)sx?$' : [...]". Offending line: ${badLine.trim()}`,
+        message: 'transform key appears unquoted; regex keys must be strings like ' +
+                 `"'^.+\\\\.(t|j)sx?$' : [...]". Offending line: ${badLine.trim()}`
       });
     }
   }
 
-  // 2) superjson whitelist (transformIgnorePatterns)
-  if (!/transformIgnorePatterns\s*:\s*\[([\s\S]*?)\]/m.test(content)) {
+  // 2) superjson whitelist: robust slice around transformIgnorePatterns to tolerate nested brackets
+  const ti = content.indexOf('transformIgnorePatterns');
+  if (ti === -1) {
     record.notes.push('No transformIgnorePatterns found (may be fine).');
   } else {
-    const m = content.match(/transformIgnorePatterns\s*:\s*\[([\s\S]*?)\]/m);
-    const inner = (m && m[1]) || '';
-    if (!/superjson/.test(inner)) {
+    const slice = content.slice(ti, ti + 800); // look ahead safely
+    if (!/superjson/i.test(slice)) {
       record.issues.push({
         code: 'JEST_SUPERJSON_NOT_WHITELISTED',
-        message:
-          "superjson (ESM) not whitelisted for transform; add '/node_modules/(?!superjson)' to transformIgnorePatterns.",
+        message: "superjson (ESM) not whitelisted for transform; add '/node_modules/(?!superjson)' or an equivalent PNPM-safe pattern."
       });
     }
   }
@@ -129,7 +98,7 @@ function analyzeJestConfigFile(file) {
     if (!ok) {
       record.issues.push({
         code: 'JEST_CONFIG_SYNTAX',
-        message: `Failed to load config: ${error && error.message ? error.message : String(error)}`,
+        message: `Failed to load config: ${error && error.message ? error.message : String(error)}`
       });
     }
   } else {
@@ -152,19 +121,13 @@ function analyzeTSConfig(file) {
     const j = JSON.parse(fs.readFileSync(file, 'utf8'));
     const target = j?.compilerOptions?.target || null;
     record.target = target;
-    if (!target) {
-      record.notes.push('No compilerOptions.target set.');
-    }
+    if (!target) record.notes.push('No compilerOptions.target set.');
   } catch (e) {
     record.issues.push({ code: 'TSCONFIG_PARSE_ERROR', message: e.message });
   }
   jsonLog.tsconfig.push(record);
-  if (record.issues.length) {
-    log(`✗ TSCONFIG: ${rel}`);
-    record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
-  } else {
-    log(`✓ TSCONFIG: ${rel}${record.target ? ' (target=' + record.target + ')' : ''}`);
-  }
+  record.issues.length ? log(`✗ TSCONFIG: ${rel}`) : log(`✓ TSCONFIG: ${rel}${record.target ? ' (target=' + record.target + ')' : ''}`);
+  record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
 }
 
 function analyzeSwcrc(file) {
@@ -184,12 +147,8 @@ function analyzeSwcrc(file) {
     record.issues.push({ code: 'SWCRC_PARSE_ERROR', message: e.message });
   }
   jsonLog.swcrc.push(record);
-  if (record.issues.length) {
-    log(`✗ SWCRC: ${rel}`);
-    record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
-  } else {
-    log(`✓ SWCRC: ${rel}${record.jscTarget ? ' (jsc.target=' + record.jscTarget + ')' : ''}`);
-  }
+  record.issues.length ? log(`✗ SWCRC: ${rel}`) : log(`✓ SWCRC: ${rel}${record.jscTarget ? ' (jsc.target=' + record.jscTarget + ')' : ''}`);
+  record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
 }
 
 function analyzeNxApiTestTarget() {
@@ -198,9 +157,7 @@ function analyzeNxApiTestTarget() {
   const record = { file: rel, issues: [], notes: [], testCommand: null, jestConfigPath: null };
   if (!fs.existsSync(pj)) {
     record.issues.push({ code: 'NX_PROJECT_JSON_MISSING', message: 'apps/api/project.json not found.' });
-    jsonLog.nx.push(record);
-    log(`✗ NX: ${rel} missing`);
-    return;
+    jsonLog.nx.push(record); log(`✗ NX: ${rel} missing`); return;
   }
   try {
     const j = JSON.parse(fs.readFileSync(pj, 'utf8'));
@@ -209,27 +166,19 @@ function analyzeNxApiTestTarget() {
     if (!cmd) {
       record.issues.push({ code: 'NX_TEST_TARGET_MISSING', message: 'apps/api test target not defined.' });
     } else {
-      // Try to extract config path
       const m = cmd.match(/--config\s+([^\s]+)/);
       if (m) {
-        const p = m[1];
-        record.jestConfigPath = p;
+        const p = m[1]; record.jestConfigPath = p;
         const abs = path.resolve(p);
-        if (!fs.existsSync(abs)) {
-          record.issues.push({ code: 'JEST_CONFIG_NOT_FOUND', message: `Referenced config not found: ${p}` });
-        }
+        if (!fs.existsSync(abs)) record.issues.push({ code: 'JEST_CONFIG_NOT_FOUND', message: `Referenced config not found: ${p}` });
       }
     }
   } catch (e) {
     record.issues.push({ code: 'NX_PROJECT_JSON_PARSE', message: e.message });
   }
   jsonLog.nx.push(record);
-  if (record.issues.length) {
-    log(`✗ NX: ${rel}`);
-    record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
-  } else {
-    log(`✓ NX: ${rel} (test target present)`);
-  }
+  record.issues.length ? log(`✗ NX: ${rel}`) : log(`✓ NX: ${rel} (test target present)`);
+  record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
 }
 
 // ---- Run scans ----

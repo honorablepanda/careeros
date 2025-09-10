@@ -5,8 +5,7 @@
 ✓ JEST: shared/prisma/jest.config.ts
 ✓ JEST: shared/trpc/jest.config.ts
 ✓ JEST: shared/types/jest.config.ts
-✗ JEST: web/jest.config.ts
-    - [JEST_TRANSFORM_KEY_UNQUOTED] transform key appears unquoted; regex keys must be strings like "'^.+\\.(t|j)sx?$' : [...]". Offending line: // keep isolatedModules in tsconfig.spec.json (not here) to avoid deprecation warning
+✓ JEST: web/jest.config.ts
 
 === Scanning tsconfig files ===
 ✓ TSCONFIG: api-e2e/tsconfig.json

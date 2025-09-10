@@ -20,3 +20,6 @@ jobs:
       - run: pnpm -w build
       - run: npx nx run api:test --skip-nx-cache
       - run: npx nx run web:test --skip-nx-cache
+      - run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
+      - run: node tools/scripts/ci-assert-clean.cjs
+      - run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry

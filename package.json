@@ -5,6 +5,10 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
+    "dev:web": "pnpm -w exec nx run web:serve",
+    "dev": "pnpm run dev:web",
+    "smoke:trpc": "node tools/scripts/trpc-smoke.cjs",
+    "ping:trpc": "node tools/scripts/ping-trpc.cjs",
     "test:web": "pnpm -w exec nx run web:test --skip-nx-cache --verbose",
     "test": "pnpm run test:web",
     "scan:final": "node tools/scripts/run-final-scan.cjs",
@@ -13,7 +17,14 @@
     "fix:phase3:tracker": "node tools/scripts/fix-phase3-tracker.cjs",
     "fix:phase3:all": "node tools/scripts/fix-phase3-all.cjs",
     "mark:stubs": "node tools/scripts/mark-existing-stubs.cjs",
-    "orchestrate:phase3": "node tools/scripts/orchestrate-phase3.cjs"
+    "orchestrate:phase3": "node tools/scripts/orchestrate-phase3.cjs",
+    "build": "pnpm -w exec nx run-many -t build --all",
+    "wire:trpc-web": "node tools/scripts/wire-trpc-web.cjs",
+    "check:trpc": "node tools/scripts/check-trpc-wiring.cjs",
+    "fix:trpc": "node tools/scripts/check-trpc-wiring.cjs --fix",
+    "check:appshape": "node tools/scripts/check-application-shape.cjs",
+    "try:tracker": "node tools/scripts/try-tracker-router-variants.cjs",
+    "try:tracker:apply": "node tools/scripts/try-tracker-router-variants.cjs --apply-best"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",
@@ -44,6 +55,9 @@
     "@testing-library/jest-dom": "6.8.0",
     "@testing-library/react": "16.1.0",
     "@testing-library/user-event": "14.6.1",
+    "@trpc/client": "10.45.2",
+    "@trpc/react-query": "10.45.2",
+    "@trpc/server": "10.45.2",
     "@types/jest": "^29.5.12",
     "@types/node": "18.16.9",
     "@types/react": "19.0.0",
@@ -80,13 +94,23 @@
     "@nestjs/core": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@prisma/client": "^6.15.0",
-    "@trpc/server": "11.5.1",
+    "@tanstack/react-query": "4.36.1",
     "axios": "^1.6.0",
     "next": "~15.2.4",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.0",
+    "superjson": "2.2.2",
     "zod": "4.1.5"
+  },
+  "pnpm": {
+    "overrides": {
+      "@trpc/server": "10.45.2",
+      "@trpc/client": "10.45.2",
+      "@trpc/react-query": "10.45.2",
+      "@trpc/next": "10.45.2",
+      "@trpc/meta": "10.45.2"
+    }
   }
 }

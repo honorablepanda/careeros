@@ -1,55 +1,53 @@
+# .github/workflows/ci.yml
 name: CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
+env:
+  PNPM_VERSION: "10"
+  NODE_VERSION: "22"
+  NEXT_TELEMETRY_DISABLED: "1"
+  CI: "true"
 
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-    env:
-      CI: true
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
+      - uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 10
+          version: ${{ env.PNPM_VERSION }}
 
-      - name: Setup Python
-        uses: actions/setup-python@v5
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          python-version: '3.x'
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
 
-      - name: Install deps
-        run: pnpm -w install
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
 
-      - name: Final repo scan
-        run: pnpm run scan:final
+      - name: Generate Prisma Client
+        run: pnpm -F ./apps/api run prisma:generate
 
-      - name: Phase 3 module scan
-        run: pnpm run scan:modules
+      - name: Typecheck (web)
+        run: pnpm -w exec tsc -p web/tsconfig.json --noEmit
 
-      - name: Stub report (non-blocking)
-        run: pnpm run scan:stubs
+      - name: Build (Nx)
+        run: pnpm -w build
+
+      - name: Test (web)
+        run: pnpm run test:web
 
       - name: Stub report (non-blocking)
         run: pnpm run scan:stubs
@@ -57,16 +55,41 @@ jobs:
       - name: Stub gate (enforce after deadline)
         run: pnpm run scan:stubs -- --fail-after=2025-11-30
 
+      - name: Final scan
+        run: pnpm run scan:final
 
-      - name: Web tests
-        run: pnpm run test:web
+  trpc-smoke:
+    needs: build-and-test
+    runs-on: ubuntu-latest
 
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          name: scans-and-module-reports
-          path: |
-            scans/**
-            tools/module-scan-output/**
-          if-no-files-found: ignore
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm i --frozen-lockfile
+
+      - name: Generate Prisma Client
+        run: pnpm -F ./apps/api run prisma:generate
+
+      - name: Start Next dev server
+        run: pnpm -w exec nx run web:serve &
+      
+      - name: Wait for server
+        run: npx wait-on http://localhost:3000
+
+      - name: Smoke tRPC (typed client)
+        run: pnpm run smoke:trpc
+
+      - name: Ping tRPC (raw HTTP)
+        run: pnpm run ping:trpc

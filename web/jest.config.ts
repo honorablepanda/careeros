@@ -19,6 +19,8 @@ const config: Config = {
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'html'],
 
   moduleNameMapper: {
+    '@careeros/trpc': '<rootDir>/specs/__mocks__/trpc.ts',
+    '^@/trpc$': '<rootDir>/specs/__mocks__/trpc.ts',
     // Point ALL @careeros/trpc imports (and subpaths) to the shared TS mock
     '^@careeros/trpc(?:/.*)?$': '<rootDir>/test/trpc.mock.ts',
     // Next-style alias for "@/..."

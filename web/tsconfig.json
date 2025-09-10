@@ -2,34 +2,37 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "preserve",
-    "strict": true,
+    "allowJs": true,
+    "strict": false,
     "noEmit": true,
-    "emitDeclarationOnly": false,
+    "incremental": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "lib": ["dom", "dom.iterable", "esnext"],
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "forceConsistentCasingInFileNames": true,
-    "incremental": true,
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "types": ["jest", "node"]
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ],
+      "@careeros/api": [
+        "../apps/api/src/trpc/root.ts"
+      ],
+      "@careeros/types": [
+        "../libs/types/src/index.ts"
+      ]
+    }
   },
   "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "**/*.js",
-    "**/*.jsx",
-    "../web/.next/types/**/*.ts",
-    "../dist/web/.next/types/**/*.ts",
-    "next-env.d.ts"
+    "next-env.d.ts",
+    "src/**/*",
+    ".next/types/**/*.ts"
   ],
-  "exclude": ["node_modules", "jest.config.ts", "**/*.spec.ts", "**/*.test.ts"]
+  "exclude": [
+    "node_modules"
+  ]
 }

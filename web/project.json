@@ -12,6 +12,14 @@
           "--runInBand"
         ]
       }
+    },
+    "serve": {
+      "executor": "@nx/next:server",
+      "options": {
+        "buildTarget": "web:build",
+        "dev": true,
+        "port": 3000
+      }
     }
   }
 }

@@ -20,7 +20,11 @@ import { skillsRouter } from './skills';
 import { insightsRouter } from './insights';
 import { metricsRouter } from './metrics';
 import { achievementsRouter } from './achievements';
+import { applicationsRouter } from './applications';
 import { networkingRouter } from './networking';
+import { DemoRouter } from './demo';
+import { systemRouter } from './system';
+
 
 export const appRouter = router({
         applications: applicationsRouter,

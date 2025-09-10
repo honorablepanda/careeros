@@ -1,5 +1,9 @@
 * text=auto
-*.ts diff=typescript
-*.tsx diff=typescript
-*.js diff=javascript
-.husky/* text eol=lf
+*.ts text eol=lf
+*.tsx text eol=lf
+*.js text eol=lf
+*.cjs text eol=lf
+*.json text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf

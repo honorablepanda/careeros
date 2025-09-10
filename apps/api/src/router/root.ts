@@ -23,7 +23,8 @@ import { achievementsRouter } from './achievements';
 import { networkingRouter } from './networking';
 
 export const appRouter = router({
-  auth: authRouter,
+    system: systemRouter,
+auth: authRouter,
   onboarding: onboardingRouter,
   dashboard: dashboardRouter,
   tracker: trackerRouter,

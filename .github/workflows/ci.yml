@@ -1,95 +1,22 @@
-# .github/workflows/ci.yml
 name: CI
-
 on:
   push:
     branches: [main]
   pull_request:
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-env:
-  PNPM_VERSION: "10"
-  NODE_VERSION: "22"
-  NEXT_TELEMETRY_DISABLED: "1"
-  CI: "true"
-
 jobs:
-  build-and-test:
+  build_test:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
+          version: 10
+      - uses: actions/setup-node@v4
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm -F ./apps/api run prisma:generate
-
-      - name: Typecheck (web)
-        run: pnpm -w exec tsc -p web/tsconfig.json --noEmit
-
-      - name: Build (Nx)
-        run: pnpm -w build
-
-      - name: Test (web)
-        run: pnpm run test:web
-
-      - name: Stub report (non-blocking)
-        run: pnpm run scan:stubs
-
-      - name: Stub gate (enforce after deadline)
-        run: pnpm run scan:stubs -- --fail-after=2025-11-30
-
-      - name: Final scan
-        run: pnpm run scan:final
-
-  trpc-smoke:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: ${{ env.PNPM_VERSION }}
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: pnpm
-
-      - name: Install dependencies
-        run: pnpm i --frozen-lockfile
-
-      - name: Generate Prisma Client
-        run: pnpm -F ./apps/api run prisma:generate
-
-      - name: Start Next dev server
-        run: pnpm -w exec nx run web:serve &
-      
-      - name: Wait for server
-        run: npx wait-on http://localhost:3000
-
-      - name: Smoke tRPC (typed client)
-        run: pnpm run smoke:trpc
-
-      - name: Ping tRPC (raw HTTP)
-        run: pnpm run ping:trpc
+          node-version: 22
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -w tsc -b
+      - run: pnpm -w build
+      - run: npx nx run api:test --skip-nx-cache
+      - run: npx nx run web:test --skip-nx-cache

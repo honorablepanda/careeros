@@ -1,0 +1,34 @@
+=== Scanning Jest configs ===
+✓ JEST: api-e2e/jest.config.ts
+✓ JEST: apps/api/jest.config.js
+✓ JEST: jest.config.ts
+✓ JEST: shared/prisma/jest.config.ts
+✓ JEST: shared/trpc/jest.config.ts
+✓ JEST: shared/types/jest.config.ts
+✗ JEST: web/jest.config.ts
+    - [JEST_TRANSFORM_KEY_UNQUOTED] transform key appears unquoted; regex keys must be strings like "'^.+\\.(t|j)sx?$' : [...]". Offending line: // keep isolatedModules in tsconfig.spec.json (not here) to avoid deprecation warning
+
+=== Scanning tsconfig files ===
+✓ TSCONFIG: api-e2e/tsconfig.json
+✓ TSCONFIG: api-e2e/tsconfig.spec.json
+✓ TSCONFIG: apps/web/tsconfig.json
+✓ TSCONFIG: shared/prisma/tsconfig.json
+✓ TSCONFIG: shared/prisma/tsconfig.lib.json
+✓ TSCONFIG: shared/prisma/tsconfig.spec.json
+✓ TSCONFIG: shared/trpc/tsconfig.json
+✓ TSCONFIG: shared/trpc/tsconfig.lib.json
+✓ TSCONFIG: shared/trpc/tsconfig.spec.json
+✓ TSCONFIG: shared/types/tsconfig.json
+✓ TSCONFIG: shared/types/tsconfig.lib.json
+✓ TSCONFIG: shared/types/tsconfig.spec.json
+✓ TSCONFIG: tsconfig.base.json (target=es2015)
+✓ TSCONFIG: tsconfig.json
+✓ TSCONFIG: web/tsconfig.json
+✓ TSCONFIG: web/tsconfig.spec.json
+✓ TSCONFIG: web-e2e/tsconfig.json
+
+=== Scanning .swcrc files ===
+✓ SWCRC: web/.swcrc (jsc.target=es2017)
+
+=== Checking Nx apps/api test target ===
+✓ NX: apps/api/project.json (test target present)

@@ -1,0 +1,115 @@
+import { router, procedure } from '../trpc';
+import { z } from 'zod';
+import type { $Enums } from '@prisma/client';
+
+const StatusZ = z.enum(['APPLIED', 'INTERVIEWING', 'OFFER', 'REJECTED']);
+
+export const trackerRouter = router({
+  getApplications: procedure
+    .input(z.object({ userId: z.string().min(1) }))
+    .query(({ ctx, input }) =>
+      ctx.prisma.application.findMany({
+        where: { userId: input.userId },
+        orderBy: { updatedAt: 'desc' },
+        select: {
+          id: true,
+          userId: true,
+          company: true,
+          role: true,
+          status: true,
+          notes: true,
+          location: true,
+          source: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+    ),
+
+  createApplication: procedure
+    .input(
+      z.object({
+        userId: z.string().min(1),
+        company: z.string().min(1),
+        role: z.string().min(1),
+        status: StatusZ,
+        notes: z.string().optional(),
+        location: z.string().optional(), // present in schema
+        source: z.string().optional(),   // present in schema
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.application.create({
+        data: {
+          userId: input.userId,
+          company: input.company,
+          role: input.role,
+          status: input.status as $Enums.ApplicationStatus,
+          // use undefined so Prisma applies defaults if any, and we don’t violate NOT NULL
+          notes: input.notes ?? undefined,
+          location: input.location ?? undefined,
+          source: input.source ?? undefined,
+        },
+        select: {
+          id: true,
+          userId: true,
+          company: true,
+          role: true,
+          status: true,
+          notes: true,
+          location: true,
+          source: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+    ),
+
+  updateApplication: procedure
+    .input(
+      z.object({
+        id: z.string().min(1),
+        data: z
+          .object({
+            company: z.string().min(1).optional(),
+            role: z.string().min(1).optional(),
+            status: StatusZ.optional(),
+            notes: z.string().optional(),
+            location: z.string().optional(),
+            source: z.string().optional(),
+          })
+          .partial(),
+      })
+    )
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.application.update({
+        where: { id: input.id },
+        data: {
+          company: input.data.company ?? undefined,
+          role: input.data.role ?? undefined,
+          status: (input.data.status as $Enums.ApplicationStatus | undefined) ?? undefined,
+          notes: input.data.notes ?? undefined,
+          location: input.data.location ?? undefined,
+          source: input.data.source ?? undefined,
+        },
+        select: {
+          id: true,
+          userId: true,
+          company: true,
+          role: true,
+          status: true,
+          notes: true,
+          location: true,
+          source: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      })
+    ),
+
+  deleteApplication: procedure
+    .input(z.object({ id: z.string().min(1) }))
+    .mutation(({ ctx, input }) =>
+      ctx.prisma.application.delete({ where: { id: input.id } })
+    ),
+});

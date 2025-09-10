@@ -1,0 +1,261 @@
+{
+  "summary": {
+    "jestFiles": [
+      "api-e2e/jest.config.ts",
+      "apps/api/jest.config.js",
+      "jest.config.ts",
+      "shared/prisma/jest.config.ts",
+      "shared/trpc/jest.config.ts",
+      "shared/types/jest.config.ts",
+      "web/jest.config.ts"
+    ],
+    "tsconfigFiles": [
+      "api-e2e/tsconfig.json",
+      "api-e2e/tsconfig.spec.json",
+      "apps/web/tsconfig.json",
+      "shared/prisma/tsconfig.json",
+      "shared/prisma/tsconfig.lib.json",
+      "shared/prisma/tsconfig.spec.json",
+      "shared/trpc/tsconfig.json",
+      "shared/trpc/tsconfig.lib.json",
+      "shared/trpc/tsconfig.spec.json",
+      "shared/types/tsconfig.json",
+      "shared/types/tsconfig.lib.json",
+      "shared/types/tsconfig.spec.json",
+      "tsconfig.base.json",
+      "tsconfig.json",
+      "web/tsconfig.json",
+      "web/tsconfig.spec.json",
+      "web-e2e/tsconfig.json"
+    ],
+    "swcrcFiles": [
+      "web/.swcrc"
+    ],
+    "issueCounts": {
+      "jest": 1,
+      "tsconfig": 0,
+      "swcrc": 0,
+      "nx": 0
+    }
+  },
+  "jest": [
+    {
+      "file": "api-e2e/jest.config.ts",
+      "issues": [],
+      "notes": [
+        "No transformIgnorePatterns found (may be fine).",
+        "pathsToModuleNameMapper not detected (alias mapping may be missing).",
+        "TS jest config detected (ensure ts-node/ts-jest/babel or convert to JS)."
+      ]
+    },
+    {
+      "file": "apps/api/jest.config.js",
+      "issues": [],
+      "notes": []
+    },
+    {
+      "file": "jest.config.ts",
+      "issues": [],
+      "notes": [
+        "No transformIgnorePatterns found (may be fine).",
+        "pathsToModuleNameMapper not detected (alias mapping may be missing).",
+        "TS jest config detected (ensure ts-node/ts-jest/babel or convert to JS)."
+      ]
+    },
+    {
+      "file": "shared/prisma/jest.config.ts",
+      "issues": [],
+      "notes": [
+        "No transformIgnorePatterns found (may be fine).",
+        "pathsToModuleNameMapper not detected (alias mapping may be missing).",
+        "TS jest config detected (ensure ts-node/ts-jest/babel or convert to JS)."
+      ]
+    },
+    {
+      "file": "shared/trpc/jest.config.ts",
+      "issues": [],
+      "notes": [
+        "No transformIgnorePatterns found (may be fine).",
+        "pathsToModuleNameMapper not detected (alias mapping may be missing).",
+        "TS jest config detected (ensure ts-node/ts-jest/babel or convert to JS)."
+      ]
+    },
+    {
+      "file": "shared/types/jest.config.ts",
+      "issues": [],
+      "notes": [
+        "No transformIgnorePatterns found (may be fine).",
+        "pathsToModuleNameMapper not detected (alias mapping may be missing).",
+        "TS jest config detected (ensure ts-node/ts-jest/babel or convert to JS)."
+      ]
+    },
+    {
+      "file": "web/jest.config.ts",
+      "issues": [
+        {
+          "code": "JEST_TRANSFORM_KEY_UNQUOTED",
+          "message": "transform key appears unquoted; regex keys must be strings like \"'^.+\\\\.(t|j)sx?$' : [...]\". Offending line: // keep isolatedModules in tsconfig.spec.json (not here) to avoid deprecation warning"
+        }
+      ],
+      "notes": [
+        "No transformIgnorePatterns found (may be fine).",
+        "pathsToModuleNameMapper not detected (alias mapping may be missing).",
+        "TS jest config detected (ensure ts-node/ts-jest/babel or convert to JS)."
+      ]
+    }
+  ],
+  "tsconfig": [
+    {
+      "file": "api-e2e/tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "api-e2e/tsconfig.spec.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "apps/web/tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/prisma/tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/prisma/tsconfig.lib.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/prisma/tsconfig.spec.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/trpc/tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/trpc/tsconfig.lib.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/trpc/tsconfig.spec.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/types/tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/types/tsconfig.lib.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "shared/types/tsconfig.spec.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "tsconfig.base.json",
+      "issues": [],
+      "notes": [],
+      "target": "es2015"
+    },
+    {
+      "file": "tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "web/tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "web/tsconfig.spec.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    },
+    {
+      "file": "web-e2e/tsconfig.json",
+      "issues": [],
+      "notes": [
+        "No compilerOptions.target set."
+      ],
+      "target": null
+    }
+  ],
+  "swcrc": [
+    {
+      "file": "web/.swcrc",
+      "issues": [],
+      "notes": [],
+      "jscTarget": "es2017"
+    }
+  ],
+  "nx": [
+    {
+      "file": "apps/api/project.json",
+      "issues": [],
+      "notes": [],
+      "testCommand": "jest --config apps/api/jest.config.js --runInBand",
+      "jestConfigPath": "apps/api/jest.config.js"
+    }
+  ],
+  "errors": []
+}

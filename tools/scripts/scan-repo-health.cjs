@@ -1,372 +1,273 @@
 #!/usr/bin/env node
 /**
  * scan-repo-health.cjs
+ * Scans the workspace for common build/test issues and logs results.
  *
- * Purpose:
- *   Scan the entire project folder for required files/configs and report anything missing or suspicious.
+ * What it checks:
+ *  - Jest configs (JS/TS) across repo
+ *    • Syntax errors (by attempting to require JS configs)
+ *    • transform key correctness (regex keys must be quoted)
+ *    • transformIgnorePatterns (superjson whitelist)
+ *    • pathsToModuleNameMapper usage (alias mapping)
+ *  - Nx project.json for apps/api test target & referenced jest config path
+ *  - tsconfig.*.json (compilerOptions.target)
+ *  - .swcrc files (jsc.target and swcrc conflicts)
  *
- * Output:
- *   - scans/repo-health-<timestamp>.log  (human-readable)
- *   - scans/repo-health-<timestamp>.json (structured)
- *
- * Exit code:
- *   - 0  => no blocking issues
- *   - 2  => one or more blocking issues found
+ * Outputs:
+ *  - tools/logs/repo-health-report.txt
+ *  - tools/logs/repo-health-report.json
  *
  * Usage:
- *   node tools/scripts/scan-repo-health.cjs
+ *  node tools/scripts/scan-repo-health.cjs
+ *  node tools/scripts/scan-repo-health.cjs --log-dir tools/logs --verbose
  */
 
 const fs = require('fs');
 const path = require('path');
-const cp = require('child_process');
 
-function gitRoot() {
+const args = process.argv.slice(2);
+function getFlag(name, def = null) {
+  const i = args.indexOf(name);
+  if (i === -1) return def;
+  const v = args[i + 1];
+  return v && !v.startsWith('--') ? v : true;
+}
+const LOG_DIR = getFlag('--log-dir', path.join('tools', 'logs'));
+const VERBOSE = !!getFlag('--verbose', false);
+
+function ensureDir(p) {
+  fs.mkdirSync(p, { recursive: true });
+}
+ensureDir(LOG_DIR);
+
+const textLog = [];
+const jsonLog = {
+  summary: {},
+  jest: [],
+  tsconfig: [],
+  swcrc: [],
+  nx: [],
+  errors: [],
+};
+
+function log(line) {
+  textLog.push(line);
+  if (VERBOSE) console.log(line);
+}
+
+function listFiles(root, matchFn) {
+  const out = [];
+  function walk(dir) {
+    if (!fs.existsSync(dir)) return;
+    for (const entry of fs.readdirSync(dir)) {
+      const p = path.join(dir, entry);
+      if (entry === 'node_modules' || entry === '.git' || entry === 'dist' || entry === 'coverage') continue;
+      const st = fs.statSync(p);
+      if (st.isDirectory()) walk(p);
+      else if (matchFn(p)) out.push(p);
+    }
+  }
+  walk(root);
+  return out;
+}
+
+function tryRequire(file) {
   try {
-    return cp.execSync('git rev-parse --show-toplevel', { stdio: ['ignore','pipe','ignore'] })
-      .toString().trim();
-  } catch {
-    return process.cwd();
+    // Avoid caching between runs
+    delete require.cache[require.resolve(file)];
+    return { ok: true, value: require(file) };
+  } catch (e) {
+    return { ok: false, error: e };
   }
 }
 
-function exists(p) { try { return fs.existsSync(p); } catch { return false; } }
-function readText(p) { try { return fs.readFileSync(p, 'utf8'); } catch { return null; } }
-function readJSON(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } }
-function rel(root, p) { return p ? path.relative(root, p) : '(none)'; }
-function ensureDir(p) { if (!exists(p)) fs.mkdirSync(p, { recursive: true }); }
+function analyzeJestConfigFile(file) {
+  const rel = path.relative(process.cwd(), file).replace(/\\/g, '/');
+  const content = fs.readFileSync(file, 'utf8');
+  const record = { file: rel, issues: [], notes: [] };
 
-function findFirst(pathsArr) { return pathsArr.find(exists) || null; }
+  // 1) Basic transform key quoted check (heuristic)
+  // Look for "transform: { ... }" and ensure the first property inside doesn't start with ^ or / unquoted.
+  const transformBlock = content.match(/transform\s*:\s*{([\s\S]*?)}/m);
+  if (transformBlock) {
+    const inner = transformBlock[1];
+    // any line that starts with optional whitespace and then ^ or / (without starting quote) is suspicious
+    const badLine = inner.split('\n').find(line => /^\s*(\^|\/)/.test(line.trim()));
+    if (badLine) {
+      record.issues.push({
+        code: 'JEST_TRANSFORM_KEY_UNQUOTED',
+        message:
+          'transform key appears unquoted; regex keys must be strings like ' +
+          `"'^.+\\\\.(t|j)sx?$' : [...]". Offending line: ${badLine.trim()}`,
+      });
+    }
+  }
 
-function hasModuleNameMapperAlias(jestText, aliasRegexSource) {
-  if (!jestText) return false;
-  // Very lightweight parse for moduleNameMapper: { ... 'pattern': 'target', ... }
-  const m = jestText.match(/moduleNameMapper\s*:\s*\{([\s\S]*?)\}/);
-  if (!m) return false;
-  const block = m[1];
-  const re = new RegExp(aliasRegexSource);
-  return re.test(block);
+  // 2) superjson whitelist (transformIgnorePatterns)
+  if (!/transformIgnorePatterns\s*:\s*\[([\s\S]*?)\]/m.test(content)) {
+    record.notes.push('No transformIgnorePatterns found (may be fine).');
+  } else {
+    const m = content.match(/transformIgnorePatterns\s*:\s*\[([\s\S]*?)\]/m);
+    const inner = (m && m[1]) || '';
+    if (!/superjson/.test(inner)) {
+      record.issues.push({
+        code: 'JEST_SUPERJSON_NOT_WHITELISTED',
+        message:
+          "superjson (ESM) not whitelisted for transform; add '/node_modules/(?!superjson)' to transformIgnorePatterns.",
+      });
+    }
+  }
+
+  // 3) pathsToModuleNameMapper presence (alias support) — warn if missing
+  if (!/pathsToModuleNameMapper/.test(content)) {
+    record.notes.push('pathsToModuleNameMapper not detected (alias mapping may be missing).');
+  }
+
+  // 4) Attempt to require if it's .js (don’t try TS configs)
+  if (file.endsWith('.js')) {
+    const { ok, error } = tryRequire(path.resolve(file));
+    if (!ok) {
+      record.issues.push({
+        code: 'JEST_CONFIG_SYNTAX',
+        message: `Failed to load config: ${error && error.message ? error.message : String(error)}`,
+      });
+    }
+  } else {
+    record.notes.push('TS jest config detected (ensure ts-node/ts-jest/babel or convert to JS).');
+  }
+
+  jsonLog.jest.push(record);
+  if (record.issues.length) {
+    log(`✗ JEST: ${rel}`);
+    record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
+  } else {
+    log(`✓ JEST: ${rel}`);
+  }
 }
 
-function extractModuleNameMapperBlock(jestText) {
-  if (!jestText) return null;
-  const m = jestText.match(/moduleNameMapper\s*:\s*\{([\s\S]*?)\}/);
-  return m ? m[1].trim() : null;
+function analyzeTSConfig(file) {
+  const rel = path.relative(process.cwd(), file).replace(/\\/g, '/');
+  const record = { file: rel, issues: [], notes: [], target: null };
+  try {
+    const j = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const target = j?.compilerOptions?.target || null;
+    record.target = target;
+    if (!target) {
+      record.notes.push('No compilerOptions.target set.');
+    }
+  } catch (e) {
+    record.issues.push({ code: 'TSCONFIG_PARSE_ERROR', message: e.message });
+  }
+  jsonLog.tsconfig.push(record);
+  if (record.issues.length) {
+    log(`✗ TSCONFIG: ${rel}`);
+    record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
+  } else {
+    log(`✓ TSCONFIG: ${rel}${record.target ? ' (target=' + record.target + ')' : ''}`);
+  }
 }
 
-(function main() {
-  const root = gitRoot();
-  const now = new Date().toISOString().replace(/[:.]/g, '-');
-  const scansDir = path.join(root, 'scans');
-  ensureDir(scansDir);
-  const jsonOut = path.join(scansDir, `repo-health-${now}.json`);
-  const logOut  = path.join(scansDir, `repo-health-${now}.log`);
+function analyzeSwcrc(file) {
+  const rel = path.relative(process.cwd(), file).replace(/\\/g, '/');
+  const record = { file: rel, issues: [], notes: [], jscTarget: null };
+  try {
+    const j = JSON.parse(fs.readFileSync(file, 'utf8'));
+    const tgt = j?.jsc?.target || null;
+    record.jscTarget = tgt;
+    if (tgt && /^es20(23|24|25)$/i.test(String(tgt))) {
+      record.issues.push({
+        code: 'SWCRC_ES_TOO_RECENT',
+        message: `jsc.target is "${tgt}" which may not be supported by current @swc/core. Prefer "es2022" or "esnext".`,
+      });
+    }
+  } catch (e) {
+    record.issues.push({ code: 'SWCRC_PARSE_ERROR', message: e.message });
+  }
+  jsonLog.swcrc.push(record);
+  if (record.issues.length) {
+    log(`✗ SWCRC: ${rel}`);
+    record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
+  } else {
+    log(`✓ SWCRC: ${rel}${record.jscTarget ? ' (jsc.target=' + record.jscTarget + ')' : ''}`);
+  }
+}
 
-  const report = {
-    meta: {
-      when: new Date().toISOString(),
-      root,
-      cwd: process.cwd(),
-    },
-    locations: {
-      prismaSchema: null,
-      apiPackageJson: null,
-      webRoot: null,
-      webJestConfig: null,
-      webTsSpec: null,
-      webSetupTests: null,
-      webTrpcMock: null,
-      trackerSpec: null,
-      indexSpec: null,
-      orchestrator: null,
-      trpcScan: null,
-      nxJson: null,
-      ciWorkflow: null,
-      playwrightConfig: null,
-    },
-    checks: [],
-    issues: [],
-    suggestions: [],
-  };
-
-  const pushIssue = (severity, code, message, details = {}) => {
-    report.issues.push({ severity, code, message, details });
-  };
-  const pushCheck = (ok, code, message, details = {}) => {
-    report.checks.push({ ok, code, message, details });
-    if (!ok) pushIssue('error', code, message, details);
-  };
-  const pushWarn = (code, message, details = {}) => {
-    report.issues.push({ severity: 'warn', code, message, details });
-  };
-  const suggest = (code, message, example) => {
-    report.suggestions.push({ code, message, example });
-  };
-
-  // --- Paths to check --------------------------------------------------------
-  const prismaSchema = findFirst([
-    path.join(root, 'prisma', 'schema.prisma'),
-    path.join(root, 'apps', 'api', 'prisma', 'schema.prisma'), // legacy pattern
-  ]);
-  report.locations.prismaSchema = prismaSchema;
-
-  const apiPkg = findFirst([
-    path.join(root, 'apps', 'api', 'package.json'),
-  ]);
-  report.locations.apiPackageJson = apiPkg;
-
-  const webRoot = findFirst([
-    path.join(root, 'apps', 'web'),
-    path.join(root, 'web'),
-  ]);
-  report.locations.webRoot = webRoot;
-
-  const webJestConfig = webRoot ? findFirst([
-    path.join(webRoot, 'jest.config.ts'),
-    path.join(webRoot, 'jest.config.js'),
-  ]) : null;
-  report.locations.webJestConfig = webJestConfig;
-
-  const webTsSpec = webRoot ? findFirst([
-    path.join(webRoot, 'tsconfig.spec.json'),
-  ]) : null;
-  report.locations.webTsSpec = webTsSpec;
-
-  const webSetupTests = webRoot ? findFirst([
-    path.join(webRoot, 'test', 'setupTests.ts'),
-    path.join(webRoot, 'test', 'setupTests.js'),
-  ]) : null;
-  report.locations.webSetupTests = webSetupTests;
-
-  const webTrpcMock = webRoot ? findFirst([
-    path.join(webRoot, 'test', 'trpc.mock.ts'),
-    path.join(webRoot, 'test', 'trpc.mock.js'),
-  ]) : null;
-  report.locations.webTrpcMock = webTrpcMock;
-
-  const trackerSpec = webRoot ? findFirst([
-    path.join(webRoot, 'specs', 'tracker.spec.tsx'),
-    path.join(webRoot, 'specs', 'tracker.spec.ts'),
-  ]) : null;
-  report.locations.trackerSpec = trackerSpec;
-
-  const indexSpec = webRoot ? findFirst([
-    path.join(webRoot, 'specs', 'index.spec.tsx'),
-    path.join(webRoot, 'specs', 'index.spec.ts'),
-  ]) : null;
-  report.locations.indexSpec = indexSpec;
-
-  const orchestrator = findFirst([
-    path.join(root, 'tools', 'scripts', 'orchestrate-tracker-setup.cjs'),
-  ]);
-  report.locations.orchestrator = orchestrator;
-
-  const trpcScan = findFirst([
-    path.join(root, 'tools', 'scripts', 'scan-trpc-web.cjs'),
-  ]);
-  report.locations.trpcScan = trpcScan;
-
-  const nxJson = findFirst([
-    path.join(root, 'nx.json'),
-  ]);
-  report.locations.nxJson = nxJson;
-
-  const ciWorkflow = findFirst([
-    path.join(root, '.github', 'workflows', 'ci.yml'),
-    path.join(root, '.github', 'workflows', 'ci.yaml'),
-  ]);
-  report.locations.ciWorkflow = ciWorkflow;
-
-  const playwrightConfig = findFirst([
-    path.join(root, 'playwright.config.ts'),
-    path.join(root, 'playwright.config.js'),
-    path.join(root, 'apps', 'web-e2e', 'playwright.config.ts'),
-    path.join(root, 'web-e2e', 'playwright.config.ts'),
-  ]);
-  report.locations.playwrightConfig = playwrightConfig;
-
-  // --- Prisma checks ---------------------------------------------------------
-  pushCheck(!!prismaSchema, 'PRISMA_SCHEMA_PRESENT',
-    prismaSchema ? `Found prisma schema at ${rel(root, prismaSchema)}` : 'Prisma schema not found',
-  );
-
-  if (prismaSchema) {
-    const ps = readText(prismaSchema);
-    if (!ps) {
-      pushIssue('warn', 'PRISMA_SCHEMA_READ', 'Could not read prisma schema.');
+function analyzeNxApiTestTarget() {
+  const pj = path.join('apps', 'api', 'project.json');
+  const rel = pj.replace(/\\/g, '/');
+  const record = { file: rel, issues: [], notes: [], testCommand: null, jestConfigPath: null };
+  if (!fs.existsSync(pj)) {
+    record.issues.push({ code: 'NX_PROJECT_JSON_MISSING', message: 'apps/api/project.json not found.' });
+    jsonLog.nx.push(record);
+    log(`✗ NX: ${rel} missing`);
+    return;
+  }
+  try {
+    const j = JSON.parse(fs.readFileSync(pj, 'utf8'));
+    const cmd = j?.targets?.test?.options?.command || null;
+    record.testCommand = cmd;
+    if (!cmd) {
+      record.issues.push({ code: 'NX_TEST_TARGET_MISSING', message: 'apps/api test target not defined.' });
     } else {
-      if (!/datasource\s+\w+\s+\{[\s\S]*?provider\s*=\s*".+?"[\s\S]*?url\s*=\s*env\(.+?\)/m.test(ps)) {
-        pushWarn('PRISMA_DATASOURCE_URL', 'Prisma schema datasource.url env reference not found or malformed.',
-          { hint: 'Ensure datasource { provider="postgresql", url=env("DATABASE_URL") }' });
-      }
-      if (!/generator\s+\w+\s+\{[\s\S]*?provider\s*=\s*"(prisma-client-js|node|js)"/m.test(ps)) {
-        pushWarn('PRISMA_GENERATOR', 'Prisma client generator may be missing.',
-          { hint: 'Ensure generator client { provider = "prisma-client-js" }' });
+      // Try to extract config path
+      const m = cmd.match(/--config\s+([^\s]+)/);
+      if (m) {
+        const p = m[1];
+        record.jestConfigPath = p;
+        const abs = path.resolve(p);
+        if (!fs.existsSync(abs)) {
+          record.issues.push({ code: 'JEST_CONFIG_NOT_FOUND', message: `Referenced config not found: ${p}` });
+        }
       }
     }
+  } catch (e) {
+    record.issues.push({ code: 'NX_PROJECT_JSON_PARSE', message: e.message });
   }
-
-  // --- API package.json prisma scripts --------------------------------------
-  if (apiPkg) {
-    const pkg = readJSON(apiPkg);
-    const scripts = (pkg && pkg.scripts) || {};
-    const expected = {
-      'prisma': 'prisma',
-      'prisma:migrate': 'prisma migrate dev --schema ../../prisma/schema.prisma',
-      'prisma:generate': 'prisma generate --schema ../../prisma/schema.prisma',
-      'prisma:format': 'prisma format --schema ../../prisma/schema.prisma',
-      'prisma:validate': 'prisma validate --schema ../../prisma/schema.prisma',
-    };
-    const missing = Object.entries(expected).filter(([k, v]) => scripts[k] !== v).map(([k]) => k);
-    pushCheck(missing.length === 0, 'API_PRISMA_SCRIPTS',
-      missing.length === 0 ? 'apps/api prisma scripts OK'
-                           : `apps/api missing/incorrect prisma scripts: ${missing.join(', ')}`,
-      { expected, current: scripts });
+  jsonLog.nx.push(record);
+  if (record.issues.length) {
+    log(`✗ NX: ${rel}`);
+    record.issues.forEach(i => log(`    - [${i.code}] ${i.message}`));
   } else {
-    pushIssue('error', 'API_PACKAGE_JSON_MISSING', 'apps/api/package.json not found.');
+    log(`✓ NX: ${rel} (test target present)`);
   }
+}
 
-  // --- Web project checks ----------------------------------------------------
-  pushCheck(!!webRoot, 'WEB_ROOT_PRESENT',
-    webRoot ? `Web root: ${rel(root, webRoot)}` : 'Web project not found');
+// ---- Run scans ----
+log('=== Scanning Jest configs ===');
+const jestFiles = listFiles(process.cwd(), p => /jest\.config\.(js|ts)$/.test(p));
+jestFiles.forEach(analyzeJestConfigFile);
 
-  // Jest config
-  if (webJestConfig) {
-    const jestText = readText(webJestConfig);
-    const mapperBlock = extractModuleNameMapperBlock(jestText);
-    const hasTrpc = hasModuleNameMapperAlias(jestText, '^\\^@careeros\\/trpc(?:\\/\\.\\*)?\\$|\\^@careeros\\/trpc\\(\\?:\\/\\.\\*\\)\\?\\$');
-    const hasAtAlias = hasModuleNameMapperAlias(jestText, '^\\^@\\/(\\.*)\\$|\\^@\\/(\\(\\.\\*\\))\\$');
+log('\n=== Scanning tsconfig files ===');
+const tsconfigs = listFiles(process.cwd(), p => /tsconfig\.(base|json|.*\.json)$/i.test(p) && p.endsWith('.json'));
+tsconfigs.forEach(analyzeTSConfig);
 
-    pushCheck(!!mapperBlock, 'WEB_JEST_MAPPER_PRESENT',
-      mapperBlock ? 'web Jest moduleNameMapper present' : 'web Jest moduleNameMapper missing');
+log('\n=== Scanning .swcrc files ===');
+const swcrcs = listFiles(process.cwd(), p => path.basename(p) === '.swcrc');
+swcrcs.forEach(analyzeSwcrc);
 
-    pushCheck(hasTrpc, 'WEB_JEST_TRPC_MAPPED',
-      hasTrpc ? '@careeros/trpc mapped to a mock file' : '@careeros/trpc not mapped in web Jest config');
+log('\n=== Checking Nx apps/api test target ===');
+analyzeNxApiTestTarget();
 
-    pushCheck(hasAtAlias, 'WEB_JEST_AT_ALIAS',
-      hasAtAlias ? '^@/(.*)$ alias present' : '^@/(.*)$ alias missing in web Jest config');
-
-  } else {
-    pushIssue('error', 'WEB_JEST_CONFIG_MISSING', 'web/jest.config.(ts|js) not found.');
+// ---- Summaries ----
+const countIssues = arr => arr.reduce((n, r) => n + (r.issues ? r.issues.length : 0), 0);
+jsonLog.summary = {
+  jestFiles: jestFiles.map(f => path.relative(process.cwd(), f).replace(/\\/g, '/')),
+  tsconfigFiles: tsconfigs.map(f => path.relative(process.cwd(), f).replace(/\\/g, '/')),
+  swcrcFiles: swcrcs.map(f => path.relative(process.cwd(), f).replace(/\\/g, '/')),
+  issueCounts: {
+    jest: countIssues(jsonLog.jest),
+    tsconfig: countIssues(jsonLog.tsconfig),
+    swcrc: countIssues(jsonLog.swcrc),
+    nx: countIssues(jsonLog.nx),
   }
+};
 
-  // tsconfig.spec.json
-  if (webTsSpec) {
-    const tsSpec = readJSON(webTsSpec);
-    const co = tsSpec && tsSpec.compilerOptions || {};
-    const jsxOK = co.jsx === 'react-jsx';
-    const types = Array.isArray(co.types) ? co.types : [];
-    const hasJestDom = types.includes('@testing-library/jest-dom');
-    const isoOK = co.isolatedModules === true;
+// ---- Write logs ----
+const txtPath = path.join(LOG_DIR, 'repo-health-report.txt');
+const jsonPath = path.join(LOG_DIR, 'repo-health-report.json');
+fs.writeFileSync(txtPath, textLog.join('\n') + '\n', 'utf8');
+fs.writeFileSync(jsonPath, JSON.stringify(jsonLog, null, 2), 'utf8');
 
-    pushCheck(jsxOK, 'WEB_TS_SPEC_JSX',
-      jsxOK ? 'tsconfig.spec.json jsx=react-jsx' : 'tsconfig.spec.json should set jsx=react-jsx');
-
-    pushCheck(hasJestDom, 'WEB_TS_SPEC_JESTDOM_TYPES',
-      hasJestDom ? 'jest-dom types present' : 'add "@testing-library/jest-dom" to tsconfig.spec.json compilerOptions.types');
-
-    pushCheck(isoOK, 'WEB_TS_SPEC_ISO',
-      isoOK ? 'isolatedModules=true' : 'set isolatedModules=true in tsconfig.spec.json');
-  } else {
-    pushIssue('error', 'WEB_TS_SPEC_MISSING', 'web/tsconfig.spec.json not found.');
-  }
-
-  // setupTests
-  pushCheck(!!webSetupTests, 'WEB_SETUP_TESTS',
-    webSetupTests ? `setupTests present at ${rel(root, webSetupTests)}` : 'web/test/setupTests.(ts|js) missing',
-  );
-
-  // trpc mock
-  pushCheck(!!webTrpcMock, 'WEB_TRPC_MOCK',
-    webTrpcMock ? `tRPC mock present at ${rel(root, webTrpcMock)}`
-                : 'web/test/trpc.mock.(ts|js) missing');
-
-  if (webTrpcMock) {
-    const txt = readText(webTrpcMock) || '';
-    const hasNamed = /\bexport\s+const\s+trpc\b/.test(txt) || /module\.exports\s*=\s*\{[\s\S]*trpc/.test(txt);
-    const hasDefault = /\bexport\s+default\b/.test(txt) || /module\.exports\s*=\s*\{[\s\S]*default/.test(txt);
-    if (!hasNamed || !hasDefault) {
-      pushWarn('WEB_TRPC_MOCK_EXPORTS', 'tRPC mock should export both named `trpc` and default { trpc }.');
-    }
-  }
-
-  // basic specs present
-  pushCheck(!!trackerSpec, 'WEB_TRACKER_SPEC_PRESENT',
-    trackerSpec ? `tracker spec at ${rel(root, trackerSpec)}` : 'web/specs/tracker.spec.(tsx|ts) missing');
-
-  pushCheck(!!indexSpec, 'WEB_INDEX_SPEC_PRESENT',
-    indexSpec ? `index spec at ${rel(root, indexSpec)}` : 'web/specs/index.spec.(tsx|ts) missing');
-
-  // orchestrator & scan tools
-  pushCheck(!!orchestrator, 'SCRIPT_ORCHESTRATOR_PRESENT',
-    orchestrator ? `orchestrator present at ${rel(root, orchestrator)}` : 'tools/scripts/orchestrate-tracker-setup.cjs missing');
-
-  pushCheck(!!trpcScan, 'SCRIPT_TRPC_SCAN_PRESENT',
-    trpcScan ? `trpc scan present at ${rel(root, trpcScan)}` : 'tools/scripts/scan-trpc-web.cjs missing');
-
-  // nx.json (workspace sanity)
-  pushCheck(!!nxJson, 'NX_JSON_PRESENT', nxJson ? 'nx.json present' : 'nx.json missing');
-
-  // CI presence
-  pushCheck(!!ciWorkflow, 'CI_WORKFLOW_PRESENT',
-    ciWorkflow ? `CI workflow present at ${rel(root, ciWorkflow)}`
-               : '.github/workflows/ci.yml missing');
-
-  // Playwright config (optional)
-  if (!playwrightConfig) {
-    pushWarn('PLAYWRIGHT_CONFIG_MISSING', 'Playwright config not found (ok if you are not running E2E yet).');
-  } else {
-    report.locations.playwrightConfig = playwrightConfig;
-  }
-
-  // suggestions (generic)
-  suggest('RUN_API_PRISMA_VALIDATE', 'Run Prisma sanity once to verify migrations & client', 'pnpm -F ./apps/api run prisma:validate && pnpm -F ./apps/api run prisma:generate');
-  suggest('RUN_TESTS_WEB', 'Run web tests to verify mock wiring', 'pnpm run test:web');
-  suggest('ADD_CI', 'Add CI step for web tests', 'pnpm run test:web');
-
-  // write files
-  fs.writeFileSync(jsonOut, JSON.stringify(report, null, 2), 'utf8');
-
-  const logLines = [];
-  logLines.push('=== Repo Health Scan ===');
-  logLines.push(`When: ${report.meta.when}`);
-  logLines.push(`Root: ${report.meta.root}`);
-  logLines.push('');
-  logLines.push('Locations:');
-  Object.entries(report.locations).forEach(([k, v]) => {
-    logLines.push(`  - ${k}: ${v ? rel(root, v) : '(not found)'}`);
-  });
-  logLines.push('');
-  logLines.push('Checks:');
-  report.checks.forEach(c => {
-    logLines.push(`  ${c.ok ? '✓' : '✗'} ${c.code} — ${c.message}`);
-  });
-  logLines.push('');
-  if (report.issues.length) {
-    logLines.push('Issues:');
-    report.issues.forEach(i => {
-      logLines.push(`  [${i.severity}] ${i.code} — ${i.message}`);
-    });
-  } else {
-    logLines.push('Issues: (none)');
-  }
-  logLines.push('');
-  if (report.suggestions.length) {
-    logLines.push('Suggestions:');
-    report.suggestions.forEach(s => {
-      logLines.push(`  - ${s.code}: ${s.message}`);
-      if (s.example) logLines.push(`      e.g. ${s.example}`);
-    });
-  }
-  logLines.push('');
-
-  fs.writeFileSync(logOut, logLines.join('\n'), 'utf8');
-
-  console.log('✓ Repo health scan complete');
-  console.log('  Log :', path.relative(process.cwd(), logOut));
-  console.log('  JSON:', path.relative(process.cwd(), jsonOut));
-
-  // Exit non-zero if there are any error-severity issues
-  const hasErrors = report.issues.some(i => i.severity === 'error');
-  if (hasErrors) process.exitCode = 2;
-})();
+console.log('\n--- Report written ---');
+console.log('Text : ' + txtPath);
+console.log('JSON : ' + jsonPath);

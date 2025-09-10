@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { trpc } from '../../trpc';
+import { trpc } from '../../utils/api';
 import type { ApplicationItem } from '@careeros/types';
 
 function Column({ title, items }: { title: string; items: ApplicationItem[] }) {

@@ -1,39 +1,37 @@
-// web/jest.config.ts
-import type { Config } from 'jest';
 
-const config: Config = {
+// Jest config for web (clean slate)
+module.exports = {
   displayName: 'web',
-  preset: '../jest.preset.js', // adjust if your preset is elsewhere
   testEnvironment: 'jsdom',
 
   transform: {
-    '^.+\\.[tj]sx?$': [
-      'ts-jest',
-      {
-        tsconfig: '<rootDir>/tsconfig.spec.json',
-        // keep isolatedModules in tsconfig.spec.json (not here) to avoid deprecation warning
+    '^.+\\.(t|j)sx?$': ['@swc/jest', {
+      swcrc: false,
+      sourceMaps: 'inline',
+      jsc: {
+        target: 'es2022',
+        parser: { syntax: 'typescript', tsx: true, decorators: true },
+        transform: { react: { runtime: 'automatic' }, decoratorMetadata: true }
       },
-    ],
+      module: { type: 'commonjs' }
+    }]
+  },
+
+  // Map app aliases and mock TRPC client in tests
+  moduleNameMapper: {
+    '^@/(.*)$': '<rootDir>/src/$1',
+    '^~/(.*)$': '<rootDir>/src/$1',
+
+    // TRPC hook imports -> jest mock
+    '^src/trpc$': '<rootDir>/specs/__mocks__/trpc.ts',
+    '^(?:\\.{1,2}/)+trpc$': '<rootDir>/specs/__mocks__/trpc.ts',
+
+    // Stable utils/api re-export -> jest mock
+    '^src/utils/api$': '<rootDir>/specs/__mocks__/utils-api.ts',
+    '^(?:\\.{1,2}/)+utils/api$': '<rootDir>/specs/__mocks__/utils-api.ts'
   },
 
   moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx', 'html'],
-
-  moduleNameMapper: {
-    '^(?:\\.\\./)+trpc$': '<rootDir>/specs/__mocks__/trpc.ts',
-    '^src/trpc$': '<rootDir>/specs/__mocks__/trpc.ts',
-    '@careeros/trpc': '<rootDir>/specs/__mocks__/trpc.ts',
-    '^@/trpc$': '<rootDir>/specs/__mocks__/trpc.ts',
-    // Point ALL @careeros/trpc imports (and subpaths) to the shared TS mock
-    '^@careeros/trpc(?:/.*)?$': '<rootDir>/test/trpc.mock.ts',
-    // Next-style alias for "@/..."
-    '^@/(.*)$': '<rootDir>/src/$1',
-  
-  },
-
-  // Loads @testing-library/jest-dom matchers, etc.
   setupFilesAfterEnv: ['<rootDir>/test/setupTests.ts'],
-
   coverageDirectory: '<rootDir>/coverage',
 };
-
-export default config;

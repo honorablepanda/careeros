@@ -25,7 +25,7 @@
     "check:appshape": "node tools/scripts/check-application-shape.cjs",
     "try:tracker": "node tools/scripts/try-tracker-router-variants.cjs",
     "try:tracker:apply": "node tools/scripts/try-tracker-router-variants.cjs --apply-best",
-    "release:prep": "pnpm -w tsc -b && pnpm -w build && pnpm -w exec nx run-many -t test --all --skip-nx-cache && node tools/scripts/run-final-scan.cjs"
+    "release:prep": "pnpm -w tsc -b && pnpm -w exec nx run-many -t build --projects prisma,types,trpc --skip-nx-cache && pnpm -w exec nx run-many -t test --all --skip-nx-cache && node tools/scripts/run-final-scan.cjs"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

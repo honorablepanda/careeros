@@ -1,4 +1,7 @@
 # CareerOS
+[![Release](https://img.shields.io/github/v/release/honorablepanda/careeros?sort=semver)](https://github.com/honorablepanda/careeros/releases) [![CI](https://github.com/honorablepanda/careeros/actions/workflows/ci.yml/badge.svg)](https://github.com/honorablepanda/careeros/actions/workflows/ci.yml)
+
+
 
 Full-stack freelance platform monorepo built with [Nx](https://nx.dev), [Next.js](https://nextjs.org/), [NestJS](https://nestjs.com/), [Prisma](https://www.prisma.io/), and `pnpm`.
 

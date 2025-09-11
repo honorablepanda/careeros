@@ -11,6 +11,7 @@ if (!hasGh()) {
   console.error('Missing GitHub CLI (gh). Install it and run: gh auth login');
   process.exit(2);
 }
+
 const repo = process.env.GITHUB_REPOSITORY
   || JSON.parse(sh('gh repo view --json nameWithOwner')).nameWithOwner;
 

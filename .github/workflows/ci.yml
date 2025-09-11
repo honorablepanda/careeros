@@ -18,7 +18,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm -w tsc -b
       - run: node tools/scripts/check-router-imports.cjs
-      - run: pnpm -w build
+      - run: pnpm -w exec nx run-many -t build --all --exclude=root --skip-nx-cache --exclude=root
       - run: npx nx run api:test --skip-nx-cache
       - run: npx nx run web:test --skip-nx-cache
       - run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs

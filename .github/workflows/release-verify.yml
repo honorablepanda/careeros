@@ -1,0 +1,43 @@
+name: release-verify
+on:
+  release:
+    types: [published]
+
+jobs:
+  verify_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify Release (notes + assets)
+        run: node tools/scripts/verify-release.cjs ${{ github.event.release.tag_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Slack notify (success)
+        if: ${{ success() && secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"✅ Release ${{ github.repository }} ${{ github.event.release.tag_name }} verified\"}" \
+            ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Discord notify (success)
+        if: ${{ success() && secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          curl -H "Content-Type: application/json" \
+            -d "{\"content\":\"✅ Release ${{ github.repository }} ${{ github.event.release.tag_name }} verified\"}" \
+            ${{ secrets.DISCORD_WEBHOOK_URL }}
+
+      - name: Slack notify (failure)
+        if: ${{ failure() && secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          curl -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"❌ Release verify failed: ${{ github.repository }} ${{ github.event.release.tag_name }}\"}" \
+            ${{ secrets.SLACK_WEBHOOK_URL }}

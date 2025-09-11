@@ -68,3 +68,5 @@ docker-data/
 tools/scripts/automate-stabilize-pr.sh
 .github/workflows/*.bak
 web/jest.config.ts.bak*
+tools/scripts/generate-release-notes.cjs
+web/jest.config.ts*.bak*

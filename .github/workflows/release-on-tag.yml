@@ -52,9 +52,12 @@ jobs:
         run: |
           set -euxo pipefail
           if [ -f apps/api/prisma/schema.prisma ]; then
-            SCHEMA=apps/api/prisma/schema.prisma
+            pnpm -C apps/api exec prisma -v
+            pnpm -C apps/api exec prisma generate --schema=prisma/schema.prisma
           else
-            SCHEMA=$(git ls-files | grep -E '/prisma/schema\.prisma
+            echo "apps/api/prisma/schema.prisma not found"; exit 1
+          fi
+
       - name: Build + Test + Final Scan
         run: pnpm run release:prep
         timeout-minutes: 25

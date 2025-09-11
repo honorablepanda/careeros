@@ -3,100 +3,88 @@ name: release-on-tag
 on:
   push:
     tags:
-      - 'v*'
-  workflow_dispatch:
-    inputs:
-      tag:
-        description: 'Tag to release (eg. v0.7.1)'
-        required: true
+      - "v*"
 
 permissions:
-  contents: write
+  contents: write   # create/update releases
+  issues: write     # if your notes script opens issues (safe to keep)
   actions: read
-  issues: write
 
 concurrency:
-  group: release-${{ github.ref_name || github.event.inputs.tag }}
-  cancel-in-progress: false
+  group: release-on-tag-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   release:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
     env:
-      TAG: ${{ github.ref_name != '' && github.ref_name || github.event.inputs.tag }}
+      CI: true
+      # Quiet Nx + avoid daemon in CI
+      NX_DAEMON: "false"
+      NX_NO_CLOUD: "true"
+      # Silence Next.js telemetry
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Handy tag var
+      TAG: ${{ github.ref_name }}
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: 'pnpm'
+          node-version: 20
+          cache: pnpm
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
       - name: Build + Test + Final Scan
         run: pnpm run release:prep
+        timeout-minutes: 25
 
       - name: Upload scan artifacts
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: scans-${{ env.TAG }}
+          if-no-files-found: warn
+          retention-days: 7
           path: |
-            scans/*.json
-            tools/logs/*.json
-          if-no-files-found: ignore
+            scans/**
+            tools/logs/**
+            web/.next/**
 
       - name: Generate release notes
-        run: node tools/scripts/gen-release-notes.cjs "${TAG}" > RELEASE_NOTES.md
+        id: notes
+        run: |
+          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
+          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
 
       - name: Create / Update GitHub Release + Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ${{ env.TAG }}
+          body_path: ${{ steps.notes.outputs.notes_path }}
+          make_latest: true
+          files: |
+            scans/**/*.json
+            tools/logs/**/*.json
         env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          # create release if missing; otherwise update notes
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --notes-file RELEASE_NOTES.md
-          else
-            gh release create "$TAG" --title "$TAG" --notes-file RELEASE_NOTES.md --verify-tag
-          fi
-          # upload assets (ignore if no files found)
-          gh release upload "$TAG" scans/*.json tools/logs/*.json --clobber 2>/dev/null || true
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Verify release has expected assets
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          echo "Verifying assets for $TAG ..."
-          names="$(gh api repos/${{ github.repository }}/releases/tags/$TAG --jq '.assets[].name')"
-          echo "$names"
-          echo "$names" | grep -E 'repo-health-.*\.json' >/dev/null
-          echo "$names" | grep -E 'trpc-scan-report-.*\.json' >/dev/null
-          echo "✓ Release has repo-health + trpc-scan reports"
-
-      - name: Ensure README badge (one-time)
+          gh release view "$TAG" --json tagName,assets,createdAt
         env:
-          REPO: ${{ github.repository }}
-        run: |
-          set -euo pipefail
-          BADGE="![release-on-tag](https://github.com/$REPO/actions/workflows/release-on-tag.yml/badge.svg)"
-          if [ -f README.md ] && ! grep -q 'actions/workflows/release-on-tag.yml' README.md; then
-            echo "" >> README.md
-            echo "$BADGE" >> README.md
-            git config user.name "github-actions[bot]"
-            git config user.email "github-actions[bot]@users.noreply.github.com"
-            git add README.md
-            git commit -m "docs: add release-on-tag status badge [skip ci]" || true
-            git push
-            echo "✓ README badge added"
-          else
-            echo "= README badge already present or README.md missing"
-          fi
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

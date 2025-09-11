@@ -113,7 +113,11 @@
       "@trpc/react-query": "10.45.2",
       "@trpc/next": "10.45.2",
       "@trpc/meta": "10.45.2"
-    }
+    },
+    "onlyBuiltDependencies": [
+      "@prisma/client",
+      "sharp"
+    ]
   },
   "engines": {
     "node": ">=20 <23"

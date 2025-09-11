@@ -46,12 +46,45 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          if [ -f apps/api/prisma/schema.prisma ]; then
-            pnpm -C apps/api exec prisma -v
-            pnpm -C apps/api exec prisma generate --schema=prisma/schema.prisma
-          else
-            echo "apps/api/prisma/schema.prisma not found"; exit 1
+          # Find every prisma/schema.prisma in the repo
+          mapfile -t SCHEMAS < <(git ls-files | grep -E '/prisma/schema\.prisma
+
+
+      - name: Typecheck
+        run: pnpm -w tsc -b
+
+      - name: Guard missing router imports
+        run: node tools/scripts/check-router-imports.cjs
+
+      - name: Build all (Nx)
+        run: pnpm -w exec nx run-many -t build --all --skip-nx-cache --exclude=root
+
+      - name: API tests
+        run: npx nx run api:test --skip-nx-cache
+
+      - name: Web tests
+        run: npx nx run web:test --skip-nx-cache
+
+      - name: Repo health scan
+        run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
+
+      - name: Assert clean working tree
+        run: node tools/scripts/ci-assert-clean.cjs
+
+      - name: Prisma enum checker (dry-run)
+        run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry
+ || true)
+          if [ ${#SCHEMAS[@]} -eq 0 ]; then
+            echo "No prisma/schema.prisma files found; skipping prisma generate"
+            exit 0
           fi
+          pnpm --version
+          pnpm exec prisma -v
+          for S in "${SCHEMAS[@]}"; do
+            echo "→ Generating Prisma Client for: $S"
+            pnpm exec prisma generate --schema="$S"
+          done
+
 
 
       - name: Typecheck

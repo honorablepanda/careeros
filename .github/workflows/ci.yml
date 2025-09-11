@@ -1,26 +1,112 @@
 name: CI
+
 on:
-  push:
-    branches: [main]
   pull_request:
+    branches: [ main ]
+    types: [ opened, synchronize, reopened, ready_for_review ]
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build_test:
+    name: build_test
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    permissions:
+      contents: read
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          version: 10
-      - uses: actions/setup-node@v4
+          fetch-depth: 0
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm -w tsc -b
-      - run: node tools/scripts/check-router-imports.cjs
-      - run: pnpm -w build
-      - run: npx nx run api:test --skip-nx-cache
-      - run: npx nx run web:test --skip-nx-cache
-      - run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
-      - run: node tools/scripts/ci-assert-clean.cjs
-      - run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      # ⬇️ Prisma Client must exist before Next type-checks
+      - name: Prisma Client generation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          # Find every prisma/schema.prisma in the repo
+          mapfile -t SCHEMAS < <(git ls-files | grep -E '/prisma/schema\.prisma
+
+
+      - name: Typecheck
+        run: pnpm -w tsc -b
+
+      - name: Guard missing router imports
+        run: node tools/scripts/check-router-imports.cjs
+
+      - name: Build all (Nx)
+        run: pnpm -w exec nx run-many -t build --all --skip-nx-cache --exclude=root
+
+      - name: API tests
+        run: npx nx run api:test --skip-nx-cache
+
+      - name: Web tests
+        run: npx nx run web:test --skip-nx-cache
+
+      - name: Repo health scan
+        run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
+
+      - name: Assert clean working tree
+        run: node tools/scripts/ci-assert-clean.cjs
+
+      - name: Prisma enum checker (dry-run)
+        run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry
+ || true)
+          if [ ${#SCHEMAS[@]} -eq 0 ]; then
+            echo "No prisma/schema.prisma files found; skipping prisma generate"
+            exit 0
+          fi
+          pnpm --version
+          pnpm exec prisma -v
+          for S in "${SCHEMAS[@]}"; do
+            echo "→ Generating Prisma Client for: $S"
+            pnpm exec prisma generate --schema="$S"
+          done
+
+
+
+      - name: Typecheck
+        run: pnpm -w tsc -b
+
+      - name: Guard missing router imports
+        run: node tools/scripts/check-router-imports.cjs
+
+      - name: Build all (Nx)
+        run: pnpm -w exec nx run-many -t build --all --skip-nx-cache --exclude=root
+
+      - name: API tests
+        run: npx nx run api:test --skip-nx-cache
+
+      - name: Web tests
+        run: npx nx run web:test --skip-nx-cache
+
+      - name: Repo health scan
+        run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
+
+      - name: Assert clean working tree
+        run: node tools/scripts/ci-assert-clean.cjs
+
+      - name: Prisma enum checker (dry-run)
+        run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry

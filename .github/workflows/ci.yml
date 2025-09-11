@@ -28,9 +28,9 @@ jobs:
       - run: node tools/scripts/ci-assert-clean.cjs
       - run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry | head -n1 || true)
           if [ -n "$SCHEMA" ]; then
-            pnpm -w dlx prisma generate --schema="$SCHEMA"
+            pnpm dlx prisma generate --schema=apps/api/prisma/schema.prisma
           else
-            pnpm -w dlx prisma generate
+            pnpm dlx prisma generate --schema=apps/api/prisma/schema.prisma
           fi
       - run: pnpm -w tsc -b
       - run: node tools/scripts/check-router-imports.cjs

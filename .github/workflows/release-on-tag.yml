@@ -93,9 +93,9 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
  | head -n1 || true)
           if [ -n "$SCHEMA" ]; then
-            pnpm -w dlx prisma generate --schema="$SCHEMA"
+            pnpm dlx prisma generate --schema=apps/api/prisma/schema.prisma
           else
-            pnpm -w dlx prisma generate
+            pnpm dlx prisma generate --schema=apps/api/prisma/schema.prisma
           fi
 
       - name: Build + Test + Final Scan

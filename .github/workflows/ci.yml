@@ -16,6 +16,22 @@ jobs:
           node-version: 22
           cache: 'pnpm'
       - run: pnpm install --frozen-lockfile
+      - name: Prisma Client generation
+        run: |
+          set -e
+          SCHEMA=$(git ls-files | grep -E '/prisma/schema\.prisma      - run: pnpm -w tsc -b
+      - run: node tools/scripts/check-router-imports.cjs
+      - run: pnpm -w exec nx run-many -t build --all --skip-nx-cache --exclude=root
+      - run: npx nx run api:test --skip-nx-cache
+      - run: npx nx run web:test --skip-nx-cache
+      - run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
+      - run: node tools/scripts/ci-assert-clean.cjs
+      - run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry | head -n1 || true)
+          if [ -n "$SCHEMA" ]; then
+            pnpm -w dlx prisma generate --schema="$SCHEMA"
+          else
+            pnpm -w dlx prisma generate
+          fi
       - run: pnpm -w tsc -b
       - run: node tools/scripts/check-router-imports.cjs
       - run: pnpm -w exec nx run-many -t build --all --exclude=root --skip-nx-cache --exclude=root

@@ -47,6 +47,56 @@ jobs:
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
+      - name: Prisma Client generation
+        run: |
+          set -e
+          SCHEMA=$(git ls-files | grep -E '/prisma/schema\.prisma
+      - name: Build + Test + Final Scan
+        run: pnpm run release:prep
+        timeout-minutes: 25
+
+      - name: Upload scan artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: scans-${{ env.TAG }}
+          if-no-files-found: warn
+          retention-days: 7
+          path: |
+            scans/**
+            tools/logs/**
+            web/.next/**
+
+      - name: Generate release notes
+        id: notes
+        run: |
+          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
+          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
+
+      - name: Create / Update GitHub Release + Upload Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: ${{ env.TAG }}
+          body_path: ${{ steps.notes.outputs.notes_path }}
+          make_latest: true
+          files: |
+            scans/**/*.json
+            tools/logs/**/*.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Verify release has expected assets
+        run: |
+          gh release view "$TAG" --json tagName,assets,createdAt
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+ | head -n1 || true)
+          if [ -n "$SCHEMA" ]; then
+            pnpm -w dlx prisma generate --schema="$SCHEMA"
+          else
+            pnpm -w dlx prisma generate
+          fi
 
       - name: Build + Test + Final Scan
         run: pnpm run release:prep

@@ -18,14 +18,15 @@
     "fix:phase3:all": "node tools/scripts/fix-phase3-all.cjs",
     "mark:stubs": "node tools/scripts/mark-existing-stubs.cjs",
     "orchestrate:phase3": "node tools/scripts/orchestrate-phase3.cjs",
-    "build": "pnpm -w exec nx run-many -t build --all",
+    "build": "pnpm -w exec nx run-many -t build --all --exclude=root",
     "wire:trpc-web": "node tools/scripts/wire-trpc-web.cjs",
     "check:trpc": "node tools/scripts/check-trpc-wiring.cjs",
     "fix:trpc": "node tools/scripts/check-trpc-wiring.cjs --fix",
     "check:appshape": "node tools/scripts/check-application-shape.cjs",
     "try:tracker": "node tools/scripts/try-tracker-router-variants.cjs",
     "try:tracker:apply": "node tools/scripts/try-tracker-router-variants.cjs --apply-best",
-    "release:prep": "pnpm -w tsc -b && pnpm -w exec nx run-many -t build --projects prisma,types,trpc --skip-nx-cache && pnpm -w exec nx run-many -t test --all --skip-nx-cache && node tools/scripts/run-final-scan.cjs"
+    "release:prep": "pnpm -w tsc -b && pnpm -w exec nx run-many -t build --all --exclude=root && pnpm -w exec nx run-many -t test --all --skip-nx-cache --exclude=root && node tools/scripts/run-final-scan.cjs",
+    "test:all": "pnpm -w exec nx run-many -t test --all --skip-nx-cache --exclude=root"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

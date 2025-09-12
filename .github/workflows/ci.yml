@@ -10,9 +10,8 @@ on:
 
 # Make the required check name stable:  "CI / build_test"
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
 jobs:
   build_test:
     # Don’t run for draft PRs
@@ -20,6 +19,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+- name: Prisma Client generation
+        shell: bash
+        run: |
+          set -euxo pipefail
+          # Generate for the API schema from repo root
+          pnpm dlx prisma -v
+          pnpm dlx prisma generate --schema=apps/api/prisma/schema.prisma
+
+          # Sanity: ensure Next/TS will see the generated client
+          test -f node_modules/.prisma/client/index.d.ts
+          grep -q 'class PrismaClient' node_modules/.prisma/client/index.d.ts
+          node -e "const c=require('@prisma/client'); if(!c.PrismaClient){process.exit(2)}"
       - name: Checkout
         uses: actions/checkout@v4
         with:

@@ -1,7 +1,8 @@
-import { $Enums, Prisma } from '@prisma/client';
 // apps/api/src/trpc/routers/tracker.router.ts
 import { router, procedure } from '../trpc';
 import { z } from 'zod';
+import { Prisma, $Enums } from '@prisma/client';
+import { $Enums, Prisma } from '@prisma/client';
 
 const GetApplicationsInput = z.object({ userId: z.string() }).strict();
 

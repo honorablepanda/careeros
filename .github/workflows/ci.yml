@@ -1,50 +1,40 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [ main ]
-    types: [ opened, synchronize, reopened, ready_for_review ]
-    paths:
-      - '**'
-  pull_request_target:
-    branches: [ main ]
-    types: [ opened, synchronize, reopened, ready_for_review ]
   push:
-    branches: [ main ]
-  workflow_dispatch: {}
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+    branches: [main]
+  workflow_dispatch:
 
-permissions:
-  contents: read
-
+# Make the required check name stable:  "CI / build_test"
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
-env:
-  NEXT_TELEMETRY_DISABLED: '1'
 
 jobs:
   build_test:
-    name: build_test
+    # Don’t run for draft PRs
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          # Needed so Prisma schema discovery and Nx can see all files/history as needed
           fetch-depth: 0
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: 'pnpm'
+          cache: pnpm
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
@@ -59,10 +49,10 @@ jobs:
             echo "No prisma/schema.prisma files found; skipping prisma generate"
             exit 0
           fi
-          pnpm exec prisma -v
+          pnpm dlx prisma -v
           for S in "${SCHEMAS[@]}"; do
             echo "→ Generating Prisma Client for: $S"
-            pnpm exec prisma generate --schema="$S"
+            pnpm dlx prisma generate --schema="$S"
           done
 
       - name: Typecheck
@@ -74,22 +64,9 @@ jobs:
       - name: Build all (Nx)
         run: pnpm -w exec nx run-many -t build --all --skip-nx-cache --exclude=root
 
-      # If you truly have an api target, keep this; otherwise it will no-op if the target doesn't exist.
-      - name: API tests (if present)
-        shell: bash
-        run: |
-          set -euxo pipefail
-          # Run if the "api:test" target exists; otherwise skip gracefully
-          if npx nx graph --help >/dev/null 2>&1 && npx nx show projects >/dev/null 2>&1; then
-            if npx nx show project api >/dev/null 2>&1; then
-              npx nx run api:test --skip-nx-cache
-            else
-              echo "Nx project 'api' not found; skipping api:test"
-            fi
-          else
-            echo "Nx 'show project' not available; attempting api:test directly (may skip)"
-            npx nx run api:test --skip-nx-cache || echo "api:test not configured; skipping"
-          fi
+      - name: API tests
+        run: npx nx run api:test --skip-nx-cache
+        # If there's no "api" target, comment this step out or make it conditional.
 
       - name: Web tests
         run: npx nx run web:test --skip-nx-cache

@@ -70,3 +70,6 @@ tools/scripts/automate-stabilize-pr.sh
 web/jest.config.ts.bak*
 tools/scripts/generate-release-notes.cjs
 web/jest.config.ts*.bak*
+
+# local backups
+*.bak

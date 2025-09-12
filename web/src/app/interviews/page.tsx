@@ -1,11 +1,61 @@
-/** STUB:PHASE3
- * This is a scaffold placeholder. Replace with a real implementation.
- * Remove this header when done.
- */
+'use client';
+import * as React from 'react';
+import { trpc } from '@/trpc';
+
+type Interview = {
+  id: string;
+  company?: string;
+  role?: string;
+  stage?: string;        // e.g., SCREEN, ONSITE
+  scheduledAt?: string | Date;
+  notes?: string;
+};
+
 export default function InterviewsPage() {
+  const userId = 'demo-user'; // TODO: replace with session user id
+  const hook = (trpc as any)?.interviews?.list?.useQuery;
+  const query = hook
+    ? hook({ userId })
+    : { data: null, isLoading: false, error: { message: 'Interviews API not available' } };
+
+  const { data, isLoading, error } = query as {
+    data: Interview[] | null; isLoading: boolean; error: null | { message: string }
+  };
+
+  if (isLoading) return <main className="p-6">Loading…</main>;
+  if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
+
+  const rows = [...(data ?? [])].sort((a,b) =>
+    new Date(a.scheduledAt ?? 0).getTime() - new Date(b.scheduledAt ?? 0).getTime()
+  );
+
   return (
-    <main>
-      <h1>Interviews</h1>
+    <main className="p-6 space-y-4">
+      <h1 className="text-2xl font-semibold">Interviews</h1>
+      {rows.length ? (
+        <table className="w-full text-sm border" role="table">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="p-2 text-left">Company</th>
+              <th className="p-2 text-left">Role</th>
+              <th className="p-2 text-left">Stage</th>
+              <th className="p-2 text-left">When</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map(iv => (
+              <tr key={iv.id} className="border-t">
+                <td className="p-2">{iv.company ?? '—'}</td>
+                <td className="p-2">{iv.role ?? '—'}</td>
+                <td className="p-2">{iv.stage ?? '—'}</td>
+                <td className="p-2">
+                  {iv.scheduledAt ? new Date(iv.scheduledAt).toLocaleString() : '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      ) : <div>No interviews scheduled.</div>}
     </main>
   );
 }

@@ -1,0 +1,1690 @@
+{
+  "prisma": {
+    "schemas": [
+      {
+        "path": "prisma/schema.prisma",
+        "enums": [
+          {
+            "name": "ApplicationStatus",
+            "values": [
+              "APPLIED",
+              "INTERVIEW",
+              "OFFER",
+              "REJECTED",
+              "WITHDRAWN",
+              "HIRED"
+            ]
+          },
+          {
+            "name": "ApplicationSource",
+            "values": [
+              "JOB_BOARD",
+              "REFERRAL",
+              "COMPANY_WEBSITE",
+              "RECRUITER",
+              "OTHER"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "name": "Application",
+            "fields": [
+              {
+                "name": "id",
+                "type": "String",
+                "attr": "@id @default(cuid())"
+              },
+              {
+                "name": "userId",
+                "type": "String",
+                "attr": "// keep loose; no FK until your User model is defined"
+              },
+              {
+                "name": "company",
+                "type": "String",
+                "attr": ""
+              },
+              {
+                "name": "role",
+                "type": "String",
+                "attr": ""
+              },
+              {
+                "name": "location",
+                "type": "String?",
+                "attr": ""
+              },
+              {
+                "name": "status",
+                "type": "ApplicationStatus",
+                "attr": "@default(APPLIED)"
+              },
+              {
+                "name": "source",
+                "type": "ApplicationSource",
+                "attr": "@default(OTHER)"
+              },
+              {
+                "name": "notes",
+                "type": "String?",
+                "attr": ""
+              },
+              {
+                "name": "createdAt",
+                "type": "DateTime",
+                "attr": "@default(now())"
+              },
+              {
+                "name": "updatedAt",
+                "type": "DateTime",
+                "attr": "@updatedAt"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "path": "shared/prisma/schema.prisma",
+        "enums": [
+          {
+            "name": "ApplicationStatus",
+            "values": [
+              "APPLIED",
+              "INTERVIEWING",
+              "OFFER",
+              "REJECTED"
+            ]
+          }
+        ],
+        "models": [
+          {
+            "name": "User",
+            "fields": [
+              {
+                "name": "id",
+                "type": "Int",
+                "attr": "@id @default(autoincrement())"
+              },
+              {
+                "name": "email",
+                "type": "String",
+                "attr": "@unique"
+              },
+              {
+                "name": "name",
+                "type": "String?",
+                "attr": ""
+              },
+              {
+                "name": "createdAt",
+                "type": "DateTime",
+                "attr": "@default(now())"
+              }
+            ]
+          },
+          {
+            "name": "Application",
+            "fields": [
+              {
+                "name": "id",
+                "type": "String",
+                "attr": "@id @default(cuid())"
+              },
+              {
+                "name": "title",
+                "type": "String",
+                "attr": ""
+              },
+              {
+                "name": "company",
+                "type": "String",
+                "attr": ""
+              },
+              {
+                "name": "status",
+                "type": "ApplicationStatus",
+                "attr": "@default(APPLIED)"
+              },
+              {
+                "name": "url",
+                "type": "String?",
+                "attr": ""
+              },
+              {
+                "name": "tags",
+                "type": "String[]",
+                "attr": "@default([])"
+              },
+              {
+                "name": "deadline",
+                "type": "DateTime?",
+                "attr": ""
+              },
+              {
+                "name": "notes",
+                "type": "String?",
+                "attr": ""
+              },
+              {
+                "name": "resumeVersion",
+                "type": "String?",
+                "attr": ""
+              },
+              {
+                "name": "createdAt",
+                "type": "DateTime",
+                "attr": "@default(now())"
+              },
+              {
+                "name": "updatedAt",
+                "type": "DateTime",
+                "attr": "@updatedAt"
+              },
+              {
+                "name": "userId",
+                "type": "String",
+                "attr": ""
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "applicationModel": {
+      "schema": "prisma/schema.prisma",
+      "name": "Application",
+      "fields": [
+        {
+          "name": "id",
+          "type": "String",
+          "attr": "@id @default(cuid())"
+        },
+        {
+          "name": "userId",
+          "type": "String",
+          "attr": "// keep loose; no FK until your User model is defined"
+        },
+        {
+          "name": "company",
+          "type": "String",
+          "attr": ""
+        },
+        {
+          "name": "role",
+          "type": "String",
+          "attr": ""
+        },
+        {
+          "name": "location",
+          "type": "String?",
+          "attr": ""
+        },
+        {
+          "name": "status",
+          "type": "ApplicationStatus",
+          "attr": "@default(APPLIED)"
+        },
+        {
+          "name": "source",
+          "type": "ApplicationSource",
+          "attr": "@default(OTHER)"
+        },
+        {
+          "name": "notes",
+          "type": "String?",
+          "attr": ""
+        },
+        {
+          "name": "createdAt",
+          "type": "DateTime",
+          "attr": "@default(now())"
+        },
+        {
+          "name": "updatedAt",
+          "type": "DateTime",
+          "attr": "@updatedAt"
+        }
+      ]
+    },
+    "applicationStatusEnum": {
+      "name": "ApplicationStatus",
+      "values": [
+        "APPLIED",
+        "INTERVIEWING",
+        "OFFER",
+        "REJECTED"
+      ]
+    },
+    "applicationSourceEnum": {
+      "name": "ApplicationSource",
+      "values": [
+        "JOB_BOARD",
+        "REFERRAL",
+        "COMPANY_WEBSITE",
+        "RECRUITER",
+        "OTHER"
+      ]
+    }
+  },
+  "trpc": {
+    "apiRoot": "apps/api/src/trpc/root.ts",
+    "routers": [
+      {
+        "file": "apps/api/src/trpc/routers/tracker.router.ts",
+        "exportedName": "tracker",
+        "usesDollarEnums": true,
+        "stubMarkers": 0
+      }
+    ]
+  },
+  "web": {
+    "pages": [
+      {
+        "module": "achievements",
+        "page": "web/src/app/achievements/page.tsx"
+      },
+      {
+        "module": "activity",
+        "page": "web/src/app/activity/page.tsx"
+      },
+      {
+        "module": "auth",
+        "page": "web/src/app/auth/page.tsx"
+      },
+      {
+        "module": "calendar",
+        "page": "web/src/app/calendar/page.tsx"
+      },
+      {
+        "module": "dashboard",
+        "page": "web/src/app/dashboard/page.tsx"
+      },
+      {
+        "module": "goals",
+        "page": "web/src/app/goals/page.tsx"
+      },
+      {
+        "module": "insights",
+        "page": "web/src/app/insights/page.tsx"
+      },
+      {
+        "module": "interviews",
+        "page": "web/src/app/interviews/page.tsx"
+      },
+      {
+        "module": "metrics",
+        "page": "web/src/app/metrics/page.tsx"
+      },
+      {
+        "module": "networking",
+        "page": "web/src/app/networking/page.tsx"
+      },
+      {
+        "module": "notifications",
+        "page": "web/src/app/notifications/page.tsx"
+      },
+      {
+        "module": "onboarding",
+        "page": "web/src/app/onboarding/page.tsx"
+      },
+      {
+        "module": "planner",
+        "page": "web/src/app/planner/page.tsx"
+      },
+      {
+        "module": "profile",
+        "page": "web/src/app/profile/page.tsx"
+      },
+      {
+        "module": "resume",
+        "page": "web/src/app/resume/page.tsx"
+      },
+      {
+        "module": "roadmap",
+        "page": "web/src/app/roadmap/page.tsx"
+      },
+      {
+        "module": "settings",
+        "page": "web/src/app/settings/page.tsx"
+      },
+      {
+        "module": "skills",
+        "page": "web/src/app/skills/page.tsx"
+      },
+      {
+        "module": "summary",
+        "page": "web/src/app/summary/page.tsx"
+      },
+      {
+        "module": "tracker",
+        "page": "web/src/app/tracker/page.tsx"
+      }
+    ],
+    "trpcClientPath": "web/src/app/providers.tsx",
+    "e2e": [
+      "web/specs/achievements.e2e.spec.ts",
+      "web/specs/activity.e2e.spec.ts",
+      "web/specs/auth.e2e.spec.ts",
+      "web/specs/calendar.e2e.spec.ts",
+      "web/specs/dashboard.e2e.spec.ts",
+      "web/specs/goals.e2e.spec.ts",
+      "web/specs/insights.e2e.spec.ts",
+      "web/specs/interviews.e2e.spec.ts",
+      "web/specs/metrics.e2e.spec.ts",
+      "web/specs/networking.e2e.spec.ts",
+      "web/specs/notifications.e2e.spec.ts",
+      "web/specs/onboarding.e2e.spec.ts",
+      "web/specs/planner.e2e.spec.ts",
+      "web/specs/profile.e2e.spec.ts",
+      "web/specs/resume.e2e.spec.ts",
+      "web/specs/roadmap.e2e.spec.ts",
+      "web/specs/settings.e2e.spec.ts",
+      "web/specs/skills.e2e.spec.ts",
+      "web/specs/summary.e2e.spec.ts"
+    ]
+  },
+  "types": [
+    "libs/types/src/index.ts"
+  ],
+  "stubs": [
+    {
+      "file": "tools/reports/stub-scan-2025-09-12T11-39-59-696Z.md",
+      "MARKER": 2120,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 25,
+      "DOUBLE_CAST": 4,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2149
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T12-09-05-411Z.md",
+      "MARKER": 199,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 199
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T14-13-58-776Z.md",
+      "MARKER": 199,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 199
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T15-37-06-950Z.md",
+      "MARKER": 197,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 197
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T15-48-31-000Z.md",
+      "MARKER": 196,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 196
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T15-50-28-777Z.md",
+      "MARKER": 196,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 196
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T16-12-51-562Z.md",
+      "MARKER": 194,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 194
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T16-20-52-941Z.md",
+      "MARKER": 194,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 194
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T16-23-29-040Z.md",
+      "MARKER": 194,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 194
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T16-32-36-319Z.md",
+      "MARKER": 194,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 194
+    },
+    {
+      "file": "scans/stub-report-2025-09-09T23-06-18-520Z.md",
+      "MARKER": 193,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 193
+    },
+    {
+      "file": "scans/stub-report-2025-09-10T12-28-32-480Z.md",
+      "MARKER": 193,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 193
+    },
+    {
+      "file": "scans/stub-report-2025-09-10T15-07-02-285Z.md",
+      "MARKER": 189,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 189
+    },
+    {
+      "file": "web/specs/achievements.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/activity.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/auth.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/calendar.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/dashboard.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/goals.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/insights.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/interviews.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/metrics.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/networking.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/notifications.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/onboarding.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/planner.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/profile.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/resume.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/roadmap.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/settings.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/skills.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "web/specs/summary.e2e.spec.ts",
+      "MARKER": 5,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 5
+    },
+    {
+      "file": "apps/api/src/router/achievements.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/activity.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/auth.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/calendar.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/dashboard.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/goals.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/insights.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/interviews.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/metrics.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/networking.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/notifications.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/onboarding.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/planner.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/profile.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/resume.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/roadmap.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/settings.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/skills.ts",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 4
+    },
+    {
+      "file": "apps/api/src/router/summary.ts",
+      "MARKER": 0,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 3,
+      "NOT_IMPLEMENTED": 0,
+      "total": 3
+    },
+    {
+      "file": "apps/api/src/router/__tests__/applications.spec.ts",
+      "MARKER": 0,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 3,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 3
+    },
+    {
+      "file": "pnpm-lock.yaml",
+      "MARKER": 3,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 3
+    },
+    {
+      "file": "web/src/app/tracker/AddApplicationForm.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 3
+    },
+    {
+      "file": "apps/api/src/router/applications.ts",
+      "MARKER": 0,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 2,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/achievements.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/activity.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/auth.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/calendar.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/dashboard.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/goals.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/insights.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/interviews.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/metrics.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/networking.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/notifications.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/onboarding.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/planner.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/profile.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/resume.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/roadmap.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/settings.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/skills.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/summary.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/tracker.spec.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/achievements.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/activity.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/auth.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/calendar.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/dashboard.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/goals.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/insights.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/interviews.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/metrics.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/networking.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/notifications.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/onboarding.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/planner.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/profile.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/resume.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/roadmap.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/skills.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "shared/types/src/summary.ts",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/achievements/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/activity/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/auth/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/calendar/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/dashboard/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/goals/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/insights/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/interviews/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/metrics/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/networking/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/notifications/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/onboarding/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/planner/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/profile/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/resume/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/roadmap/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/settings/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/skills/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "web/src/app/summary/page.tsx",
+      "MARKER": 2,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 2
+    },
+    {
+      "file": "apps/api/src/router/__tests__/demo.spec.ts",
+      "MARKER": 0,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    },
+    {
+      "file": "apps/api/src/router/__tests__/system.spec.ts",
+      "MARKER": 0,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 1,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    },
+    {
+      "file": "apps/api/src/server/db.ts",
+      "MARKER": 0,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 1,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    },
+    {
+      "file": "apps/api/src/trpc/context.ts",
+      "MARKER": 1,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    },
+    {
+      "file": "apps/api/src/trpc/trpc.ts",
+      "MARKER": 1,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    },
+    {
+      "file": "CONTRIBUTING.md",
+      "MARKER": 1,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    },
+    {
+      "file": "web/src/app/layout.tsx",
+      "MARKER": 1,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    },
+    {
+      "file": "web/src/app/tracker/page.tsx",
+      "MARKER": 1,
+      "TS_BANDAID": 0,
+      "CAST_ANY": 0,
+      "DOUBLE_CAST": 0,
+      "NOT_IMPLEMENTED": 0,
+      "total": 1
+    }
+  ],
+  "modules": [
+    {
+      "name": "index",
+      "types": "libs/types/src/index.ts",
+      "router": null,
+      "page": null,
+      "apiSpec": null,
+      "e2e": null,
+      "stubScore": 0
+    },
+    {
+      "name": "tracker",
+      "types": null,
+      "router": "apps/api/src/trpc/routers/tracker.router.ts",
+      "page": "web/src/app/tracker/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/tracker.spec.ts",
+      "e2e": null,
+      "stubScore": 6
+    },
+    {
+      "name": "achievements",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/achievements/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/achievements.spec.ts",
+      "e2e": "web/specs/achievements.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "activity",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/activity/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/activity.spec.ts",
+      "e2e": "web/specs/activity.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "auth",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/auth/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/auth.spec.ts",
+      "e2e": "web/specs/auth.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "calendar",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/calendar/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/calendar.spec.ts",
+      "e2e": "web/specs/calendar.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "dashboard",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/dashboard/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/dashboard.spec.ts",
+      "e2e": "web/specs/dashboard.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "goals",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/goals/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/goals.spec.ts",
+      "e2e": "web/specs/goals.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "insights",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/insights/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/insights.spec.ts",
+      "e2e": "web/specs/insights.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "interviews",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/interviews/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/interviews.spec.ts",
+      "e2e": "web/specs/interviews.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "metrics",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/metrics/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/metrics.spec.ts",
+      "e2e": "web/specs/metrics.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "networking",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/networking/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/networking.spec.ts",
+      "e2e": "web/specs/networking.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "notifications",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/notifications/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/notifications.spec.ts",
+      "e2e": "web/specs/notifications.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "onboarding",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/onboarding/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/onboarding.spec.ts",
+      "e2e": "web/specs/onboarding.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "planner",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/planner/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/planner.spec.ts",
+      "e2e": "web/specs/planner.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "profile",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/profile/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/profile.spec.ts",
+      "e2e": "web/specs/profile.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "resume",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/resume/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/resume.spec.ts",
+      "e2e": "web/specs/resume.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "roadmap",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/roadmap/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/roadmap.spec.ts",
+      "e2e": "web/specs/roadmap.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "settings",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/settings/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/settings.spec.ts",
+      "e2e": "web/specs/settings.e2e.spec.ts",
+      "stubScore": 13
+    },
+    {
+      "name": "skills",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/skills/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/skills.spec.ts",
+      "e2e": "web/specs/skills.e2e.spec.ts",
+      "stubScore": 15
+    },
+    {
+      "name": "summary",
+      "types": null,
+      "router": null,
+      "page": "web/src/app/summary/page.tsx",
+      "apiSpec": "apps/api/src/router/__tests__/summary.spec.ts",
+      "e2e": "web/specs/summary.e2e.spec.ts",
+      "stubScore": 14
+    },
+    {
+      "name": "applications",
+      "types": null,
+      "router": null,
+      "page": null,
+      "apiSpec": "apps/api/src/router/__tests__/applications.spec.ts",
+      "e2e": null,
+      "stubScore": 5
+    },
+    {
+      "name": "demo",
+      "types": null,
+      "router": null,
+      "page": null,
+      "apiSpec": "apps/api/src/router/__tests__/demo.spec.ts",
+      "e2e": null,
+      "stubScore": 0
+    },
+    {
+      "name": "system",
+      "types": null,
+      "router": null,
+      "page": null,
+      "apiSpec": "apps/api/src/router/__tests__/system.spec.ts",
+      "e2e": null,
+      "stubScore": 0
+    }
+  ]
+}

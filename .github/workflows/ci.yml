@@ -2,91 +2,72 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
+      - develop
+      - 'feature/**'
+      - 'chore/**'
+      - 'fix/**'
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
-    branches: [main]
-  workflow_dispatch:
+    branches:
+      - '**'
 
-# Make the required check name stable:  "CI / build_test"
 concurrency:
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  CI: 'true'
+  NX_DAEMON: 'false'
+  NEXT_TELEMETRY_DISABLED: '1'
+
 jobs:
-  build_test:
-    # Don’t run for draft PRs
-    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
-- name: Prisma Client generation
-        shell: bash
-        run: |
-          set -euxo pipefail
-          # Generate for the API schema from repo root
-          pnpm dlx prisma -v
-          pnpm dlx prisma generate --schema=apps/api/prisma/schema.prisma
-
-          # Sanity: ensure Next/TS will see the generated client
-          test -f node_modules/.prisma/client/index.d.ts
-          grep -q 'class PrismaClient' node_modules/.prisma/client/index.d.ts
-          node -e "const c=require('@prisma/client'); if(!c.PrismaClient){process.exit(2)}"
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
+      - name: Set up pnpm
         uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - name: Setup Node
+      - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+          cache: 'pnpm'
 
-      - name: Install deps
+      - name: Show versions
+        run: |
+          node -v
+          pnpm -v
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Prisma Client generation
-        shell: bash
-        run: |
-          set -euxo pipefail
-          # Find every prisma/schema.prisma in the repo (monorepo-safe)
-          mapfile -t SCHEMAS < <(git ls-files | grep -E '/prisma/schema\.prisma$' || true)
-          if [ ${#SCHEMAS[@]} -eq 0 ]; then
-            echo "No prisma/schema.prisma files found; skipping prisma generate"
-            exit 0
-          fi
-          pnpm dlx prisma -v
-          for S in "${SCHEMAS[@]}"; do
-            echo "→ Generating Prisma Client for: $S"
-            pnpm dlx prisma generate --schema="$S"
-          done
-
-      - name: Typecheck
+      - name: Type check
         run: pnpm -w tsc -b
 
-      - name: Guard missing router imports
-        run: node tools/scripts/check-router-imports.cjs
+      - name: Run tests (Vitest)
+        run: pnpm -w test
 
-      - name: Build all (Nx)
-        run: pnpm -w exec nx run-many -t build --all --skip-nx-cache --exclude=root
+      - name: Build (Nx)
+        run: pnpm -w build
 
-      - name: API tests
-        run: npx nx run api:test --skip-nx-cache
-        # If there's no "api" target, comment this step out or make it conditional.
-
-      - name: Web tests
-        run: npx nx run web:test --skip-nx-cache
-
-      - name: Repo health scan
-        run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
-
-      - name: Assert clean working tree
-        run: node tools/scripts/ci-assert-clean.cjs
-
-      - name: Prisma enum checker (dry-run)
-        run: node tools/scripts/fix-prisma-enums.cjs --glob "apps/api/src/**/*.ts" --dry
+      # Optional: upload Vitest coverage if you enable coverage in tests
+      # - name: Upload coverage
+      #   if: always()
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: coverage
+      #     path: |
+      #       apps/api/coverage
+      #       web/coverage

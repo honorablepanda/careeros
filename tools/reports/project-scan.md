@@ -1,0 +1,60 @@
+# Project Scan
+
+## Prisma
+- Application model: **Application** (from prisma/schema.prisma)
+  - Fields: id:String, userId:String, company:String, role:String, location:String?, status:ApplicationStatus, source:ApplicationSource, notes:String?, createdAt:DateTime, updatedAt:DateTime
+- ApplicationStatus: APPLIED, INTERVIEWING, OFFER, REJECTED
+- ApplicationSource: JOB_BOARD, REFERRAL, COMPANY_WEBSITE, RECRUITER, OTHER
+
+## TRPC
+- Root: apps/api/src/trpc/root.ts
+- Routers (1):
+  - apps/api/src/trpc/routers/tracker.router.ts → **trackerRouter** (uses $Enums)
+
+## Web
+- TRPC client: web/src/app/providers.tsx
+- Pages (20): achievements, activity, auth, calendar, dashboard, goals, insights, interviews, metrics, networking, notifications, onboarding, planner, profile, resume, roadmap, settings, skills, summary, tracker
+- Legacy e2e specs: 19
+
+## Types
+- Files: 1
+
+## Stub findings
+- Files with markers: 122
+- Top offenders:
+  - tools/reports/stub-scan-2025-09-12T11-39-59-696Z.md (total=2149, MARKER=2120, ANY=25)
+  - scans/stub-report-2025-09-09T12-09-05-411Z.md (total=199, MARKER=199, ANY=0)
+  - scans/stub-report-2025-09-09T14-13-58-776Z.md (total=199, MARKER=199, ANY=0)
+  - scans/stub-report-2025-09-09T15-37-06-950Z.md (total=197, MARKER=197, ANY=0)
+  - scans/stub-report-2025-09-09T15-48-31-000Z.md (total=196, MARKER=196, ANY=0)
+  - scans/stub-report-2025-09-09T15-50-28-777Z.md (total=196, MARKER=196, ANY=0)
+  - scans/stub-report-2025-09-09T16-12-51-562Z.md (total=194, MARKER=194, ANY=0)
+  - scans/stub-report-2025-09-09T16-20-52-941Z.md (total=194, MARKER=194, ANY=0)
+  - scans/stub-report-2025-09-09T16-23-29-040Z.md (total=194, MARKER=194, ANY=0)
+  - scans/stub-report-2025-09-09T16-32-36-319Z.md (total=194, MARKER=194, ANY=0)
+
+## Module matrix (24)
+- **index** — types:✅, router:—, page:—, apiSpec:—, e2e: (stubScore=0)
+- **tracker** — types:—, router:✅, page:✅, apiSpec:✅, e2e: (stubScore=6)
+- **achievements** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **activity** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **auth** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **calendar** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **dashboard** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=14)
+- **goals** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **insights** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **interviews** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **metrics** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **networking** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **notifications** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **onboarding** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **planner** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **profile** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **resume** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **roadmap** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **settings** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=13)
+- **skills** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=15)
+- **summary** — types:—, router:—, page:✅, apiSpec:✅, e2e:⚠️ (stubScore=13)
+- **applications** — types:—, router:—, page:—, apiSpec:✅, e2e: (stubScore=5)
+- **demo** — types:—, router:—, page:—, apiSpec:✅, e2e: (stubScore=0)
+- **system** — types:—, router:—, page:—, apiSpec:✅, e2e: (stubScore=0)

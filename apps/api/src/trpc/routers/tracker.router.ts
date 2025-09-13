@@ -52,11 +52,17 @@ export const trackerRouter = router({
     }),
 
   // Optional — mocked activity for now
-  getApplicationActivity: publicProcedure
+    getApplicationActivity: publicProcedure
     .input(z.object({ id: z.string() }))
-    .query(async ({ input }) => {
-      return [
-        { ts: new Date().toISOString(), type: 'CREATED', by: 'system', appId: input.id },
+    .query(async ({ ctx, input }) => {
+      const prismaAny = ctx.prisma as any;
+      if (!prismaAny?.applicationActivity?.findMany) return [];
+      return await prismaAny.applicationActivity.findMany({
+        where: { applicationId: input.id },
+        orderBy: { createdAt: 'desc' },
+      });
+    }),
+type: 'CREATED', by: 'system', appId: input.id },
         { ts: new Date().toISOString(), type: 'STATUS_CHANGE', from: 'APPLIED', to: 'INTERVIEWING', appId: input.id },
       ];
     }),

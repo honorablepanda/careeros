@@ -1,18 +1,14 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 type Row = { [k: string]: any };
 
 export default function TrackerPage() {
-  const userId = 'demo-user'; // TODO: replace with session user id
+  const userId = getUserId(); // TODO: replace with session user id
 
-  const hook = (trpc as any)?.tracker?.getApplications?.useQuery;
-  const query = hook
-    ? hook({ userId })
-    : { data: null, isLoading: false, error: { message: 'Tracker API not available' } };
-
-  const { data, isLoading, error } = query as {
+  const { data, isLoading, error } = trpc.tracker.getApplications.useQuery({ userId: getUserId() }, { keepPreviousData: true });
     data: null | Row[];
     isLoading: boolean;
     error: null | { message: string };

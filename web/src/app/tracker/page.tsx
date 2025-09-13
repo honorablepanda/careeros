@@ -9,10 +9,7 @@ export default function TrackerPage() {
   const userId = getUserId(); // TODO: replace with session user id
 
   const { data, isLoading, error } = trpc.tracker.getApplications.useQuery({ userId: getUserId() }, { keepPreviousData: true });
-    data: null | Row[];
-    isLoading: boolean;
-    error: null | { message: string };
-  };
+
 
   if (isLoading) return <main className="p-6">Loading…</main>;
   if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;

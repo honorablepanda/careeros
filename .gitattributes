@@ -7,3 +7,7 @@
 *.json text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+* text=auto eol=lf
+*.bat eol=crlf
+*.cmd eol=crlf
+*.ps1 eol=crlf

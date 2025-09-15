@@ -1,3 +1,5 @@
+[![Activity E2E](https://github.com/honorablepanda/careeros/actions/workflows/activity-ci.yml/badge.svg)](https://github.com/honorablepanda/careeros/actions/workflows/activity-ci.yml)
+
 # CareerOS
 [![Release](https://img.shields.io/github/v/release/honorablepanda/careeros?sort=semver)](https://github.com/honorablepanda/careeros/releases) [![CI](https://github.com/honorablepanda/careeros/actions/workflows/ci.yml/badge.svg)](https://github.com/honorablepanda/careeros/actions/workflows/ci.yml)
 

@@ -1,9 +1,10 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 export default function DashboardPage() {
-  const userId = 'demo-user'; // TODO: replace with session user id
+  const userId = getUserId(); // TODO: replace with session user id
   const { data: apps, isLoading, error } = trpc.tracker.getApplications.useQuery({ userId });
 
   if (isLoading) return <main className="p-6">Loading…</main>;

@@ -1,9 +1,10 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 export default function ProfilePage() {
-  const userId = 'demo-user'; // TODO: replace with session user id
+  const userId = getUserId(); // TODO: replace with session user id
 
   // Be resilient if profile router shape differs — compile-safe & runtime-safe.
   const hook = (trpc as any)?.profile?.get?.useQuery;

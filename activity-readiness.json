@@ -1,0 +1,30 @@
+{
+  "id": "cmfcgyxgp00012kg83y794d3z",
+  "server": {
+    "host": "http://localhost",
+    "port": 3000,
+    "ok": true
+  },
+  "web": {
+    "webPath": "web",
+    "appDir": "web\\app"
+  },
+  "prisma": {
+    "checked": true,
+    "applicationExists": true,
+    "activityCount": 0
+  },
+  "results": {
+    "query": {
+      "status": 200,
+      "url": "http://localhost:3000/tracker/activity?id=cmfcgyxgp00012kg83y794d3z",
+      "hasNoActivity": true
+    },
+    "dynamic": {
+      "status": 200,
+      "url": "http://localhost:3000/tracker/cmfcgyxgp00012kg83y794d3z/activity",
+      "hasNoActivity": true
+    }
+  },
+  "issues": []
+}

@@ -1,0 +1,13 @@
+type SP = { id?: string };
+export default function ActivityQuerystringPage(
+  { searchParams }: { searchParams?: SP }
+) {
+  const id = searchParams?.id;
+  return (
+    <main style={{padding: 24}}>
+      <h1>Tracker Activity</h1>
+      <p><strong>Querystring id:</strong> {id ?? '—'}</p>
+      <p>Activity API not available — No activity</p>
+    </main>
+  );
+}

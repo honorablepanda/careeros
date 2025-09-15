@@ -1,0 +1,38 @@
+{
+  "params": {
+    "host": "http://localhost",
+    "port": 3000,
+    "strict": true
+  },
+  "steps": [],
+  "results": {
+    "seed": {
+      "beforeCount": 0,
+      "created": 2,
+      "afterCount": 2,
+      "byType": {
+        "CREATE": 1,
+        "STATUS_CHANGE": 1
+      }
+    },
+    "db": {
+      "activityCount": 2
+    },
+    "web": {
+      "query": {
+        "url": "http://localhost:3000/tracker/activity?id=cmfcgyxgp00012kg83y794d3z",
+        "ok": true,
+        "status": 200,
+        "snippet": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static"
+      },
+      "dynamic": {
+        "url": "http://localhost:3000/tracker/cmfcgyxgp00012kg83y794d3z/activity",
+        "ok": true,
+        "status": 200,
+        "snippet": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static"
+      }
+    }
+  },
+  "ok": true,
+  "appId": "cmfcgyxgp00012kg83y794d3z"
+}

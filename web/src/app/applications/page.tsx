@@ -1,9 +1,10 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 export default function ApplicationsPage() {
-  const userId = 'demo-user'; // TODO: replace with session user id
+  const userId = getUserId(); // TODO: replace with session user id
   const [status, setStatus] = React.useState<string | undefined>(undefined);
 
   const { data, isLoading, error } = trpc.applications.list.useQuery(

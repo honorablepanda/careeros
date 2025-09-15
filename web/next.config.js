@@ -1,3 +1,5 @@
+
+const path = require('path');
 //@ts-check
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires

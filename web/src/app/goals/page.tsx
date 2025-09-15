@@ -1,9 +1,10 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 export default function GoalsPage() {
-  const userId = 'demo-user'; // TODO: replace with session user id
+  const userId = getUserId(); // TODO: replace with session user id
   const [status, setStatus] = React.useState<string | undefined>(undefined);
 
   const hook = (trpc as any)?.goals?.list?.useQuery;

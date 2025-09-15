@@ -1,0 +1,32 @@
+{
+  "timestamp": "2025-09-15T09:20:52.354Z",
+  "host": "http://localhost",
+  "port": 3000,
+  "id": "cmfcgyxgp00012kg83y794d3z",
+  "urls": {
+    "query": "http://localhost:3000/tracker/activity?id=cmfcgyxgp00012kg83y794d3z",
+    "dynamic": "http://localhost:3000/tracker/cmfcgyxgp00012kg83y794d3z/activity"
+  },
+  "results": {
+    "query": {
+      "ok": true,
+      "status": 200,
+      "redirected": false,
+      "company": "\\\"},\\\"$2d\\\",\\\"$65\\\",1],\\\" \\\",\\\"Globex\\\"]},\\\"$2d\\\",\\\"$64\\\",1],[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"strong\\\",null,{\\\"children\\\":\\\"Role:\\\"},\\\"$2d\\\",\\\"$67\\\",1],\\\" \\\",\\\"FE Dev\\\"]},\\\"$2d\\\",\\\"$66\\\",1],[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"strong\\\",null,{\\\"children\\\":\\\"Status:\\\"},\\\"$2d\\\",\\\"$69\\\",1],\\\" \\\",\\\"INTERVIEW\\\"]},\\\"$2d\\\",\\\"$68\\\",1]]},\\\"$2d\\\",\\\"$63\\\",1],[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":18,\\\"fontWeight\\\":600,\\\"marginBottom\\\":8},\\\"children\\\":\\\"Activity\\\"},\\\"$2d\\\",\\\"$6a\\\",1],[\\\"$\\\",\\\"p\\\",null,{\\\"children\\\":\\\"— No activity yet —\\\"},\\\"$2d\\\",\\\"$6b\\\",1]]},\\\"$2d\\\",\\\"$62\\\",1]]},\\\"$2d\\\",\\\"$5b\\\",1]\\n\"])",
+      "role": "\\\"},\\\"$2d\\\",\\\"$67\\\",1],\\\" \\\",\\\"FE Dev\\\"]},\\\"$2d\\\",\\\"$66\\\",1],[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"strong\\\",null,{\\\"children\\\":\\\"Status:\\\"},\\\"$2d\\\",\\\"$69\\\",1],\\\" \\\",\\\"INTERVIEW\\\"]},\\\"$2d\\\",\\\"$68\\\",1]]},\\\"$2d\\\",\\\"$63\\\",1],[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":18,\\\"fontWeight\\\":600,\\\"marginBottom\\\":8},\\\"children\\\":\\\"Activity\\\"},\\\"$2d\\\",\\\"$6a\\\",1],[\\\"$\\\",\\\"p\\\",null,{\\\"children\\\":\\\"— No activity yet —\\\"},\\\"$2d\\\",\\\"$6b\\\",1]]},\\\"$2d\\\",\\\"$62\\\",1]]},\\\"$2d\\\",\\\"$5b\\\",1]\\n\"])",
+      "statusText": "\\\"},\\\"$2d\\\",\\\"$69\\\",1],\\\" \\\",\\\"INTERVIEW\\\"]},\\\"$2d\\\",\\\"$68\\\",1]]},\\\"$2d\\\",\\\"$63\\\",1],[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":18,\\\"fontWeight\\\":600,\\\"marginBottom\\\":8},\\\"children\\\":\\\"Activity\\\"},\\\"$2d\\\",\\\"$6a\\\",1],[\\\"$\\\",\\\"p\\\",null,{\\\"children\\\":\\\"— No activity yet —\\\"},\\\"$2d\\\",\\\"$6b\\\",1]]},\\\"$2d\\\",\\\"$62\\\",1]]},\\\"$2d\\\",\\\"$5b\\\",1]\\n\"])",
+      "hasActivity": false,
+      "bodyPreview": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1757928053115\"/><script src=\"/_next/static/chunks/main-app.js?v=1757928053115\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><scrip"
+    },
+    "dynamic": {
+      "ok": true,
+      "status": 200,
+      "redirected": false,
+      "company": "\\\"},\\\"$30\\\",\\\"$61\\\",1],\\\" \\\",\\\"Globex\\\"]},\\\"$30\\\",\\\"$60\\\",1],[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"strong\\\",null,{\\\"children\\\":\\\"Role:\\\"},\\\"$30\\\",\\\"$63\\\",1],\\\" \\\",\\\"FE Dev\\\"]},\\\"$30\\\",\\\"$62\\\",1],[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"strong\\\",null,{\\\"children\\\":\\\"Status:\\\"},\\\"$30\\\",\\\"$65\\\",1],\\\" \\\",\\\"INTERVIEW\\\"]},\\\"$30\\\",\\\"$64\\\",1]]},\\\"$30\\\",\\\"$5f\\\",1],[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":18,\\\"fontWeight\\\":600,\\\"marginBottom\\\":8},\\\"children\\\":\\\"Activity\\\"},\\\"$30\\\",\\\"$66\\\",1],[\\\"$\\\",\\\"p\\\",null,{\\\"children\\\":\\\"— No activity yet —\\\"},\\\"$30\\\",\\\"$67\\\",1]]},\\\"$30\\\",\\\"$5e\\\",1]]},\\\"$30\\\",\\\"$5a\\\",1]\\n\"])",
+      "role": "\\\"},\\\"$30\\\",\\\"$63\\\",1],\\\" \\\",\\\"FE Dev\\\"]},\\\"$30\\\",\\\"$62\\\",1],[\\\"$\\\",\\\"div\\\",null,{\\\"children\\\":[[\\\"$\\\",\\\"strong\\\",null,{\\\"children\\\":\\\"Status:\\\"},\\\"$30\\\",\\\"$65\\\",1],\\\" \\\",\\\"INTERVIEW\\\"]},\\\"$30\\\",\\\"$64\\\",1]]},\\\"$30\\\",\\\"$5f\\\",1],[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":18,\\\"fontWeight\\\":600,\\\"marginBottom\\\":8},\\\"children\\\":\\\"Activity\\\"},\\\"$30\\\",\\\"$66\\\",1],[\\\"$\\\",\\\"p\\\",null,{\\\"children\\\":\\\"— No activity yet —\\\"},\\\"$30\\\",\\\"$67\\\",1]]},\\\"$30\\\",\\\"$5e\\\",1]]},\\\"$30\\\",\\\"$5a\\\",1]\\n\"])",
+      "statusText": "\\\"},\\\"$30\\\",\\\"$65\\\",1],\\\" \\\",\\\"INTERVIEW\\\"]},\\\"$30\\\",\\\"$64\\\",1]]},\\\"$30\\\",\\\"$5f\\\",1],[\\\"$\\\",\\\"h2\\\",null,{\\\"style\\\":{\\\"fontSize\\\":18,\\\"fontWeight\\\":600,\\\"marginBottom\\\":8},\\\"children\\\":\\\"Activity\\\"},\\\"$30\\\",\\\"$66\\\",1],[\\\"$\\\",\\\"p\\\",null,{\\\"children\\\":\\\"— No activity yet —\\\"},\\\"$30\\\",\\\"$67\\\",1]]},\\\"$30\\\",\\\"$5e\\\",1]]},\\\"$30\\\",\\\"$5a\\\",1]\\n\"])",
+      "hasActivity": false,
+      "bodyPreview": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static/chunks/webpack.js?v=1757928054523\"/><script src=\"/_next/static/chunks/main-app.js?v=1757928054523\" async=\"\"></script><script src=\"/_next/static/chunks/app-pages-internals.js\" async=\"\"></script><scrip"
+    }
+  }
+}

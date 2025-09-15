@@ -26,19 +26,36 @@ enum ApplicationSource {
   OTHER
 }
 
-model Application {
-  id        String             @id @default(cuid())
-  userId    String                                 // keep loose; no FK until your User model is defined
-  company   String
-  role      String
-  location  String?
-  status    ApplicationStatus  @default(APPLIED)
-  source    ApplicationSource  @default(OTHER)
-  notes     String?
+enum ApplicationActivityType {
+  CREATE
+  STATUS_CHANGE
+}
 
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+model Application {
+  id       String            @id @default(cuid())
+  userId   String // keep loose; no FK until your User model is defined
+  company  String
+  role     String
+  location String?
+  status   ApplicationStatus @default(APPLIED)
+  source   ApplicationSource @default(OTHER)
+  notes    String?
+
+  createdAt           DateTime              @default(now())
+  updatedAt           DateTime              @updatedAt
+  ApplicationActivity ApplicationActivity[]
 
   @@index([userId, status])
   @@index([company, role])
+}
+
+model ApplicationActivity {
+  id            String                  @id @default(cuid())
+  applicationId String
+  application   Application             @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  type          ApplicationActivityType
+  payload       Json?
+  createdAt     DateTime                @default(now())
+
+  @@index([applicationId, createdAt(sort: Desc)])
 }

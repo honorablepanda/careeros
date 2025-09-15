@@ -1,10 +1,11 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 export default function SummaryPage() {
   // TODO: replace with real userId from your auth/session
-  const userId = 'demo-user';
+  const userId = getUserId();
   const { data: apps, isLoading, error } = trpc.tracker.getApplications.useQuery({ userId });
 
   if (isLoading) return <div className="p-6">Loading…</div>;

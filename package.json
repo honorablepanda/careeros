@@ -27,7 +27,18 @@
     "try:tracker:apply": "node tools/scripts/try-tracker-router-variants.cjs --apply-best",
     "release:prep": "pnpm -w tsc -b && pnpm -w exec nx run-many -t build --all --exclude=root && pnpm -w exec nx run-many -t test --all --skip-nx-cache --exclude=root && node tools/scripts/run-final-scan.cjs",
     "test:all": "pnpm -w exec nx run-many -t test --all --skip-nx-cache --exclude=root",
-    "test:api": "vitest run --config apps/api/vitest.config.ts"
+    "test:api": "vitest run --config apps/api/vitest.config.ts",
+    "maintain:all": "node tools/scripts/maintain-all.cjs",
+    "maintain:all:ci": "node tools/scripts/maintain-all.cjs --commit",
+    "phase3:tracker": "node tools/scripts/phase3-tracker.cjs",
+    "verify:activity": "node tools/scripts/verify-activity.cjs",
+    "dev:open-activity": "node tools/scripts/open-activity.cjs",
+    "dev:activity": "node tools/scripts/dev-activity.cjs",
+    "activity:ci": "node tools/scripts/seed-and-verify-activity.cjs --host http://localhost --port 3000 --strict --out activity-ci-report.json",
+    "activity:ci:auto": "node tools/scripts/seed-and-verify-activity.cjs --host http://localhost --port 3000 --out activity-ci-report.json",
+    "ci:web": "start-server-and-test \"pnpm -w exec nx run web:serve\" http://localhost:3000 \"pnpm run activity:ci:auto\"",
+    "ci:web:prod": "start-server-and-test \"pnpm -w exec nx run web:start\" http://localhost:3000 \"pnpm run activity:ci\"",
+    "db:migrate": "pnpm -w exec prisma migrate deploy || pnpm -w exec prisma db push"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",
@@ -89,7 +100,8 @@
     "typescript-eslint": "^8.29.0",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "3.2.4",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "start-server-and-test": "^2.0.3"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",

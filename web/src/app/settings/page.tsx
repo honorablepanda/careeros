@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 type Settings = {
@@ -9,7 +10,7 @@ type Settings = {
 };
 
 export default function SettingsPage() {
-  const userId = 'demo-user'; // TODO: wire session user id
+  const userId = getUserId(); // TODO: wire session user id
 
   const hook = (trpc as any)?.settings?.get?.useQuery;
   const query = hook

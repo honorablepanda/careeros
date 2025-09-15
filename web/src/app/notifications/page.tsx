@@ -1,5 +1,6 @@
 'use client';
 import * as React from 'react';
+import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
 type Noti = {
@@ -11,7 +12,7 @@ type Noti = {
 };
 
 export default function NotificationsPage() {
-  const userId = 'demo-user'; // TODO: replace with session user id
+  const userId = getUserId(); // TODO: replace with session user id
 
   const hook = (trpc as any)?.notifications?.list?.useQuery;
   const query = hook

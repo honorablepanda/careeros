@@ -36,7 +36,7 @@
     "dev:activity": "node tools/scripts/dev-activity.cjs",
     "activity:ci": "node tools/scripts/seed-and-verify-activity.cjs --host http://localhost --port 3000 --strict --out activity-ci-report.json",
     "activity:ci:auto": "node tools/scripts/seed-and-verify-activity.cjs --host http://localhost --port 3000 --out activity-ci-report.json",
-    "ci:web": "start-server-and-test \"cross-env NX_DAEMON=false pnpm -w exec nx run web:serve --port=3000\" http://localhost:3000 \"pnpm run activity:ci:auto\"",
+    "ci:web": "start-server-and-test \"pnpm -w exec nx run web:serve\" http://localhost:3000 \"pnpm run activity:ci:auto\"",
     "ci:web:prod": "start-server-and-test \"pnpm -w exec nx run web:start\" http://localhost:3000 \"pnpm run activity:ci\"",
     "db:migrate": "pnpm -w exec prisma migrate deploy || pnpm -w exec prisma db push"
   },

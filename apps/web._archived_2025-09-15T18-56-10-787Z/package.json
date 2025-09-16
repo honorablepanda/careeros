@@ -1,8 +1,0 @@
-{
-	"devDependencies": {
-		"@vitejs/plugin-react-swc": "4.0.1",
-		"@testing-library/react": "16.1.0",
-		"@testing-library/jest-dom": "6.8.0",
-		"happy-dom": "18.0.1"
-	}
-}

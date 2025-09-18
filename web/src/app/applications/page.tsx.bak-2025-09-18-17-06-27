@@ -48,7 +48,7 @@ export default function ApplicationsPage() {
             {data.map((a: any) => (
               <tr key={a.id} className="border-t">
                 <td className="p-2">{a.company}</td>
-                <td className="p-2">{a.title}</td>
+                <td className="p-2">{a.role}</td>
                 <td className="p-2">{String(a.status)}</td>
               </tr>
             ))}

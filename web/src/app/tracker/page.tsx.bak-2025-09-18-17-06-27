@@ -33,7 +33,7 @@ export default function TrackerPage() {
           {rows.map((r) => (
             <tr key={String(r.id ?? Math.random())} className="border-t">
                 <td className="p-2">{String(r.company ?? '—')}</td>
-                <td className="p-2">{String(r.title ?? '—')}</td>
+                <td className="p-2">{String(r.role ?? '—')}</td>
                 <td className="p-2">{String(r.status ?? '—')}</td>
                 <td className="p-2">{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : '—'}</td>
             </tr>

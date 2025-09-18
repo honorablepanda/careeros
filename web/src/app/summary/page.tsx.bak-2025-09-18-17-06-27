@@ -53,7 +53,7 @@ export default function SummaryPage() {
             {apps.slice(0, 5).map((r) => (
               <tr key={r.id} className="border-t">
                 <td className="p-2">{r.company}</td>
-                <td className="p-2">{r.title}</td>
+                <td className="p-2">{r.role}</td>
                 <td className="p-2">{String(r.status)}</td>
                 <td className="p-2">{new Date(r.createdAt).toLocaleDateString()}</td>
               </tr>

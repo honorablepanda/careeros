@@ -47,7 +47,7 @@ export default function InterviewsPage() {
             {rows.map(iv => (
               <tr key={iv.id} className="border-t">
                 <td className="p-2">{iv.company ?? '—'}</td>
-                <td className="p-2">{iv.title ?? '—'}</td>
+                <td className="p-2">{iv.role ?? '—'}</td>
                 <td className="p-2">{iv.stage ?? '—'}</td>
                 <td className="p-2">
                   {iv.scheduledAt ? new Date(iv.scheduledAt).toLocaleString() : '—'}

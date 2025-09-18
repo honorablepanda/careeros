@@ -49,7 +49,7 @@ export default function SettingsPage() {
         <button
           className="rounded px-4 py-2 border"
           disabled={update.isLoading}
-          onClick={() => update.mutate((form as unknown) as any)}
+          onClick={() => update.mutate(form)}
         >
           {update.isLoading ? 'Saving…' : 'Save changes'}
         </button>

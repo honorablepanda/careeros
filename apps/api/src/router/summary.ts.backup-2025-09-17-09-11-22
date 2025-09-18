@@ -1,0 +1,60 @@
+// apps/api/src/router/summary.ts
+
+import { createTRPCRouter, publicProcedure } from "../trpc";
+
+/**
+ * Output types kept simple to avoid importing Prisma types at build time.
+ */
+type StatusCount = { status: string; count: number };
+type LatestItem = { id: string | number; status: string | null; updatedAt: Date | string | null };
+
+export const summaryRouter = createTRPCRouter({
+  /**
+   * Returns status aggregates and the latest 10 applications for the current user.
+   * Implementation uses findMany + reduce (no Prisma groupBy).
+   */
+  get: publicProcedure.query(async ({ ctx }) => {
+    const userId =
+      // prefer whatever your app sets on ctx; these fallbacks keep it resilient
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((ctx as any).session?.user?.id as string | undefined) ??
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      ((ctx as any).user?.id as string | undefined);
+
+    if (!userId) {
+      return { statusCounts: [] as StatusCount[], latest: [] as LatestItem[] };
+    }
+
+    // 1) Status counts (all apps for the user, select only status)
+    const statuses = await ctx.prisma.application.findMany({
+      where: { userId },
+      select: { status: true },
+    });
+
+    const statusMap = statuses.reduce<Record<string, number>>((acc, { status }) => {
+      const key = status ?? "UNKNOWN";
+      acc[key] = (acc[key] ?? 0) + 1;
+      return acc;
+    }, {});
+    const statusCounts: StatusCount[] = Object.entries(statusMap).map(([status, count]) => ({
+      status,
+      count,
+    }));
+
+    // 2) Latest 10 (id, status, updatedAt only)
+    const latestRows = await ctx.prisma.application.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      select: { id: true, status: true, updatedAt: true },
+      take: 10,
+    });
+
+    const latest: LatestItem[] = latestRows.map((r) => ({
+      id: r.id,
+      status: r.status ?? null,
+      updatedAt: r.updatedAt ?? null,
+    }));
+
+    return { statusCounts, latest };
+  }),
+});

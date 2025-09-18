@@ -1,64 +1,62 @@
 'use client';
-import * as React from 'react';
-import { getUserId } from '@/lib/user';
+import { useEffect, useState } from 'react';
 import { trpc } from '@/trpc';
 
 type Settings = {
-  emailNotifications?: boolean;
-  theme?: 'light' | 'dark' | 'system' | string;
+  theme?: 'light'|'dark'|'system';
   timezone?: string;
+  notifications?: boolean;
 };
 
 export default function SettingsPage() {
-  const userId = getUserId(); // TODO: wire session user id
+  const { data, isLoading, error } = trpc.settings.get.useQuery();
+  const update = trpc.settings.update.useMutation();
+  const [form, setForm] = useState<Settings>({ theme: 'system', timezone: Intl.DateTimeFormat().resolvedOptions().timeZone, notifications: true });
 
-  const hook = (trpc as any)?.settings?.get?.useQuery;
-  const query = hook
-    ? hook({ userId })
-    : { data: null, isLoading: false, error: { message: 'Settings API not available' } };
-
-  const { data, isLoading, error } = query as {
-    data: Settings | null;
-    isLoading: boolean;
-    error: null | { message: string };
-  };
-
-  if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error) return <main className="p-6 text-red-600">Error: {error.message}</main>;
-
-  const s = data ?? {};
+  useEffect(() => {
+    if (data) setForm(prev => ({ ...prev, ...data }));
+  }, [data]);
 
   return (
-    <main className="p-6 space-y-6">
+    <main className="mx-auto max-w-2xl p-6 space-y-6">
       <h1 className="text-2xl font-semibold">Settings</h1>
 
-      <section className="rounded-xl border divide-y">
-        <div className="p-4 flex items-center justify-between">
-          <div>
-            <div className="font-medium">Email notifications</div>
-            <div className="text-sm text-gray-600">Receive updates about your applications and goals</div>
-          </div>
-          <div className="text-sm">{s.emailNotifications ? 'On' : 'Off'}</div>
+      {isLoading && <p className="text-sm">Loading…</p>}
+      {error && <p className="text-sm text-red-600">{error.message}</p>}
+
+      <section className="space-y-4">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Theme</label>
+          <select className="border rounded p-2" value={form.theme} onChange={(e)=>setForm(f=>({ ...f, theme: e.target.value as Settings['theme']}))}>
+            <option value="system">System</option>
+            <option value="light">Light</option>
+            <option value="dark">Dark</option>
+          </select>
         </div>
 
-        <div className="p-4 flex items-center justify-between">
-          <div>
-            <div className="font-medium">Theme</div>
-            <div className="text-sm text-gray-600">Appearance preference</div>
-          </div>
-          <div className="text-sm capitalize">{s.theme ?? 'system'}</div>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium">Timezone</label>
+          <input className="border rounded p-2 w-full" value={form.timezone || ''} onChange={(e)=>setForm(f=>({ ...f, timezone: e.target.value }))} />
         </div>
 
-        <div className="p-4 flex items-center justify-between">
-          <div>
-            <div className="font-medium">Time zone</div>
-            <div className="text-sm text-gray-600">Used for reminders and due dates</div>
-          </div>
-          <div className="text-sm">{s.timezone ?? '—'}</div>
+        <div className="space-y-2">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" checked={!!form.notifications} onChange={(e)=>setForm(f=>({ ...f, notifications: e.target.checked }))} />
+            Email notifications
+          </label>
         </div>
+
+        <button
+          className="rounded px-4 py-2 border"
+          disabled={update.isLoading}
+          onClick={() => update.mutate(form)}
+        >
+          {update.isLoading ? 'Saving…' : 'Save changes'}
+        </button>
+
+        {update.isSuccess && <p className="text-sm text-green-700">Saved.</p>}
+        {update.error && <p className="text-sm text-red-600">{update.error.message}</p>}
       </section>
-
-      {/* TODO: follow-up — wire mutations (update.useMutation) with optimistic UI */}
     </main>
   );
 }

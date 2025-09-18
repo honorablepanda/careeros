@@ -1,0 +1,344 @@
+{
+  "generatedAt": "2025-09-18T09:02:07.189Z",
+  "root": "C:\\Users\\kashi\\Desktop\\COS\\careeros",
+  "webDir": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web",
+  "fast": false,
+  "ran": {
+    "tsc": true,
+    "eslint": true
+  },
+  "counts": {
+    "scannedFiles": 56,
+    "flaggedFiles": 32,
+    "pagesFlagged": 28,
+    "trpcHookSites": 7,
+    "prismaRoleSelectFiles": 0,
+    "roleReadsFiles": 3
+  },
+  "findings": [
+    {
+      "file": "web\\app\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\app\\tracker\\activity\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\app\\tracker\\[id]\\activity\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\achievements\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\activity\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\applications\\page.spec.tsx",
+      "isPage": false,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [
+        325,
+        400
+      ],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\applications\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [
+        {
+          "router": "applications",
+          "procedure": "list",
+          "hook": "useQuery",
+          "index": 346
+        }
+      ],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\auth\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\calendar\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\dashboard\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [
+        {
+          "router": "summary",
+          "procedure": "get",
+          "hook": "useQuery",
+          "index": 365
+        }
+      ],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\goals\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\insights\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\interviews\\page.spec.tsx",
+      "isPage": false,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [
+        323,
+        441
+      ],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\interviews\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\magic\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\metrics\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\networking\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\notifications\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\onboarding\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\planner\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\profile\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\reset\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\resume\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\roadmap\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\settings\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [
+        {
+          "router": "settings",
+          "procedure": "get",
+          "hook": "useQuery",
+          "index": 274
+        },
+        {
+          "router": "settings",
+          "procedure": "update",
+          "hook": "useMutation",
+          "index": 321
+        }
+      ],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\skills\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\summary\\page.spec.tsx",
+      "isPage": false,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [
+        330,
+        446
+      ],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\summary\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [
+        {
+          "router": "tracker",
+          "procedure": "getApplications",
+          "hook": "useQuery",
+          "index": 290
+        }
+      ],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\tracker\\activity\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\tracker\\AddApplicationForm.tsx",
+      "isPage": false,
+      "trpcHooks": [
+        {
+          "router": "tracker",
+          "procedure": "createApplication",
+          "hook": "useMutation",
+          "index": 480
+        }
+      ],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    },
+    {
+      "file": "web\\src\\app\\tracker\\page.tsx",
+      "isPage": true,
+      "trpcHooks": [
+        {
+          "router": "tracker",
+          "procedure": "getApplications",
+          "hook": "useQuery",
+          "index": 298
+        }
+      ],
+      "prismaSelectHasRole": false,
+      "roleReads": [],
+      "hasNoExplicitAnyRule": false
+    }
+  ],
+  "tsc": {
+    "status": null,
+    "stdout": "",
+    "stderr": "",
+    "cmd": "pnpm.cmd -w exec tsc -p C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\tsconfig.json --noEmit --pretty false"
+  },
+  "eslint": {
+    "status": null,
+    "cmd": "pnpm.cmd -w exec eslint web\\**\\*.{ts,tsx} -f json",
+    "issues": []
+  }
+}

@@ -1,81 +1,82 @@
 // apps/api/src/router/summary.ts
-import { z } from 'zod';
-import { prisma } from '../prisma'; // adjust if your prisma client path differs
-import { t, publicProcedure } from '../trpc/trpc'; // adjust import to your trpc helpers
- // or your workspace alias to shared types
 
-const InputSchema = z.object({
-  userId: z.string().min(1),
+// Flexible import so this works with either createTRPCRouter/publicProcedure
+// or t.router/t.procedure style TRPC setups.
+import * as TRPC from "../trpc";
+
+type StatusCount = { status: string; count: number };
+type LatestItem = { id: string | number; status: string | null; updatedAt: Date };
+
+// Resolve router/procedure constructors defensively (v10/v11 style or "t.*").
+const ROUTER: any =
+  (TRPC as any).createTRPCRouter ??
+  (TRPC as any).router ??
+  (TRPC as any).t?.router;
+
+const PROC: any =
+  (TRPC as any).publicProcedure ??
+  (TRPC as any).procedure ??
+  (TRPC as any).t?.procedure;
+
+if (!ROUTER || !PROC) {
+  throw new Error(
+    'TRPC bootstrap not found: expected createTRPCRouter/publicProcedure or t.router/t.procedure in "../trpc".'
+  );
+}
+
+export const summaryRouter = ROUTER({
+  /**
+   * Returns status aggregates and the latest 10 applications for the current user.
+   * Implementation avoids Prisma `groupBy` to sidestep TS circular mapped type issues.
+   */
+  overview: PROC.query(async ({ ctx }): Promise<{
+    statusCounts: StatusCount[];
+    latest: LatestItem[];
+  }> => {
+    const userId =
+      ctx?.session?.user?.id ?? ctx?.user?.id ?? (ctx as any)?.userId ?? null;
+
+    if (!userId) {
+      return { statusCounts: [], latest: [] };
+    }
+
+    // 1) Status counts (safe findMany + reduce; no TS generics on reduce)
+    const statuses = await ctx.prisma.application.findMany({
+      where: { userId },
+      select: { status: true },
+    });
+
+    const statusMap = statuses.reduce(
+      (acc: Record<string, number>, row: { status: unknown }) => {
+        const key =
+          (row.status as string | null | undefined) ?? /* fallback */ "UNKNOWN";
+        acc[key] = (acc[key] ?? 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const statusCounts: StatusCount[] = Object.keys(statusMap).map((status) => ({
+  status,
+  count: statusMap[status] ?? 0,
+}));
+
+    // 2) Latest 10 apps
+    const latestRows = await ctx.prisma.application.findMany({
+      where: { userId },
+      orderBy: { updatedAt: "desc" },
+      take: 10,
+      select: { id: true, status: true, updatedAt: true },
+    });
+
+    const latest: LatestItem[] = latestRows.map((r) => ({
+      id: r.id,
+      status: (r.status as string | null | undefined) ?? null,
+      updatedAt: r.updatedAt,
+    }));
+
+    return { statusCounts, latest };
+  }),
 });
 
-export const summaryRouter = t.router({
-  overview: publicProcedure
-    .input(InputSchema)
-    
-    .query(async ({ input }) => {
-      const { userId } = input;
-
-      // 1) Status counts
-      const statusGrp = await prisma.application.groupBy({
-        by: ['status'],
-        where: { userId },
-        _count: { _all: true },
-      });
-      const statusCounts = statusGrp.map((g) => ({
-        status: g.status as unknown as string,
-        count: g._count._all,
-      }));
-
-      // 2) Source counts
-      const sourceGrp = await prisma.application.groupBy({
-        by: ['source'],
-        where: { userId },
-        _count: { _all: true },
-      });
-      const sourceCounts = sourceGrp.map((g) => ({
-        source: g.source as unknown as string,
-        count: g._count._all,
-      }));
-
-      // 3) Recent 30-day trend (bucket by day in JS)
-      const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const recent = await prisma.application.findMany({
-        where: { userId, createdAt: { gte: since } },
-        select: { createdAt: true },
-      });
-      const trendMap = new Map<string, number>();
-      for (const r of recent) {
-        const d = r.createdAt.toISOString().slice(0, 10); // YYYY-MM-DD
-        trendMap.set(d, (trendMap.get(d) ?? 0) + 1);
-      }
-      // fill missing days with 0 so the UI can render a continuous list if desired
-      const days: string[] = [];
-      for (let i = 29; i >= 0; i--) {
-        const d = new Date(Date.now() - i * 24 * 60 * 60 * 1000)
-          .toISOString()
-          .slice(0, 10);
-        days.push(d);
-      }
-      const recentTrend = days.map((d) => ({ date: d, count: trendMap.get(d) ?? 0 }));
-
-      // 4) Latest 5
-      const latestRaw = await prisma.application.findMany({
-        where: { userId },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-        select: {
-          id: true,
-          company: true,
-          role: true,
-          status: true,
-          createdAt: true,
-        },
-      });
-      const latest = latestRaw.map((a) => ({
-        ...a,
-        status: a.status as unknown as string,
-      }));
-
-      return { statusCounts, sourceCounts, recentTrend, latest };
-    }),
-});
+export type SummaryRouter = typeof summaryRouter;

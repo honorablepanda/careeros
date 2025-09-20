@@ -1,4 +1,5 @@
 'use client';
+import { dateValue, formatDate } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
@@ -19,7 +20,7 @@ export default function SummaryPage() {
   }, {});
 
   const last30 = new Date(); last30.setDate(last30.getDate() - 30);
-  const recent = apps.filter(a => new Date(a.createdAt) >= last30).length;
+  const recent = apps.filter(a => dateValue(a.createdAt) >= last30.getTime()).length;
 
   return (
     <div className="p-6 space-y-6">
@@ -55,7 +56,7 @@ export default function SummaryPage() {
                 <td className="p-2">{r.company}</td>
                 <td className="p-2">{r.title}</td>
                 <td className="p-2">{String(r.status)}</td>
-                <td className="p-2">{new Date(r.createdAt).toLocaleDateString()}</td>
+                <td className="p-2">{formatDate(r.createdAt)}</td>
               </tr>
             ))}
           </tbody>

@@ -80,10 +80,10 @@ async function trySeed(appIdHint) {
     let app = null;
 
     if (appIdHint) {
-      app = await prisma.application.findUnique({ where: { id: appIdHint }, select: { id: true } });
+      app = await prisma.application.findUnique({ where: { id: appIdHint }, select: { id: true  } });
     }
     if (!app) {
-      app = await prisma.application.findFirst({ select: { id: true } });
+      app = await prisma.application.findFirst({ select: { id: true  } });
     }
     if (!app) {
       // Create with minimal likely fields; adjust if your schema requires different ones.
@@ -94,7 +94,7 @@ async function trySeed(appIdHint) {
           role: 'Engineer',
           status: 'APPLIED',
         },
-        select: { id: true }
+        select: { id: true  }
       });
       // Best-effort activity row (if model exists)
       try {
@@ -164,12 +164,10 @@ export default async function ActivityByIdPage({ params }: Params) {
   const [app, activity] = await Promise.all([
     prisma.application.findUnique({
       where: { id },
-      select: { id: true, company: true, role: true, status: true },
+      select: { id: true, company: true, title: true, status: true  },
     }),
-    prisma.applicationActivity.findMany({
-      where: { applicationId: id },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, type: true, payload: true, createdAt: true },
+    prisma.applicationActivity.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, payload: true, createdAt: true  },
     }),
   ]);
 
@@ -240,12 +238,10 @@ export default async function ActivityByQueryPage({ searchParams }: Props) {
   const [app, activity] = await Promise.all([
     prisma.application.findUnique({
       where: { id },
-      select: { id: true, company: true, role: true, status: true },
+      select: { id: true, company: true, title: true, status: true  },
     }),
-    prisma.applicationActivity.findMany({
-      where: { applicationId: id },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, type: true, payload: true, createdAt: true },
+    prisma.applicationActivity.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, payload: true, createdAt: true  },
     }),
   ]);
 

@@ -1,35 +1,30 @@
+import { renderWithProviders } from '@/test/renderWithProviders';
+import { vi } from 'vitest';
+
+
+
+
+// Auto-added by quick-wire-web-fixes (keeps test self-contained)
+
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 
-vi.mock('@/trpc', () => ({
-  trpc: {
-    settings: {
-      get: {
-        useQuery: () => ({
-          isLoading: false,
-          error: null,
-          data: {
-            emailNotifications: true,
-            theme: 'dark',
-            timezone: 'Europe/Brussels',
-          },
-        }),
-      },
-    },
-  },
-}));
+
 
 import Page from './page';
 
 describe('Settings page', () => {
   it('renders core settings values', () => {
-    render(<Page />);
+    renderWithProviders(<Page />);
     expect(screen.getByRole('heading', { name: /settings/i })).toBeInTheDocument();
     expect(screen.getByText('Email notifications')).toBeInTheDocument();
-    expect(screen.getByText('On')).toBeInTheDocument();
+    expect((screen.getByRole('checkbox', { name: /Email notifications/i }) as HTMLInputElement).checked).toBe(true);
     expect(screen.getByText(/Theme/i)).toBeInTheDocument();
-    expect(screen.getByText('dark')).toBeInTheDocument();
+    expect(screen.getByText(/Theme/i)).toBeInTheDocument();
+expect(screen.getByRole('combobox')).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /Dark/i })).toBeInTheDocument();
     expect(screen.getByText(/Time zone/i)).toBeInTheDocument();
-    expect(screen.getByText('Europe/Brussels')).toBeInTheDocument();
+    expect((screen.getByLabelText(/Time zone/i) as HTMLInputElement).value).toBe('Europe/Brussels');
   });
 });

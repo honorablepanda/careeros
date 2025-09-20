@@ -26,8 +26,8 @@ export default function SettingsPage() {
 
       <section className="space-y-4">
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Theme</label>
-          <select className="border rounded p-2" value={form.theme} onChange={(e)=>setForm(f=>({ ...f, theme: e.target.value as Settings['theme']}))}>
+          <label className="block text-sm font-medium" htmlFor="theme">Theme</label>
+          <select id="theme" className="border rounded p-2" value={form.theme} onChange={(e)=>setForm(f=>({ ...f, theme: e.target.value as Settings['theme']}))}>
             <option value="system">System</option>
             <option value="light">Light</option>
             <option value="dark">Dark</option>
@@ -35,8 +35,8 @@ export default function SettingsPage() {
         </div>
 
         <div className="space-y-2">
-          <label className="block text-sm font-medium">Timezone</label>
-          <input className="border rounded p-2 w-full" value={form.timezone || ''} onChange={(e)=>setForm(f=>({ ...f, timezone: e.target.value }))} />
+          <label className="block text-sm font-medium" htmlFor="timezone">Time zone</label>
+          <input id="timezone" className="border rounded p-2 w-full" value={form.timezone || ''} onChange={(e)=>setForm(f=>({ ...f, timezone: e.target.value }))} />
         </div>
 
         <div className="space-y-2">

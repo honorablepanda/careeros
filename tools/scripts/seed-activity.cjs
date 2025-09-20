@@ -13,20 +13,20 @@ async function main() {
   // Find or create an application
   const existing = await p.application.findFirst({
     where: { userId, company, role },
-    select: { id: true },
+    select: { id: true  },
   });
 
   const app =
     existing ??
     (await p.application.create({
       data: { userId, company, role, status },
-      select: { id: true },
+      select: { id: true  },
     }));
 
   // Ensure at least one activity row exists
   const hasAnyActivity = await p.applicationActivity.findFirst({
     where: { applicationId: app.id },
-    select: { id: true },
+    select: { id: true  },
   });
 
   if (!hasAnyActivity) {

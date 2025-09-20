@@ -30,9 +30,7 @@ const procImpl =
     .query(async ({ ctx, input }) => {
       const prismaAny = ctx.prisma as any;
       if (!prismaAny?.applicationActivity?.findMany) return [];
-      return await prismaAny.applicationActivity.findMany({
-        where: { applicationId: input.id },
-        orderBy: { createdAt: 'desc' },
+      return await prismaAny.applicationActivity.findMany({ where: { applicationId: input.id }, orderBy: { createdAt: 'desc' },
       });
     }),`;
 

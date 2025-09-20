@@ -1,14 +1,15 @@
 'use client';
+import { dateValue, formatDate } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
-type Row = { [k: string]: any };
+type Row = { [k: string]: unknown };
 
 export default function AchievementsPage() {
   const userId = getUserId(); // TODO: replace with session user id
 
-  const hook = (trpc as any)?.achievements?.list?.useQuery;
+  const hook = trpc?.achievements?.list?.useQuery;
   const query = hook
     ? hook({ userId })
     : { data: null, isLoading: false, error: { message: 'Achievements API not available' } };
@@ -23,7 +24,7 @@ export default function AchievementsPage() {
   if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
   if (!data?.length) return <main className="p-6">No achievements yet.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => new Date(b.awardedAt ?? 0).getTime() - new Date(a.awardedAt ?? 0).getTime());
+  const rows = [...(data ?? [])].sort((a,b) => dateValue(b.awardedAt) - dateValue(a.awardedAt));
 
   return (
     <main className="p-6 space-y-4">
@@ -41,7 +42,7 @@ export default function AchievementsPage() {
             <tr key={String(r.id ?? Math.random())} className="border-t">
                 <td className="p-2">{String(r.title ?? '—')}</td>
                 <td className="p-2">{String(r.category ?? '—')}</td>
-                <td className="p-2">{r.awardedAt ? new Date(r.awardedAt).toLocaleDateString() : '—'}</td>
+                <td className="p-2">{r.awardedAt ? formatDate(r.awardedAt) : '—'}</td>
             </tr>
           ))}
         </tbody>

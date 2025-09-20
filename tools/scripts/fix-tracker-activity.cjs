@@ -179,9 +179,7 @@ if (!/getApplicationActivity\s*:\s*publicProcedure/.test(src)) {
     .query(async ({ ctx, input }) => {
       const prismaAny = ctx.prisma as any;
       if (!prismaAny?.applicationActivity?.findMany) return [];
-      return await prismaAny.applicationActivity.findMany({
-        where: { applicationId: input.id },
-        orderBy: { createdAt: 'desc' },
+      return await prismaAny.applicationActivity.findMany({ where: { applicationId: input.id }, orderBy: { createdAt: 'desc' },
       });
     }),
 `
@@ -191,9 +189,7 @@ if (!/getApplicationActivity\s*:\s*publicProcedure/.test(src)) {
   replaceOnce(
     'getApplicationActivity → orderBy createdAt desc',
     /applicationActivity\.findMany\(\s*\{\s*where\s*:\s*\{\s*applicationId\s*:\s*input\.id\s*\}\s*,\s*orderBy\s*:\s*\{[^}]*\}\s*\}\s*\)/m,
-    `applicationActivity.findMany({
-        where: { applicationId: input.id },
-        orderBy: { createdAt: 'desc' },
+    `applicationActivity.findMany({ where: { applicationId: input.id }, orderBy: { createdAt: 'desc' },
       })`
   );
 }

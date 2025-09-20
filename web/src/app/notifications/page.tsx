@@ -1,4 +1,5 @@
 'use client';
+import { formatDate } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
@@ -14,7 +15,7 @@ type Noti = {
 export default function NotificationsPage() {
   const userId = getUserId(); // TODO: replace with session user id
 
-  const hook = (trpc as any)?.notifications?.list?.useQuery;
+  const hook = trpc?.notifications?.list?.useQuery;
   const query = hook
     ? hook({ userId })
     : { data: null, isLoading: false, error: { message: 'Notifications API not available' } };
@@ -49,7 +50,7 @@ export default function NotificationsPage() {
               <div className="flex-1">
                 <div className="text-sm">{n.message}</div>
                 <div className="text-xs text-gray-500">
-                  {n.type ? `${n.type} • ` : ''}{n.createdAt ? new Date(n.createdAt).toLocaleDateString() : ''}
+                  {n.type ? `${n.type} • ` : ''}{n.createdAt ? formatDate(n.createdAt) : ''}
                 </div>
               </div>
             </li>

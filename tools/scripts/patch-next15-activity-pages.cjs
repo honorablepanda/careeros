@@ -44,12 +44,10 @@ export default async function ActivityByIdPage({ params }: Params) {
   const [app, activity] = await Promise.all([
     prisma.application.findUnique({
       where: { id },
-      select: { id: true, company: true, role: true, status: true },
+      select: { id: true, company: true, title: true, status: true  },
     }),
-    prisma.applicationActivity.findMany({
-      where: { applicationId: id },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, type: true, payload: true, createdAt: true },
+    prisma.applicationActivity.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, payload: true, createdAt: true  },
     }),
   ]);
 
@@ -126,12 +124,10 @@ export default async function ActivityByQueryPage({ searchParams }: Props) {
   const [app, activity] = await Promise.all([
     prisma.application.findUnique({
       where: { id: idTrim },
-      select: { id: true, company: true, role: true, status: true },
+      select: { id: true, company: true, title: true, status: true  },
     }),
-    prisma.applicationActivity.findMany({
-      where: { applicationId: idTrim },
-      orderBy: { createdAt: 'desc' },
-      select: { id: true, type: true, payload: true, createdAt: true },
+    prisma.applicationActivity.findMany({ where: { applicationId: idTrim }, orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, payload: true, createdAt: true  },
     }),
   ]);
 
@@ -217,11 +213,11 @@ async function seedOrFindAppId() {
   try {
     const { PrismaClient } = require('@prisma/client');
     const p = new PrismaClient();
-    const found = await p.application.findFirst({ select: { id: true }, orderBy: { updatedAt: 'desc' } }).catch(()=>null);
+    const found = await p.application.findFirst({ select: { id: true  }, orderBy: { updatedAt: 'desc' } }).catch(()=>null);
     if (found?.id) { await p.$disconnect(); return found.id; }
     const created = await p.application.create({
       data: { userId: 'dev-user', company: 'Acme Inc', role: 'Engineer', status: 'APPLIED' },
-      select: { id: true }
+      select: { id: true  }
     }).catch(()=>null);
     if (created?.id) {
       // best-effort activity

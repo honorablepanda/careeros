@@ -1,4 +1,5 @@
 'use client';
+import { dateValue } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
@@ -27,7 +28,7 @@ export default function InterviewsPage() {
   if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
 
   const rows = [...(data ?? [])].sort((a,b) =>
-    new Date(a.scheduledAt ?? 0).getTime() - new Date(b.scheduledAt ?? 0).getTime()
+    dateValue(a.scheduledAt) - dateValue(b.scheduledAt)
   );
 
   return (
@@ -47,8 +48,7 @@ export default function InterviewsPage() {
             {rows.map(iv => (
               <tr key={iv.id} className="border-t">
                 <td className="p-2">{iv.company ?? '—'}</td>
-                <td className="p-2">{iv.title ?? '—'}</td>
-                <td className="p-2">{iv.stage ?? '—'}</td>
+<td className="p-2">{iv.stage ?? '—'}</td>
                 <td className="p-2">
                   {iv.scheduledAt ? new Date(iv.scheduledAt).toLocaleString() : '—'}
                 </td>

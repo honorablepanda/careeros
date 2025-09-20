@@ -7,9 +7,9 @@ export default function ProfilePage() {
   const userId = getUserId(); // TODO: replace with session user id
 
   // Be resilient if profile router shape differs — compile-safe & runtime-safe.
-  const hook = (trpc as any)?.profile?.get?.useQuery;
+  const hook = trpc?.profile?.get?.useQuery;
   const query = hook
-    ? hook({ userId })
+    ? hook({ id: userId })
     : { data: null, isLoading: false, error: { message: 'Profile API not available' } };
 
   const { data, isLoading, error } = query as {

@@ -1,14 +1,15 @@
 'use client';
+import { dateValue, formatDate } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
-type Row = { [k: string]: any };
+type Row = { [k: string]: unknown };
 
 export default function ResumePage() {
   const userId = getUserId(); // TODO: replace with session user id
 
-  const hook = (trpc as any)?.resume?.list?.useQuery;
+  const hook = trpc?.resume?.list?.useQuery;
   const query = hook
     ? hook({ userId })
     : { data: null, isLoading: false, error: { message: 'Resume API not available' } };
@@ -23,7 +24,7 @@ export default function ResumePage() {
   if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
   if (!data?.length) return <main className="p-6">No resume entries.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime());
+  const rows = [...(data ?? [])].sort((a,b) => dateValue(b.updatedAt) - dateValue(a.updatedAt));
 
   return (
     <main className="p-6 space-y-4">
@@ -41,7 +42,7 @@ export default function ResumePage() {
             <tr key={String(r.id ?? Math.random())} className="border-t">
                 <td className="p-2">{String(r.section ?? '—')}</td>
                 <td className="p-2">{String(r.value ?? '—')}</td>
-                <td className="p-2">{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : '—'}</td>
+                <td className="p-2">{formatDate(r.updatedAt)}</td>
             </tr>
           ))}
         </tbody>

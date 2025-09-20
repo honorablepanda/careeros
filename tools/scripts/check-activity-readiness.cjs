@@ -168,7 +168,7 @@ async function fetchText(url, opts = {}) {
     try {
       const { PrismaClient } = require('@prisma/client');
       const p = new PrismaClient();
-      const app = await p.application.findUnique({ where: { id: APP_ID }, select: { id: true } });
+      const app = await p.application.findUnique({ where: { id: APP_ID }, select: { id: true  } });
       applicationExists = !!app;
       if (applicationExists) ok(`Application exists in DB: ${APP_ID}`);
       else fail(`No Application found with id ${APP_ID} (Prisma)`);

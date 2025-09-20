@@ -1,4 +1,5 @@
 'use client';
+import { formatDate } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
@@ -7,7 +8,7 @@ export default function GoalsPage() {
   const userId = getUserId(); // TODO: replace with session user id
   const [status, setStatus] = React.useState<string | undefined>(undefined);
 
-  const hook = (trpc as any)?.goals?.list?.useQuery;
+  const hook = trpc?.goals?.list?.useQuery;
   const query = hook
     ? hook({ userId, status })
     : { data: null, isLoading: false, error: { message: 'Goals API not available' } };
@@ -23,12 +24,8 @@ export default function GoalsPage() {
       <h1 className="text-2xl font-semibold">Goals</h1>
 
       <div className="flex items-center gap-3">
-        <label className="text-sm">Filter status:</label>
-        <select
-          className="border rounded-md px-2 py-1 text-sm"
-          value={status ?? ''}
-          onChange={(e) => setStatus(e.target.value || undefined)}
-        >
+        <label className="text-sm" htmlFor="statusFilter">Filter status:</label>
+        <select className="border rounded-md px-2 py-1 text-sm" id="statusFilter" value={status ?? ''} onChange={(e)=> setStatus(e.target.value || undefined)}>
           <option value="">All</option>
           <option value="PLANNED">PLANNED</option>
           <option value="IN_PROGRESS">IN_PROGRESS</option>
@@ -54,7 +51,7 @@ export default function GoalsPage() {
                 <td className="p-2">{g.title}</td>
                 <td className="p-2">{g.status ?? '—'}</td>
                 <td className="p-2">
-                  {g.dueDate ? new Date(g.dueDate).toLocaleDateString() : '—'}
+                  {g.dueDate ? formatDate(g.dueDate) : '—'}
                 </td>
               </tr>
             ))}

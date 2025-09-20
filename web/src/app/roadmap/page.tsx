@@ -1,14 +1,15 @@
 'use client';
+import { dateValue, formatDate } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
-type Row = { [k: string]: any };
+type Row = { [k: string]: unknown };
 
 export default function RoadmapPage() {
   const userId = getUserId(); // TODO: replace with session user id
 
-  const hook = (trpc as any)?.roadmap?.list?.useQuery;
+  const hook = trpc?.roadmap?.list?.useQuery;
   const query = hook
     ? hook({ userId })
     : { data: null, isLoading: false, error: { message: 'Roadmap API not available' } };
@@ -23,7 +24,7 @@ export default function RoadmapPage() {
   if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
   if (!data?.length) return <main className="p-6">No roadmap items.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => new Date(b.dueDate ?? 0).getTime() - new Date(a.dueDate ?? 0).getTime());
+  const rows = [...(data ?? [])].sort((a,b) => dateValue(b.dueDate) - dateValue(a.dueDate));
 
   return (
     <main className="p-6 space-y-4">
@@ -41,7 +42,7 @@ export default function RoadmapPage() {
             <tr key={String(r.id ?? Math.random())} className="border-t">
                 <td className="p-2">{String(r.milestone ?? '—')}</td>
                 <td className="p-2">{String(r.status ?? '—')}</td>
-                <td className="p-2">{r.dueDate ? new Date(r.dueDate).toLocaleDateString() : '—'}</td>
+                <td className="p-2">{formatDate(r.dueDate)}</td>
             </tr>
           ))}
         </tbody>

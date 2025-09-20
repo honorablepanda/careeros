@@ -1,10 +1,20 @@
 'use client';
+import { formatDateTime } from '@/lib/dates';
 import React from 'react';
-import { trpc } from '@/trpc/react';
+type ActivityRow = {
+  createdAt?: unknown;
+  ts?: unknown;
+  type?: string;
+  details?: string;
+  by?: string;
+  to?: string;
+};
+
+import { trpc } from '@/trpc';
 
 export default function Page() {
-  const hook = (trpc as any)?.tracker?.getApplicationActivity?.useQuery;
-  let data: any[] = [];
+  const hook = trpc?.tracker?.getApplicationActivity?.useQuery;
+  let data: unknown[] = [];
   let isLoading = false;
   let error: null | { message: string } = null;
 
@@ -34,11 +44,11 @@ export default function Page() {
             <tr><th align="left">When</th><th align="left">Type</th><th align="left">Details</th></tr>
           </thead>
           <tbody>
-            {data.map((row:any, i:number) => (
+            {data.map((row: ActivityRow, i: number) => (
               <tr key={i}>
-                <td>{row.createdAt || row.ts || ''}</td>
-                <td>{row.type}</td>
-                <td>{row.details || row.by || row.to || ''}</td>
+                <td>{formatDateTime(row.createdAt ?? row.ts)}</td>
+                <td>{row.type ?? ""}</td>
+                <td>{row.details ?? row.by ?? row.to ?? ""}</td>
               </tr>
             ))}
           </tbody>

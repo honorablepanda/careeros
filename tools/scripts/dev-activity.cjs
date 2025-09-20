@@ -140,19 +140,19 @@ async function seed() {
   const p = new PrismaClient();
   try {
     const existing = await p.application.findFirst({
-      select: { id: true },
+      select: { id: true  },
       orderBy: { createdAt: 'desc' },
     }).catch(() => null);
 
     let id = existing?.id;
     if (!id) {
       try {
-        const created = await p.application.create({ data: {}, select: { id: true } });
+        const created = await p.application.create({ data: {}, select: { id: true  } });
         id = created.id;
       } catch {
         const created = await p.application.create({
           data: { notes: 'Seeded via dev-activity script' },
-          select: { id: true },
+          select: { id: true  },
         });
         id = created.id;
       }

@@ -1,5 +1,5 @@
 import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '@careeros/trpc';
+import type { AppRouter } from '@careeros/api';
 
 export const trpc = createTRPCReact<AppRouter>();
 export default trpc;

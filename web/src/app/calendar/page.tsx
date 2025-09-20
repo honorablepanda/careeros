@@ -1,4 +1,5 @@
 'use client';
+import { dateValue } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
@@ -13,7 +14,7 @@ type CalEvent = {
 
 export default function CalendarPage() {
   const userId = getUserId(); // TODO: replace with session user id
-  const hook = (trpc as any)?.calendar?.list?.useQuery;
+  const hook = trpc?.calendar?.list?.useQuery;
   const query = hook
     ? hook({ userId })
     : { data: null, isLoading: false, error: { message: 'Calendar API not available' } };
@@ -26,7 +27,7 @@ export default function CalendarPage() {
   if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
 
   const rows = [...(data ?? [])].sort((a,b) =>
-    new Date(a.startsAt ?? 0).getTime() - new Date(b.startsAt ?? 0).getTime()
+    dateValue(a.startsAt) - dateValue(b.startsAt)
   );
 
   return (

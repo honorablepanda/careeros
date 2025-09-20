@@ -42,9 +42,7 @@ const WEB_TEST = P('web/src/app/tracker/activity/page.spec.tsx');
     .query(async ({ ctx, input }) => {
       const prismaAny = ctx.prisma as any;
       if (!prismaAny?.applicationActivity?.findMany) return [];
-      return await prismaAny.applicationActivity.findMany({
-        where: { applicationId: input.id },
-        orderBy: { createdAt: 'desc' },
+      return await prismaAny.applicationActivity.findMany({ where: { applicationId: input.id }, orderBy: { createdAt: 'desc' },
       });
     }),
 `;

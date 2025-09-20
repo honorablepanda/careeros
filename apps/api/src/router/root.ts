@@ -24,6 +24,8 @@ import { applicationsRouter } from './applications';
 import { networkingRouter } from './networking';
 import { DemoRouter } from './demo';
 import { systemRouter } from './system';
+import { trackerRouter } from './../trpc/routers/tracker.router';
+
 
 
 export const appRouter = router({

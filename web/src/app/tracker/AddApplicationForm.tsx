@@ -1,5 +1,5 @@
 'use client';
-
+type Source = "JOB_BOARD" | "REFERRAL" | "COMPANY_WEBSITE" | "RECRUITER" | "OTHER";
 import * as React from 'react';
 import { trpc } from '@/trpc';
 
@@ -36,12 +36,12 @@ export default function AddApplicationForm({ userId }: Props) {
         value={role}
         onChange={e=>setRole(e.target.value)}
       />
-      <select value={source} onChange={e=>setSource(e.target.value as any)}>
-        <option>JOB_BOARD</option>
-        <option>REFERRAL</option>
-        <option>COMPANY_WEBSITE</option>
-        <option>RECRUITER</option>
-        <option>OTHER</option>
+      <select value={source} onChange={e=>setSource(e.target.value as Source)}>
+        <option value="JOB_BOARD">JOB_BOARD</option>
+        <option value="REFERRAL">REFERRAL</option>
+        <option value="COMPANY_WEBSITE">COMPANY_WEBSITE</option>
+        <option value="RECRUITER">RECRUITER</option>
+        <option value="OTHER">OTHER</option>
       </select>
       <button type="submit" disabled={isLoading}>
         {isLoading ? 'Adding…' : 'Add Application'}

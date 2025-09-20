@@ -46,13 +46,12 @@ async function seedActivity(appId) {
   // Get the application to mirror into payload.data
   const app = await prisma.application.findUnique({
     where: { id: appId },
-    select: { id: true, userId: true, company: true, role: true, status: true },
+    select: { id: true, userId: true, company: true, title: true, status: true  },
   });
   if (!app) throw new Error(`Application not found: ${appId}`);
 
-  const existing = await prisma.applicationActivity.findMany({
-    where: { applicationId: appId },
-    select: { id: true, type: true },
+  const existing = await prisma.applicationActivity.findMany({ where: { applicationId: appId }, orderBy: { createdAt: 'desc' },
+    select: { id: true, type: true  },
     orderBy: { createdAt: 'desc' },
   });
 

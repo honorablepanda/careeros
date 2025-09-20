@@ -1,6 +1,5 @@
-// web/src/app/magic/page.tsx
 'use client';
-
+// web/src/app/magic/page.tsx
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 

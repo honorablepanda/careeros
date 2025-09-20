@@ -1,7 +1,6 @@
 'use client';
-
 import React from 'react';
-import { trpc } from '@/trpc/react';
+import { trpc } from '@/trpc';
 
 type StatusCount = { status: string; count: number };
 type LatestItem = {
@@ -13,7 +12,10 @@ type LatestItem = {
 };
 
 export default function DashboardPage() {
-  const { data, isLoading, error } = trpc.summary.get.useQuery();
+  // summary router may be absent in this build; call defensively
+const _summaryHook = (trpc as any)?.summary?.get?.useQuery;
+const { data, isLoading, error } =
+  (_summaryHook?.() as any) ?? { data: null, isLoading: false, error: null };
 
   if (isLoading) {
     return (

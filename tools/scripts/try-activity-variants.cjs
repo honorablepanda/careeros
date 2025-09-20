@@ -120,9 +120,7 @@ export const trackerRouter = router({
     .query(async ({ ctx, input }) => {
       const prismaAny = ctx.prisma as any;
       if (!prismaAny?.applicationActivity?.findMany) return [];
-      return await prismaAny.applicationActivity.findMany({
-        where: { applicationId: input.id },
-        orderBy: { createdAt: 'desc' },
+      return await prismaAny.applicationActivity.findMany({ where: { applicationId: input.id }, orderBy: { createdAt: 'desc' },
       });
     }),
 });
@@ -202,9 +200,7 @@ export const trackerRouter = router({
     .query(async ({ ctx, input }) => {
       const prismaAny = ctx.prisma as any;
       if (!prismaAny?.applicationActivity?.findMany) return [];
-      return await prismaAny.applicationActivity.findMany({
-        where: { applicationId: input.id },
-        orderBy: { createdAt: 'desc' },
+      return await prismaAny.applicationActivity.findMany({ where: { applicationId: input.id }, orderBy: { createdAt: 'desc' },
       });
     }),
 });
@@ -243,7 +239,7 @@ export const trackerRouter = router({
       const created = await prismaAny?.application?.create?.({ data: input });
       if (prismaAny?.applicationActivity?.create && created?.id) {
         await prismaAny.applicationActivity.create({
-          data: { applicationId: created.id, type: 'CREATED', by: 'system' },
+          data: { applicationId: created.id, type: 'CREATE', by: 'system' },
         });
       }
       return created;
@@ -277,9 +273,7 @@ export const trackerRouter = router({
     .query(async ({ ctx, input }) => {
       const prismaAny = ctx.prisma as any;
       if (!prismaAny?.applicationActivity?.findMany) return [];
-      return await prismaAny.applicationActivity.findMany({
-        where: { applicationId: input.id },
-        orderBy: { createdAt: 'desc' },
+      return await prismaAny.applicationActivity.findMany({ where: { applicationId: input.id }, orderBy: { createdAt: 'desc' },
       });
     }),
 });

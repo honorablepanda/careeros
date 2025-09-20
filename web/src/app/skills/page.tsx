@@ -1,14 +1,15 @@
 'use client';
+import { dateValue, formatDate } from '@/lib/dates';
 import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
-type Row = { [k: string]: any };
+type Row = { [k: string]: unknown };
 
 export default function SkillsPage() {
   const userId = getUserId(); // TODO: replace with session user id
 
-  const hook = (trpc as any)?.skills?.list?.useQuery;
+  const hook = trpc?.skills?.list?.useQuery;
   const query = hook
     ? hook({ userId })
     : { data: null, isLoading: false, error: { message: 'Skills API not available' } };
@@ -23,7 +24,7 @@ export default function SkillsPage() {
   if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
   if (!data?.length) return <main className="p-6">No skills yet.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => new Date(b.updatedAt ?? 0).getTime() - new Date(a.updatedAt ?? 0).getTime());
+  const rows = [...(data ?? [])].sort((a,b) => dateValue(b.updatedAt) - dateValue(a.updatedAt));
 
   return (
     <main className="p-6 space-y-4">
@@ -41,7 +42,7 @@ export default function SkillsPage() {
             <tr key={String(r.id ?? Math.random())} className="border-t">
                 <td className="p-2">{String(r.name ?? '—')}</td>
                 <td className="p-2">{String(r.level ?? '—')}</td>
-                <td className="p-2">{r.updatedAt ? new Date(r.updatedAt).toLocaleDateString() : '—'}</td>
+                <td className="p-2">{formatDate(r.updatedAt)}</td>
             </tr>
           ))}
         </tbody>

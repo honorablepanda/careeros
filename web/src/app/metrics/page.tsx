@@ -3,12 +3,12 @@ import * as React from 'react';
 import { getUserId } from '@/lib/user';
 import { trpc } from '@/trpc';
 
-type Row = { [k: string]: any };
+type Row = { [k: string]: unknown };
 
 export default function MetricsPage() {
   const userId = getUserId(); // TODO: replace with session user id
 
-  const hook = (trpc as any)?.metrics?.list?.useQuery;
+  const hook = trpc?.metrics?.list?.useQuery;
   const query = hook
     ? hook({ userId })
     : { data: null, isLoading: false, error: { message: 'Metrics API not available' } };

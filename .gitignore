@@ -83,3 +83,6 @@ web/jest.config.ts*.bak*
 # tool backups
 *.bak.*
 apps/web._archived_*/
+
+# Windows reserved filename
+web/NUL

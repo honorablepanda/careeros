@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 echo "⏳ Running activity contract check…"
 pnpm run check:activity || {
   echo "❌ Activity check failed. Fix the tracker router before pushing."

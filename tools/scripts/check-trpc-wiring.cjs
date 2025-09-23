@@ -6,11 +6,12 @@ const path = require('path');
 const ROOT = process.cwd();
 const FIX = process.argv.includes('--fix');
 
-const rel = p => path.join(ROOT, p);
-const readIf = p => (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null);
-const readJSON = p => (fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null);
+const rel = (p) => path.join(ROOT, p);
+const readIf = (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null);
+const readJSON = (p) =>
+  fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null;
 const writeJSON = (p, obj) => fs.writeFileSync(p, JSON.stringify(obj, null, 2));
-const ensureDir = p => fs.mkdirSync(p, { recursive: true });
+const ensureDir = (p) => fs.mkdirSync(p, { recursive: true });
 
 let errors = [];
 let fixes = [];
@@ -39,9 +40,15 @@ let fixes = [];
       if (!same) {
         if (FIX) {
           paths[k] = v;
-          fixes.push(`tsconfig.base.json: set paths["${k}"] -> ${JSON.stringify(v)}`);
+          fixes.push(
+            `tsconfig.base.json: set paths["${k}"] -> ${JSON.stringify(v)}`
+          );
         } else {
-          errors.push(`tsconfig.base.json: paths["${k}"] is missing or different (want ${JSON.stringify(v)})`);
+          errors.push(
+            `tsconfig.base.json: paths["${k}"] is missing or different (want ${JSON.stringify(
+              v
+            )})`
+          );
         }
       }
     }
@@ -59,7 +66,11 @@ let fixes = [];
       ensureDir(path.dirname(p));
       json = {
         extends: '../tsconfig.base.json',
-        compilerOptions: { baseUrl: '.', jsx: 'react-jsx', paths: { '@/*': ['src/*'] } },
+        compilerOptions: {
+          baseUrl: '.',
+          jsx: 'react-jsx',
+          paths: { '@/*': ['src/*'] },
+        },
         include: ['next-env.d.ts', 'src/**/*', '.next/types/**/*.ts'],
         exclude: ['node_modules'],
       };
@@ -84,9 +95,15 @@ let fixes = [];
       if (!same) {
         if (FIX) {
           paths[k] = v;
-          fixes.push(`web/tsconfig.json: set paths["${k}"] -> ${JSON.stringify(v)}`);
+          fixes.push(
+            `web/tsconfig.json: set paths["${k}"] -> ${JSON.stringify(v)}`
+          );
         } else {
-          errors.push(`web/tsconfig.json: paths["${k}"] missing or different (want ${JSON.stringify(v)})`);
+          errors.push(
+            `web/tsconfig.json: paths["${k}"] missing or different (want ${JSON.stringify(
+              v
+            )})`
+          );
         }
       }
     }
@@ -115,7 +132,7 @@ export const trpc = createTRPCReact<AppRouter>();
     }
   } else {
     const ok =
-      content.includes("createTRPCReact") &&
+      content.includes('createTRPCReact') &&
       content.includes("from '@trpc/react-query'") &&
       content.includes("type { AppRouter } from '@careeros/api'") &&
       content.includes('createTRPCReact<AppRouter>()');
@@ -125,7 +142,9 @@ export const trpc = createTRPCReact<AppRouter>();
         fs.writeFileSync(p, wanted);
         fixes.push('rewrote web/src/trpc.ts to standard client');
       } else {
-        errors.push('web/src/trpc.ts exists but does not export a typed TRPC client (AppRouter)');
+        errors.push(
+          'web/src/trpc.ts exists but does not export a typed TRPC client (AppRouter)'
+        );
       }
     }
   }
@@ -137,19 +156,25 @@ export const trpc = createTRPCReact<AppRouter>();
   const content = readIf(p);
   if (!content) {
     // We won't create providers.tsx automatically; just report.
-    errors.push('web/src/app/providers.tsx missing (expected to import { trpc } from "@/trpc")');
-  } else if (!/import\s*\{\s*trpc\s*\}\s*from\s*['"]@\/trpc['"]/.test(content)) {
+    errors.push(
+      'web/src/app/providers.tsx missing (expected to import { trpc } from "@/trpc")'
+    );
+  } else if (
+    !/import\s*\{\s*trpc\s*\}\s*from\s*['"]@\/trpc['"]/.test(content)
+  ) {
     if (FIX) {
       // Insert the import after the first 'use client' or at top
       let updated = content;
       const line = `import { trpc } from '@/trpc';\n`;
       if (/^'use client';/m.test(updated) && !updated.includes(line)) {
-        updated = updated.replace(/^'use client';\s*\n?/, m => m + line);
+        updated = updated.replace(/^'use client';\s*\n?/, (m) => m + line);
       } else if (!updated.includes(line)) {
         updated = line + updated;
       }
       fs.writeFileSync(p, updated);
-      fixes.push('patched web/src/app/providers.tsx to import { trpc } from "@/trpc"');
+      fixes.push(
+        'patched web/src/app/providers.tsx to import { trpc } from "@/trpc"'
+      );
     } else {
       errors.push('providers.tsx does not import { trpc } from "@/trpc"');
     }
@@ -165,7 +190,7 @@ if (!FIX && errors.length) {
 
 if (FIX) {
   if (fixes.length) {
-    console.log('í»   Applied fixes:');
+    console.log('ï¿½ï¿½ï¿½  Applied fixes:');
     for (const f of fixes) console.log(' -', f);
   } else {
     console.log('âœ“ Nothing to fix; configuration already correct.');

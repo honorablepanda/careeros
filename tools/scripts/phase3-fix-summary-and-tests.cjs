@@ -8,26 +8,40 @@ const fs = require('fs');
 const path = require('path');
 
 const repo = process.cwd();
-const exist = p => fs.existsSync(p);
-const read  = p => fs.readFileSync(p,'utf8');
-const write = (p,s)=>{ fs.mkdirSync(path.dirname(p),{recursive:true}); fs.writeFileSync(p,s,'utf8'); console.log('✓ wrote', p); };
+const exist = (p) => fs.existsSync(p);
+const read = (p) => fs.readFileSync(p, 'utf8');
+const write = (p, s) => {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s, 'utf8');
+  console.log('✓ wrote', p);
+};
 
 /* 1) Patch summary.ts (replace any lingering `{ source }` reducer with { status }) */
-(function patchSummary(){
+(function patchSummary() {
   const file = path.join(repo, 'apps/api/src/router/summary.ts');
-  if (!exist(file)) { console.log('• summary.ts not found (skip)'); return; }
+  if (!exist(file)) {
+    console.log('• summary.ts not found (skip)');
+    return;
+  }
   let src = read(file);
 
   // If we already have the exact finalized block, skip.
-  if (src.includes(`select: { status: true }`) && src.includes(`const sourceGrp = Object.entries(sourceCountMap)`)) {
+  if (
+    src.includes(`select: { status: true }`) &&
+    src.includes(`const sourceGrp = Object.entries(sourceCountMap)`)
+  ) {
     // Make sure reducer is correct (uses { status })
     if (!/reduce<[^>]*>\(\s*\(?acc.*\{\s*status\s*\}\)/m.test(src)) {
       // Try to fix only the reducer arg + key line
       src = src
-        .replace(/reduce<[^>]*>\(\s*(acc[^,]*),\s*\{\s*source\s*\}\s*\)\s*=>\s*\{/m,
-                 'reduce<$1>((acc, { status }) => {')
-        .replace(/const\s+key\s*=\s*source\s*\?\?\s*['"]Unknown['"]/m,
-                 "const key = status ?? 'UNKNOWN'");
+        .replace(
+          /reduce<[^>]*>\(\s*(acc[^,]*),\s*\{\s*source\s*\}\s*\)\s*=>\s*\{/m,
+          'reduce<$1>((acc, { status }) => {'
+        )
+        .replace(
+          /const\s+key\s*=\s*source\s*\?\?\s*['"]Unknown['"]/m,
+          "const key = status ?? 'UNKNOWN'"
+        );
       write(file, src);
       console.log('• summary.ts reducer fixed to use { status }');
     } else {
@@ -38,8 +52,7 @@ const write = (p,s)=>{ fs.mkdirSync(path.dirname(p),{recursive:true}); fs.writeF
 
   // Broader fix: replace a "source grouping" section with the safe status aggregation.
   // We look for either a groupBy by ['source'] or a findMany select { source: true } block.
-  const safeBlock =
-`// 2) "Source" counts (fallback via status, since \`source\` is not in the model).
+  const safeBlock = `// 2) "Source" counts (fallback via status, since \`source\` is not in the model).
 const appsForSources = await prisma.application.findMany({
   where: { userId },
   select: { status: true },
@@ -65,20 +78,28 @@ const sourceGrp = Object.entries(sourceCountMap).map(([source, count]) => ({
   // Try to replace a groupBy(['source']) block
   src = src.replace(
     /const\s+[A-Za-z0-9_$]+\s*=\s*await\s*prisma\.application\.groupBy\s*\([\s\S]*?by:\s*\[\s*'source'\s*\][\s\S]*?\);\s*/m,
-    () => { replaced = true; return safeBlock + '\n'; }
+    () => {
+      replaced = true;
+      return safeBlock + '\n';
+    }
   );
 
   // Or replace a findMany select { source: true } → reduce(...) pattern block
   if (!replaced) {
     src = src.replace(
       /const\s+[A-Za-z0-9_$]+\s*=\s*await\s*prisma\.application\.findMany\s*\([\s\S]*?select:\s*\{\s*source:\s*true\s*\}[\s\S]*?reduce[\s\S]*?\);\s*/m,
-      () => { replaced = true; return safeBlock + '\n'; }
+      () => {
+        replaced = true;
+        return safeBlock + '\n';
+      }
     );
   }
 
   if (replaced) {
     write(file, src);
-    console.log('• summary.ts source-counts block replaced with safe status aggregation');
+    console.log(
+      '• summary.ts source-counts block replaced with safe status aggregation'
+    );
     return;
   }
 
@@ -86,19 +107,21 @@ const sourceGrp = Object.entries(sourceCountMap).map(([source, count]) => ({
   if (src.includes('where: { userId }')) {
     const idx = src.indexOf('where: { userId }');
     const insertAt = src.indexOf('\n', idx) + 1;
-    src = src.slice(0, insertAt) + '\n' + safeBlock + '\n' + src.slice(insertAt);
+    src =
+      src.slice(0, insertAt) + '\n' + safeBlock + '\n' + src.slice(insertAt);
     write(file, src);
     console.log('• summary.ts safe block injected (fallback)');
   } else {
-    console.log('• Could not confidently patch summary.ts; please manual check.');
+    console.log(
+      '• Could not confidently patch summary.ts; please manual check.'
+    );
   }
 })();
 
 /* 2) Ensure web/vitest.setup.ts has jest-dom and a robust @/trpc mock */
-(function ensureVitestSetup(){
+(function ensureVitestSetup() {
   const file = path.join(repo, 'web/vitest.setup.ts');
-  const content =
-`import '@testing-library/jest-dom/vitest';
+  const content = `import '@testing-library/jest-dom/vitest';
 
 vi.mock('@/trpc', () => {
   const q = (data: any) => ({ data, isLoading: false, isSuccess: true, error: undefined });
@@ -128,9 +151,12 @@ vi.mock('@/trpc', () => {
 })();
 
 /* 3) Ensure web/vitest.config.ts includes setupFiles + jsdom */
-(function ensureVitestConfig(){
+(function ensureVitestConfig() {
   const file = path.join(repo, 'web/vitest.config.ts');
-  if (!exist(file)) { console.log('• web/vitest.config.ts not found (skip)'); return; }
+  if (!exist(file)) {
+    console.log('• web/vitest.config.ts not found (skip)');
+    return;
+  }
   let src = read(file);
 
   // Ensure environment: 'jsdom'
@@ -139,7 +165,10 @@ vi.mock('@/trpc', () => {
       // If there is an existing test block, add/override environment
       if (inner) {
         if (/environment\s*:/.test(inner)) {
-          return `test: { ${inner.replace(/environment\s*:\s*['"][^'"]+['"]/, `environment: 'jsdom'`)} }`;
+          return `test: { ${inner.replace(
+            /environment\s*:\s*['"][^'"]+['"]/,
+            `environment: 'jsdom'`
+          )} }`;
         }
         return `test: { environment: 'jsdom', ${inner} }`;
       }
@@ -158,7 +187,8 @@ vi.mock('@/trpc', () => {
     // append to existing array
     src = src.replace(/setupFiles\s*:\s*\[([^\]]*)\]/m, (m, arr) => {
       const trimmed = arr.trim();
-      const withComma = trimmed && !trimmed.endsWith(',') ? trimmed + ', ' : trimmed;
+      const withComma =
+        trimmed && !trimmed.endsWith(',') ? trimmed + ', ' : trimmed;
       return `setupFiles: [${withComma}'./vitest.setup.ts']`;
     });
   }

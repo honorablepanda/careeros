@@ -34,7 +34,14 @@ const COLORS = {
 };
 
 const P = (...p) => path.join(ROOT, ...p);
-const has = (p) => { try { fs.accessSync(p); return true; } catch { return false; } };
+const has = (p) => {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
 const read = (p) => fs.readFileSync(p, 'utf8');
 
 /* -------------------------------- utils ----------------------------------- */
@@ -45,7 +52,12 @@ function walk(dir, out = []) {
     const fp = path.join(dir, e.name);
     if (e.isDirectory()) {
       // skip heavy/irrelevant dirs
-      if (/(^|[\\/])(?:node_modules|.git|dist|build|.next|out|coverage)([\\/]|$)/.test(fp)) continue;
+      if (
+        /(^|[\\/])(?:node_modules|.git|dist|build|.next|out|coverage)([\\/]|$)/.test(
+          fp
+        )
+      )
+        continue;
       walk(fp, out);
     } else {
       out.push(fp);
@@ -92,15 +104,25 @@ function logLine(msg) {
 
 /* ----------------------------- scan definitions --------------------------- */
 
-const trackerPath = P('apps', 'api', 'norm', 'trpc', 'routers', 'tracker.router.ts');
+const trackerPath = P(
+  'apps',
+  'api',
+  'norm',
+  'trpc',
+  'routers',
+  'tracker.router.ts'
+);
 const prismaSchema = P('prisma', 'schema.prisma');
 const webTsconfig = P('web', 'tsconfig.json');
 const webTrpcStub = P('web', 'norm', 'trpc', 'react.ts');
 
 const EXPECT = {
-  createActivity: /applicationActivity\.create\(\s*\{\s*data:\s*\{\s*applicationId:\s*[^}]+type:\s*'CREATE'\s*,\s*payload:\s*\{\s*data:\s*[^}]+\}\s*\}\s*\}\s*\)/m,
-  updateActivity: /applicationActivity\.create\(\s*\{\s*data:\s*\{\s*applicationId:\s*[^}]+type:\s*'STATUS_CHANGE'\s*,\s*payload:\s*\{\s*to:\s*[^}]+\}\s*\}\s*\}\s*\)/m,
-  inputPermissive: /\.input\(\s*z\.object\(\s*\{\s*\}\s*\)\.passthrough\(\)\s*\)/m,
+  createActivity:
+    /applicationActivity\.create\(\s*\{\s*data:\s*\{\s*applicationId:\s*[^}]+type:\s*'CREATE'\s*,\s*payload:\s*\{\s*data:\s*[^}]+\}\s*\}\s*\}\s*\)/m,
+  updateActivity:
+    /applicationActivity\.create\(\s*\{\s*data:\s*\{\s*applicationId:\s*[^}]+type:\s*'STATUS_CHANGE'\s*,\s*payload:\s*\{\s*to:\s*[^}]+\}\s*\}\s*\}\s*\)/m,
+  inputPermissive:
+    /\.input\(\s*z\.object\(\s*\{\s*\}\s*\)\.passthrough\(\)\s*\)/m,
   inputRequiresUserId: /z\.object\([\s\S]*userId:\s*z\.string\(\)/m,
 };
 
@@ -108,7 +130,12 @@ function scanTrackerRouter() {
   const result = {
     exists: has(trackerPath),
     getActivitySymbol: false,
-    create: { found: false, inputPermissive: null, writesExpectedActivity: null, preview: '' },
+    create: {
+      found: false,
+      inputPermissive: null,
+      writesExpectedActivity: null,
+      preview: '',
+    },
     update: { found: false, writesExpectedActivity: null, preview: '' },
     rawPreview: '',
   };
@@ -116,7 +143,8 @@ function scanTrackerRouter() {
   if (!result.exists) return result;
 
   const norm = read(trackerPath);
-  result.getActivitySymbol = /getApplicationActivity\s*:\s*publicProcedure/.test(norm);
+  result.getActivitySymbol =
+    /getApplicationActivity\s*:\s*publicProcedure/.test(norm);
 
   // Grab createApplication block
   const createIdx = norm.indexOf('createApplication:');
@@ -124,7 +152,9 @@ function scanTrackerRouter() {
     result.create.found = true;
     const block = blockBetween(norm, createIdx) || '';
     result.create.preview = block.slice(0, 800);
-    result.create.inputPermissive = EXPECT.inputPermissive.test(block) && !EXPECT.inputRequiresUserId.test(block);
+    result.create.inputPermissive =
+      EXPECT.inputPermissive.test(block) &&
+      !EXPECT.inputRequiresUserId.test(block);
     result.create.writesExpectedActivity = EXPECT.createActivity.test(block);
   }
 
@@ -147,7 +177,9 @@ function scanPrisma() {
   const norm = read(prismaSchema);
   out.hasModel = /model\s+ApplicationActivity\s+\{[\s\S]*?\}/m.test(norm);
   if (out.hasModel) {
-    out.modelPreview = (norm.match(/model\s+ApplicationActivity\s+\{[\s\S]*?\}/m) || [''])[0];
+    out.modelPreview = (norm.match(
+      /model\s+ApplicationActivity\s+\{[\s\S]*?\}/m
+    ) || [''])[0];
   }
   return out;
 }
@@ -201,14 +233,34 @@ if (AS_JSON) {
 
 logTitle('API: tracker.router.ts');
 if (!report.tracker.exists) {
-  logLine(COLORS.red(`✗ router not found -> ${path.relative(ROOT, trackerPath)}`));
+  logLine(
+    COLORS.red(`✗ router not found -> ${path.relative(ROOT, trackerPath)}`)
+  );
 } else {
-  logLine(COLORS.green(`✓ router found -> ${path.relative(ROOT, trackerPath)}`));
-  logLine(`${report.tracker.getActivitySymbol ? COLORS.green('✓') : COLORS.red('✗')} getApplicationActivity symbol`);
+  logLine(
+    COLORS.green(`✓ router found -> ${path.relative(ROOT, trackerPath)}`)
+  );
+  logLine(
+    `${
+      report.tracker.getActivitySymbol ? COLORS.green('✓') : COLORS.red('✗')
+    } getApplicationActivity symbol`
+  );
   if (report.tracker.create.found) {
     logLine('\n' + COLORS.bold('— createApplication —'));
-    logLine(`${report.tracker.create.inputPermissive ? COLORS.green('✓') : COLORS.red('✗')} input is permissive (no required userId)`);
-    logLine(`${report.tracker.create.writesExpectedActivity ? COLORS.green('✓') : COLORS.red('✗')} writes expected CREATE activity with payload.data`);
+    logLine(
+      `${
+        report.tracker.create.inputPermissive
+          ? COLORS.green('✓')
+          : COLORS.red('✗')
+      } input is permissive (no required userId)`
+    );
+    logLine(
+      `${
+        report.tracker.create.writesExpectedActivity
+          ? COLORS.green('✓')
+          : COLORS.red('✗')
+      } writes expected CREATE activity with payload.data`
+    );
     if (!QUIET) {
       logLine(COLORS.gray('Preview:\n' + report.tracker.create.preview));
     }
@@ -218,7 +270,13 @@ if (!report.tracker.exists) {
 
   if (report.tracker.update.found) {
     logLine('\n' + COLORS.bold('— updateApplication —'));
-    logLine(`${report.tracker.update.writesExpectedActivity ? COLORS.green('✓') : COLORS.red('✗')} writes expected STATUS_CHANGE with payload.to`);
+    logLine(
+      `${
+        report.tracker.update.writesExpectedActivity
+          ? COLORS.green('✓')
+          : COLORS.red('✗')
+      } writes expected STATUS_CHANGE with payload.to`
+    );
     if (!QUIET) {
       logLine(COLORS.gray('Preview:\n' + report.tracker.update.preview));
     }
@@ -229,26 +287,38 @@ if (!report.tracker.exists) {
 
 logTitle('Prisma: ApplicationActivity model');
 if (!report.prisma.exists) {
-  logLine(COLORS.red(`✗ schema not found -> ${path.relative(ROOT, prismaSchema)}`));
+  logLine(
+    COLORS.red(`✗ schema not found -> ${path.relative(ROOT, prismaSchema)}`)
+  );
 } else {
-  logLine(report.prisma.hasModel
-    ? COLORS.green('✓ model ApplicationActivity present')
-    : COLORS.yellow('⚠ No model ApplicationActivity (router guards with as any; tests are fine)'));
+  logLine(
+    report.prisma.hasModel
+      ? COLORS.green('✓ model ApplicationActivity present')
+      : COLORS.yellow(
+          '⚠ No model ApplicationActivity (router guards with as any; tests are fine)'
+        )
+  );
   if (report.prisma.modelPreview && !QUIET) {
     logLine(COLORS.gray('Preview:\n' + report.prisma.modelPreview));
   }
 }
 
 logTitle('Web: TRPC alias + stub');
-logLine(report.web.tsconfigExists
-  ? COLORS.green(`✓ web tsconfig -> ${path.relative(ROOT, webTsconfig)}`)
-  : COLORS.red(`✗ missing -> ${path.relative(ROOT, webTsconfig)}`));
-logLine(report.web.aliasOk
-  ? COLORS.green('✓ "@/*" path alias present')
-  : COLORS.red('✗ "@/*" path alias missing'));
-logLine(report.web.trpcStubExists
-  ? COLORS.green(`✓ trpc stub -> ${path.relative(ROOT, webTrpcStub)}`)
-  : COLORS.red(`✗ no trpc stub at ${path.relative(ROOT, webTrpcStub)}`));
+logLine(
+  report.web.tsconfigExists
+    ? COLORS.green(`✓ web tsconfig -> ${path.relative(ROOT, webTsconfig)}`)
+    : COLORS.red(`✗ missing -> ${path.relative(ROOT, webTsconfig)}`)
+);
+logLine(
+  report.web.aliasOk
+    ? COLORS.green('✓ "@/*" path alias present')
+    : COLORS.red('✗ "@/*" path alias missing')
+);
+logLine(
+  report.web.trpcStubExists
+    ? COLORS.green(`✓ trpc stub -> ${path.relative(ROOT, webTrpcStub)}`)
+    : COLORS.red(`✗ no trpc stub at ${path.relative(ROOT, webTrpcStub)}`)
+);
 if (!QUIET && report.web.aliasPreview) {
   logLine(COLORS.gray('paths preview:\n' + report.web.aliasPreview));
 }
@@ -261,7 +331,9 @@ if (report.repoActivityRefs.length === 0) {
     logLine(COLORS.cyan('→ ' + h.file));
     if (!QUIET) {
       for (const c of h.contexts) {
-        logLine(COLORS.gray(`  [${c.line}] ${c.context.replace(/\n/g, '\n       ')}`));
+        logLine(
+          COLORS.gray(`  [${c.line}] ${c.context.replace(/\n/g, '\n       ')}`)
+        );
       }
     }
   }
@@ -275,7 +347,22 @@ const okInput = report.tracker.create.inputPermissive === true;
 if (okCreatePayload && okUpdatePayload && okInput) {
   logLine(COLORS.green('All good: router matches test expectations ✅'));
 } else {
-  if (!okInput) logLine(COLORS.red('✗ createApplication input is not permissive (tests pass { company, role } without userId).'));
-  if (!okCreatePayload) logLine(COLORS.red(`✗ createApplication should write: { data: { applicationId, type: 'CREATE', payload: { data: <input> } } }`));
-  if (!okUpdatePayload) logLine(COLORS.red(`✗ updateApplication should write: { data: { applicationId, type: 'STATUS_CHANGE', payload: { to: <status> } } }`));
+  if (!okInput)
+    logLine(
+      COLORS.red(
+        '✗ createApplication input is not permissive (tests pass { company, role } without userId).'
+      )
+    );
+  if (!okCreatePayload)
+    logLine(
+      COLORS.red(
+        `✗ createApplication should write: { data: { applicationId, type: 'CREATE', payload: { data: <input> } } }`
+      )
+    );
+  if (!okUpdatePayload)
+    logLine(
+      COLORS.red(
+        `✗ updateApplication should write: { data: { applicationId, type: 'STATUS_CHANGE', payload: { to: <status> } } }`
+      )
+    );
 }

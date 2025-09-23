@@ -12,7 +12,8 @@ function guessWebPath() {
     path.join(ROOT, 'web'),
   ];
   for (const p of candidates) {
-    if (fs.existsSync(p) && fs.existsSync(path.join(p, 'project.json'))) return p;
+    if (fs.existsSync(p) && fs.existsSync(path.join(p, 'project.json')))
+      return p;
     if (fs.existsSync(p) && fs.existsSync(path.join(p, 'src'))) return p;
   }
   return candidates[0];
@@ -27,12 +28,16 @@ function getSourceRoot(webPath) {
     } catch {}
   }
   // fallback
-  if (fs.existsSync(path.join(webPath, 'src'))) return path.join(webPath, 'src').replace(ROOT + path.sep, '').replace(/\\/g,'/');
+  if (fs.existsSync(path.join(webPath, 'src')))
+    return path
+      .join(webPath, 'src')
+      .replace(ROOT + path.sep, '')
+      .replace(/\\/g, '/');
   return path.basename(webPath) + '/src';
 }
 
 function pickAppDir(webPath, sourceRoot) {
-  const isSrc = /\/src$/.test(sourceRoot.replace(/\\/g,'/'));
+  const isSrc = /\/src$/.test(sourceRoot.replace(/\\/g, '/'));
   const a = path.join(webPath, 'src', 'app');
   const b = path.join(webPath, 'app');
   if (isSrc && fs.existsSync(a)) return a;
@@ -59,9 +64,15 @@ function ensureExports(code) {
       /export\s+const\s+dynamic\s*=\s*['"][^'"]+['"]\s*;?/,
       "export const dynamic = 'force-dynamic';"
     );
-    if (next !== code) { code = next; changed = true; }
+    if (next !== code) {
+      code = next;
+      changed = true;
+    }
   } else {
-    code = insertAfterUseClientOrTop(code, "export const dynamic = 'force-dynamic';\n");
+    code = insertAfterUseClientOrTop(
+      code,
+      "export const dynamic = 'force-dynamic';\n"
+    );
     changed = true;
   }
 
@@ -69,11 +80,14 @@ function ensureExports(code) {
   if (/export\s+const\s+revalidate\s*=/.test(code)) {
     const next = code.replace(
       /export\s+const\s+revalidate\s*=\s*[^;]+;?/,
-      "export const revalidate = 0;"
+      'export const revalidate = 0;'
     );
-    if (next !== code) { code = next; changed = true; }
+    if (next !== code) {
+      code = next;
+      changed = true;
+    }
   } else {
-    code = insertAfterUseClientOrTop(code, "export const revalidate = 0;\n");
+    code = insertAfterUseClientOrTop(code, 'export const revalidate = 0;\n');
     changed = true;
   }
 
@@ -81,11 +95,17 @@ function ensureExports(code) {
   if (/export\s+const\s+dynamicParams\s*=/.test(code)) {
     const next = code.replace(
       /export\s+const\s+dynamicParams\s*=\s*false\s*;?/,
-      "export const dynamicParams = true;"
+      'export const dynamicParams = true;'
     );
-    if (next !== code) { code = next; changed = true; }
+    if (next !== code) {
+      code = next;
+      changed = true;
+    }
   } else {
-    code = insertAfterUseClientOrTop(code, "export const dynamicParams = true;\n");
+    code = insertAfterUseClientOrTop(
+      code,
+      'export const dynamicParams = true;\n'
+    );
     changed = true;
   }
 
@@ -93,10 +113,14 @@ function ensureExports(code) {
 }
 
 function commentOutGenerateStaticParams(code) {
-  const re = /export\s+async\s+function\s+generateStaticParams\s*\([^)]*\)\s*\{\s*[\s\S]*?\}\s*/m;
+  const re =
+    /export\s+async\s+function\s+generateStaticParams\s*\([^)]*\)\s*\{\s*[\s\S]*?\}\s*/m;
   if (re.test(code)) {
-    const next = code.replace(re, match => {
-      const commented = match.split('\n').map(l => `// ${l}`).join('\n');
+    const next = code.replace(re, (match) => {
+      const commented = match
+        .split('\n')
+        .map((l) => `// ${l}`)
+        .join('\n');
       return `/* dynamic route; static params disabled */\n${commented}\n`;
     });
     return { code: next, changed: true, found: true };
@@ -105,7 +129,9 @@ function commentOutGenerateStaticParams(code) {
 }
 
 function hasDefaultExport(code) {
-  return /export\s+default\s+function|export\s+default\s*\(|export\s+default\s+[A-Za-z0-9_$]+/.test(code);
+  return /export\s+default\s+function|export\s+default\s*\(|export\s+default\s+[A-Za-z0-9_$]+/.test(
+    code
+  );
 }
 
 function main() {
@@ -120,16 +146,21 @@ function main() {
   console.log(`• Target: ${pagePath}`);
 
   if (!fs.existsSync(pagePath)) {
-    console.error('✗ Dynamic activity page not found. Expected at the path above.');
+    console.error(
+      '✗ Dynamic activity page not found. Expected at the path above.'
+    );
     process.exit(1);
   }
 
   let code = fs.readFileSync(pagePath, 'utf8');
 
   // Warn on notFound usage/import
-  const importsNotFound = /from\s+['"]next\/navigation['"]/.test(code) && /notFound\s*\(/.test(code);
+  const importsNotFound =
+    /from\s+['"]next\/navigation['"]/.test(code) && /notFound\s*\(/.test(code);
   if (importsNotFound) {
-    console.warn('! This page imports/uses notFound() — that can cause 404 if data fetch fails.');
+    console.warn(
+      '! This page imports/uses notFound() — that can cause 404 if data fetch fails.'
+    );
   }
 
   const before = code;
@@ -144,7 +175,9 @@ function main() {
 
   // Sanity: default export exists
   if (!hasDefaultExport(code)) {
-    console.warn('! No default export detected — this will 404. Please ensure the page exports a React component as default.');
+    console.warn(
+      '! No default export detected — this will 404. Please ensure the page exports a React component as default.'
+    );
   }
 
   if (code !== before) {
@@ -157,9 +190,15 @@ function main() {
 
   console.log('\nNext steps:');
   console.log('  1) Clear Next cache: rimraf apps/web/.next .nx/cache');
-  console.log('  2) Rebuild once:     pnpm -w exec nx run web:build --filter ./apps/web');
-  console.log('  3) Serve:            pnpm -w exec nx run web:serve --filter ./apps/web');
-  console.log('  4) Visit:            http://localhost:3000/tracker/<APP_ID>/activity');
+  console.log(
+    '  2) Rebuild once:     pnpm -w exec nx run web:build --filter ./apps/web'
+  );
+  console.log(
+    '  3) Serve:            pnpm -w exec nx run web:serve --filter ./apps/web'
+  );
+  console.log(
+    '  4) Visit:            http://localhost:3000/tracker/<APP_ID>/activity'
+  );
 }
 
 main();

@@ -37,7 +37,11 @@ const files = [
 ];
 
 function readMaybe(p) {
-  try { return fs.readFileSync(p, 'utf8'); } catch { return null; }
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return null;
+  }
 }
 
 function w(p, s) {
@@ -45,10 +49,14 @@ function w(p, s) {
   fs.writeFileSync(p, s, 'utf8');
 }
 
-let changed = 0, skipped = 0;
+let changed = 0,
+  skipped = 0;
 for (const f of files) {
   const body = readMaybe(f);
-  if (body == null) { skipped++; continue; }
+  if (body == null) {
+    skipped++;
+    continue;
+  }
   let s = body;
 
   // 1) Normalize enum value to 'CREATE'
@@ -58,7 +66,7 @@ for (const f of files) {
   //    (covers prismaAny.applicationActivity.create({... created.id ...}))
   s = s.replace(
     /applicationActivity\.create\(\s*\{\s*data\s*:\s*\{\s*applicationId\s*:\s*created\.id\s*,\s*type\s*:\s*'CREATE'[^}]*\}\s*\}\s*\)/g,
-    m => {
+    (m) => {
       // If already has payload: { data: input }, leave it.
       if (/payload\s*:\s*\{\s*data\s*:\s*input\s*\}/.test(m)) return m;
       // Replace whatever payload is with the canonical shape
@@ -69,7 +77,7 @@ for (const f of files) {
   // 3) Ensure update payload shape: payload: { to: nextStatus }
   s = s.replace(
     /applicationActivity\.create\(\s*\{\s*data\s*:\s*\{\s*applicationId\s*:\s*input\.id\s*,\s*type\s*:\s*'STATUS_CHANGE'[^}]*\}\s*\}\s*\)/g,
-    m => {
+    (m) => {
       // Try to find explicit variable/expr after "to:"
       let toExpr = 'nextStatus';
       const mTo = m.match(/to\s*:\s*([a-zA-Z0-9_.$]+)/);
@@ -109,7 +117,12 @@ for (const f of files) {
     return `select: { ${fixed} }`;
   });
 
-  if (s !== body) { w(f, s); changed++; } else { skipped++; }
+  if (s !== body) {
+    w(f, s);
+    changed++;
+  } else {
+    skipped++;
+  }
 }
 
 console.log(`normalize-activity-repo: changed ${changed}, skipped ${skipped}`);

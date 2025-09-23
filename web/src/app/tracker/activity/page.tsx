@@ -41,14 +41,18 @@ export default function Page() {
       ) : data?.length ? (
         <table className="mt-4 w-full text-sm">
           <thead>
-            <tr><th align="left">When</th><th align="left">Type</th><th align="left">Details</th></tr>
+            <tr>
+              <th align="left">When</th>
+              <th align="left">Type</th>
+              <th align="left">Details</th>
+            </tr>
           </thead>
           <tbody>
             {data.map((row: ActivityRow, i: number) => (
               <tr key={i}>
                 <td>{formatDateTime(row.createdAt ?? row.ts)}</td>
-                <td>{row.type ?? ""}</td>
-                <td>{row.details ?? row.by ?? row.to ?? ""}</td>
+                <td>{row.type ?? ''}</td>
+                <td>{row.details ?? row.by ?? row.to ?? ''}</td>
               </tr>
             ))}
           </tbody>

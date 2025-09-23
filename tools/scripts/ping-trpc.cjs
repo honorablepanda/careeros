@@ -5,13 +5,19 @@ const BASE = process.env.TRPC_URL || 'http://localhost:3000/api/trpc';
 
 async function read(res) {
   const txt = await res.text();
-  try { return JSON.parse(txt); } catch { return { parseError: txt }; }
+  try {
+    return JSON.parse(txt);
+  } catch {
+    return { parseError: txt };
+  }
 }
 const sjs = (v) => SuperJSON.serialize(v);
 
 /** GET query: /path?input=<SuperJSON JSON> */
 async function queryGET(path, input) {
-  const url = `${BASE}/${path}?input=${encodeURIComponent(JSON.stringify(sjs(input ?? {})))}`;
+  const url = `${BASE}/${path}?input=${encodeURIComponent(
+    JSON.stringify(sjs(input ?? {}))
+  )}`;
   const res = await fetch(url, { method: 'GET' });
   return { url, status: res.status, json: await read(res) };
 }
@@ -29,19 +35,25 @@ async function mutatePOST(path, input) {
 
 (async () => {
   console.log('→ QUERY tracker.getApplications (GET)');
-  console.log(await queryGET('tracker.getApplications', { userId: 'demo-user' }));
+  console.log(
+    await queryGET('tracker.getApplications', { userId: 'demo-user' })
+  );
 
   console.log('→ MUTATION tracker.createApplication (POST)');
-  console.log(await mutatePOST('tracker.createApplication', {
-    userId: 'demo-user',
-    company: 'ACME',
-    role: 'SWE',
-    status: 'APPLIED',
-    source: 'OTHER',
-  }));
+  console.log(
+    await mutatePOST('tracker.createApplication', {
+      userId: 'demo-user',
+      company: 'ACME',
+      role: 'SWE',
+      status: 'APPLIED',
+      source: 'OTHER',
+    })
+  );
 
   console.log('→ QUERY tracker.getApplications (GET) after insert');
-  console.log(await queryGET('tracker.getApplications', { userId: 'demo-user' }));
+  console.log(
+    await queryGET('tracker.getApplications', { userId: 'demo-user' })
+  );
 })().catch((e) => {
   console.error(e);
   process.exit(1);

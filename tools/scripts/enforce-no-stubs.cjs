@@ -24,24 +24,27 @@ const path = require('node:path');
 
 const argv = process.argv.slice(2);
 const arg = (name) => {
-  const p = argv.find(a => a === name || a.startsWith(name + '='));
+  const p = argv.find((a) => a === name || a.startsWith(name + '='));
   if (!p) return null;
   if (p.includes('=')) return p.split('=').slice(1).join('=');
   return true;
 };
 
-const OUTPUT = (arg('--json') || (process.env.STUB_OUTPUT || '').toLowerCase() === 'json') ? 'json' : 'text';
+const OUTPUT =
+  arg('--json') || (process.env.STUB_OUTPUT || '').toLowerCase() === 'json'
+    ? 'json'
+    : 'text';
 let BASE = arg('--base') || process.env.STUB_BASE || 'origin/main';
-const SCAN_ALL = Boolean(arg('--all')) || (process.env.STUB_ALL === 'true');
+const SCAN_ALL = Boolean(arg('--all')) || process.env.STUB_ALL === 'true';
 
 const EXTRA_INCLUDE = (process.env.STUB_INCLUDE || '')
   .split(',')
-  .map(s => s.trim())
+  .map((s) => s.trim())
   .filter(Boolean);
 
 const EXTRA_IGNORE = (process.env.STUB_IGNORE || '')
   .split(',')
-  .map(s => s.trim())
+  .map((s) => s.trim())
   .filter(Boolean);
 
 // Normalize to forward slashes
@@ -100,7 +103,10 @@ function isSourceFile(fp) {
   if (EXTRA_INCLUDE.length > 0) {
     let ok = false;
     for (const must of EXTRA_INCLUDE) {
-      if (must && n.includes(must)) { ok = true; break; }
+      if (must && n.includes(must)) {
+        ok = true;
+        break;
+      }
     }
     if (!ok) return false;
   }
@@ -115,7 +121,13 @@ function resolveBase(ref) {
     return ref;
   } catch {
     // common fallbacks
-    const tries = ['origin/main', 'main', 'origin/master', 'master', 'HEAD~100'];
+    const tries = [
+      'origin/main',
+      'main',
+      'origin/master',
+      'master',
+      'HEAD~100',
+    ];
     for (const t of tries) {
       try {
         execSync(`git rev-parse --verify --quiet ${t}`, { stdio: 'ignore' });
@@ -134,21 +146,28 @@ function getFiles() {
       const out = execSync('git ls-files', { encoding: 'utf8' });
       return out.split(/\r?\n/).filter(Boolean);
     }
-    const out = execSync(`git diff --name-only ${BASE}...HEAD`, { encoding: 'utf8' });
+    const out = execSync(`git diff --name-only ${BASE}...HEAD`, {
+      encoding: 'utf8',
+    });
     const files = out.split(/\r?\n/).filter(Boolean);
     if (files.length === 0) {
       // Nothing changed; still allow running on staged files (pre-commit) or all tracked as fallback
-      const staged = execSync('git diff --cached --name-only', { encoding: 'utf8' })
-        .split(/\r?\n/).filter(Boolean);
+      const staged = execSync('git diff --cached --name-only', {
+        encoding: 'utf8',
+      })
+        .split(/\r?\n/)
+        .filter(Boolean);
       if (staged.length > 0) return staged;
       const all = execSync('git ls-files', { encoding: 'utf8' })
-        .split(/\r?\n/).filter(Boolean);
+        .split(/\r?\n/)
+        .filter(Boolean);
       return all;
     }
     return files;
   } catch (e) {
     const all = execSync('git ls-files', { encoding: 'utf8' })
-      .split(/\r?\n/).filter(Boolean);
+      .split(/\r?\n/)
+      .filter(Boolean);
     return all;
   }
 }
@@ -156,10 +175,10 @@ function getFiles() {
 // Patterns to flag as “stub-like”
 const RULES = [
   { id: 'MARKER', rx: /STUB:PHASE\d+/i, weight: 10 },
-  { id: 'ANY',    rx: /\bSTUB\b/i, weight: 5 },
-  { id: 'TODO',   rx: /TODO:.*\bstub\b/i, weight: 3 },
+  { id: 'ANY', rx: /\bSTUB\b/i, weight: 5 },
+  { id: 'TODO', rx: /TODO:.*\bstub\b/i, weight: 3 },
   { id: 'PLACEHOLDER', rx: /\bplaceholder test\b/i, weight: 2 },
-  { id: 'TRPC_LOCAL',  rx: /Local-only TRPC stub/i, weight: 2 },
+  { id: 'TRPC_LOCAL', rx: /Local-only TRPC stub/i, weight: 2 },
 ];
 
 function scanFile(file) {
@@ -172,7 +191,7 @@ function scanFile(file) {
   const lines = text.split(/\r?\n/);
   const hits = [];
   lines.forEach((line, i) => {
-    RULES.forEach(rule => {
+    RULES.forEach((rule) => {
       const m = line.match(rule.rx);
       if (m) {
         const col = (m.index || 0) + 1;
@@ -187,7 +206,12 @@ function scanFile(file) {
     });
   });
   if (hits.length === 0) return null;
-  return { file, hits, count: hits.length, score: hits.reduce((a, b) => a + (b.weight || 1), 0) };
+  return {
+    file,
+    hits,
+    count: hits.length,
+    score: hits.reduce((a, b) => a + (b.weight || 1), 0),
+  };
 }
 
 function main() {
@@ -215,7 +239,8 @@ function main() {
 
   // Sort by score/weight, then file/line
   flat.sort((a, b) => {
-    if ((b.weight || 0) !== (a.weight || 0)) return (b.weight || 0) - (a.weight || 0);
+    if ((b.weight || 0) !== (a.weight || 0))
+      return (b.weight || 0) - (a.weight || 0);
     if (a.file !== b.file) return a.file.localeCompare(b.file);
     return a.line - b.line;
   });
@@ -239,13 +264,15 @@ function main() {
   }
 
   if (flat.length === 0) {
-    console.log('\n✓ No stub-like occurrences found in changed source files.\n');
+    console.log(
+      '\n✓ No stub-like occurrences found in changed source files.\n'
+    );
     process.exit(0);
   }
 
   console.log(`\n✗ Found ${flat.length} stub-like occurrences:\n`);
   const MAX = 200; // don’t spam the console
-  flat.slice(0, MAX).forEach(hit => {
+  flat.slice(0, MAX).forEach((hit) => {
     const loc = `${hit.file}:${hit.line}:${hit.column}`;
     console.log(`- ${loc} • ${hit.snippet}`);
   });

@@ -8,12 +8,27 @@
 const fs = require('fs');
 const path = require('path');
 
-const IGNORED_DIRS = new Set(['node_modules', '.next', 'dist', 'build', 'coverage', '.git']);
+const IGNORED_DIRS = new Set([
+  'node_modules',
+  '.next',
+  'dist',
+  'build',
+  'coverage',
+  '.git',
+]);
 const EXTS = new Set(['.tsx', '.ts', '.jsx', '.js']);
 const DEFAULT_ROOTS = ['web/src', 'web/app'];
 
 // fields that often trigger "new Date(unknown)" errors
-const DATE_FIELDS = ['dueDate','scheduledAt','lastContacted','awardedAt','appliedAt','createdAt','updatedAt'];
+const DATE_FIELDS = [
+  'dueDate',
+  'scheduledAt',
+  'lastContacted',
+  'awardedAt',
+  'appliedAt',
+  'createdAt',
+  'updatedAt',
+];
 
 // CLI roots
 const roots = process.argv.slice(2).filter(Boolean);
@@ -33,18 +48,21 @@ function walk(dir, acc = []) {
 
 function buildLineIndex(s) {
   const idx = [0];
-  for (let i = 0; i < s.length; i++) if (s.charCodeAt(i) === 10) idx.push(i + 1); // '\n'
+  for (let i = 0; i < s.length; i++)
+    if (s.charCodeAt(i) === 10) idx.push(i + 1); // '\n'
   return idx;
 }
 function offsetToLineCol(idxArr, off) {
   // binary search for last line start <= off
-  let lo = 0, hi = idxArr.length - 1;
+  let lo = 0,
+    hi = idxArr.length - 1;
   while (lo <= hi) {
     const mid = (lo + hi) >> 1;
-    if (idxArr[mid] <= off) lo = mid + 1; else hi = mid - 1;
+    if (idxArr[mid] <= off) lo = mid + 1;
+    else hi = mid - 1;
   }
   const lineStart = idxArr[Math.max(0, hi)];
-  return { line: Math.max(1, hi + 1), col: (off - lineStart) + 1 };
+  return { line: Math.max(1, hi + 1), col: off - lineStart + 1 };
 }
 function lineExcerpt(lines, line) {
   const L = Math.min(lines.length, Math.max(1, line));
@@ -74,29 +92,55 @@ function scanFile(file) {
 
   // 1) explicit any
   for (const m of src.matchAll(/:\s*any\b/g)) {
-    findings.TS_ANY++; printFinding('TS_ANY', file, src, idxArr, m.index, 'Explicit ": any" type');
+    findings.TS_ANY++;
+    printFinding('TS_ANY', file, src, idxArr, m.index, 'Explicit ": any" type');
   }
   for (const m of src.matchAll(/<\s*any\s*>/g)) {
-    findings.TS_GENERIC_ANY++; printFinding('TS_GENERIC_ANY', file, src, idxArr, m.index, 'Generic "<any>"');
+    findings.TS_GENERIC_ANY++;
+    printFinding(
+      'TS_GENERIC_ANY',
+      file,
+      src,
+      idxArr,
+      m.index,
+      'Generic "<any>"'
+    );
   }
   for (const m of src.matchAll(/\bas\s+any\b/g)) {
-    findings.TS_AS_ANY++; printFinding('TS_AS_ANY', file, src, idxArr, m.index, 'Cast "as any"');
+    findings.TS_AS_ANY++;
+    printFinding('TS_AS_ANY', file, src, idxArr, m.index, 'Cast "as any"');
   }
 
   // 2) new Date(<something>.<dateField> ...)
   const dateRe = new RegExp(
-    String.raw`new\s+Date\s*\(\s*[^)]*?\.\s*(?:${DATE_FIELDS.join('|')})\b[^)]*\)`,
+    String.raw`new\s+Date\s*\(\s*[^)]*?\.\s*(?:${DATE_FIELDS.join(
+      '|'
+    )})\b[^)]*\)`,
     'g'
   );
   for (const m of src.matchAll(dateRe)) {
     findings.DATE_UNKNOWN++;
-    printFinding('DATE_UNKNOWN', file, src, idxArr, m.index, 'new Date(field) on possibly unknown field (consider safe cast or proper typing)');
+    printFinding(
+      'DATE_UNKNOWN',
+      file,
+      src,
+      idxArr,
+      m.index,
+      'new Date(field) on possibly unknown field (consider safe cast or proper typing)'
+    );
   }
 
   // 3) legacy trpc import path
   for (const m of src.matchAll(/from\s+['"]@\/trpc\/react['"]/g)) {
     findings.TRPC_LEGACY_IMPORT++;
-    printFinding('TRPC_LEGACY_IMPORT', file, src, idxArr, m.index, 'Importing "@/trpc/react" (prefer "@/trpc")');
+    printFinding(
+      'TRPC_LEGACY_IMPORT',
+      file,
+      src,
+      idxArr,
+      m.index,
+      'Importing "@/trpc/react" (prefer "@/trpc")'
+    );
   }
 
   // 4) label ↔ control wiring (accessible names)
@@ -113,18 +157,35 @@ function scanFile(file) {
 
     if (!hasFor) {
       findings.LABEL_MISSING_FOR++;
-      printFinding('LABEL_MISSING_FOR', file, src, idxArr, m.index, `Label "${inner}" missing htmlFor/for`);
+      printFinding(
+        'LABEL_MISSING_FOR',
+        file,
+        src,
+        idxArr,
+        m.index,
+        `Label "${inner}" missing htmlFor/for`
+      );
     }
 
     // peek ahead up to ~400 chars for first select/input after the label
-    const lookAhead = src.slice((m.index ?? 0) + m[0].length, (m.index ?? 0) + m[0].length + 400);
+    const lookAhead = src.slice(
+      (m.index ?? 0) + m[0].length,
+      (m.index ?? 0) + m[0].length + 400
+    );
     const control = lookAhead.match(/<(select|input)([^>]*)>/i);
     if (control) {
       const controlAttrs = control[2] || '';
       const hasId = /\bid\s*=/.test(controlAttrs);
       if (!hasId) {
         findings.CONTROL_MISSING_ID++;
-        printFinding('CONTROL_MISSING_ID', file, src, idxArr, (m.index ?? 0) + m[0].length + control.index, `First <${control[1].toLowerCase()}> after label "${inner}" missing id`);
+        printFinding(
+          'CONTROL_MISSING_ID',
+          file,
+          src,
+          idxArr,
+          (m.index ?? 0) + m[0].length + control.index,
+          `First <${control[1].toLowerCase()}> after label "${inner}" missing id`
+        );
       }
     }
   }
@@ -132,18 +193,34 @@ function scanFile(file) {
   // 5) brittle test assertions (only in tests)
   const isSpec = /\.spec\.(t|j)sx?$/.test(file);
   if (isSpec) {
-    for (const m of src.matchAll(/getByText\(\s*['"](On|Off|dark|light)['"]\s*\)/g)) {
+    for (const m of src.matchAll(
+      /getByText\(\s*['"](On|Off|dark|light)['"]\s*\)/g
+    )) {
       findings.TEST_BRITTLE_TEXT++;
-      printFinding('TEST_BRITTLE_TEXT', file, src, idxArr, m.index, `Brittle text assertion "${m[0]}" (prefer role/label/value-based checks)`);
+      printFinding(
+        'TEST_BRITTLE_TEXT',
+        file,
+        src,
+        idxArr,
+        m.index,
+        `Brittle text assertion "${m[0]}" (prefer role/label/value-based checks)`
+      );
     }
     for (const m of src.matchAll(/expect\(\(screen\.expect/g)) {
       findings.TEST_BROKEN_EXPECT++;
-      printFinding('TEST_BROKEN_EXPECT', file, src, idxArr, m.index, `Suspicious "expect((screen.expect..." chain (likely a bad refactor)`);
+      printFinding(
+        'TEST_BROKEN_EXPECT',
+        file,
+        src,
+        idxArr,
+        m.index,
+        `Suspicious "expect((screen.expect..." chain (likely a bad refactor)`
+      );
     }
   }
 }
 
-const files = roots.flatMap(r => walk(r));
+const files = roots.flatMap((r) => walk(r));
 if (files.length === 0) {
   console.log(`No files found in: ${roots.join(', ')}`);
   process.exit(0);
@@ -151,7 +228,9 @@ if (files.length === 0) {
 
 console.log(`Scanning ${files.length} files...\n`);
 for (const f of files) {
-  try { scanFile(f); } catch (e) {
+  try {
+    scanFile(f);
+  } catch (e) {
     console.error(`[ERROR] ${f}: ${e.message}`);
   }
 }
@@ -173,4 +252,8 @@ for (const [k, v] of Object.entries(findings)) {
   console.log(`${k.padEnd(22)} ${String(v).padStart(4)}`);
 }
 console.log('─'.repeat(72));
-console.log(total ? 'Findings detected. Address the logs above.' : 'No issues detected by this scanner.');
+console.log(
+  total
+    ? 'Findings detected. Address the logs above.'
+    : 'No issues detected by this scanner.'
+);

@@ -37,7 +37,9 @@ const OPTS = {
 function nowStamp() {
   const d = new Date();
   const pad = (n) => `${n}`.padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(d.getHours())}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}-${pad(
+    d.getHours()
+  )}-${pad(d.getMinutes())}-${pad(d.getSeconds())}`;
 }
 
 function ensureDir(p) {
@@ -45,10 +47,16 @@ function ensureDir(p) {
 }
 
 function readSafe(file) {
-  try { return fs.readFileSync(file, 'utf8'); } catch { return null; }
+  try {
+    return fs.readFileSync(file, 'utf8');
+  } catch {
+    return null;
+  }
 }
 
-function exists(p) { return fs.existsSync(p); }
+function exists(p) {
+  return fs.existsSync(p);
+}
 
 function timeit(fn) {
   const t0 = process.hrtime.bigint();
@@ -112,7 +120,8 @@ function smartSummaryRouterShape() {
     kind: 'smart',
     name: 'summary router shape',
     ok,
-    details: `exports router: ${/export\s+const\s+summaryRouter\s*=/.test(src)}\n` +
+    details:
+      `exports router: ${/export\s+const\s+summaryRouter\s*=/.test(src)}\n` +
       `has statusCounts: ${/statusCounts/.test(src)}\n` +
       `has latest: ${/latest/.test(src)}`,
   };
@@ -123,14 +132,22 @@ function smartVitestSetupTrpcMock() {
   const src = readSafe(file) || '';
   const hasJestDom = /@testing-library\/jest-dom/.test(src);
   const hasViMock = /vi\.mock\(\s*["']@\/trpc["']\s*,?/.test(src);
-  const hasSettingsUpdateUseMutation = /settings:\s*{[\s\S]*?\bupdate\b:\s*{[\s\S]*?\buseMutation\b/.test(src);
+  const hasSettingsUpdateUseMutation =
+    /settings:\s*{[\s\S]*?\bupdate\b:\s*{[\s\S]*?\buseMutation\b/.test(src);
   // error pattern: “return { … }” directly inside vi.mock callback body
-  const returnInsideMock = /vi\.mock\(\s*["']@\/trpc["']\s*,\s*\(\)\s*=>\s*{[\s\S]*?\breturn\b[\s\S]*?}\s*\)/m.test(src);
+  const returnInsideMock =
+    /vi\.mock\(\s*["']@\/trpc["']\s*,\s*\(\)\s*=>\s*{[\s\S]*?\breturn\b[\s\S]*?}\s*\)/m.test(
+      src
+    );
 
   return {
     kind: 'smart',
     name: 'vitest setup trpc mock',
-    ok: hasJestDom && hasViMock && hasSettingsUpdateUseMutation && !returnInsideMock,
+    ok:
+      hasJestDom &&
+      hasViMock &&
+      hasSettingsUpdateUseMutation &&
+      !returnInsideMock,
     details:
       `has jest-dom import: ${hasJestDom}\n` +
       `has vi.mock("@/trpc"): ${hasViMock}\n` +
@@ -168,9 +185,12 @@ function smartWebVitestConfigBasics() {
   const file = path.join(repo, 'web', 'vitest.config.ts');
   const src = readSafe(file) || '';
   const jsdom = /environment:\s*['"]jsdom['"]/.test(src);
-  const setupIncludes = /setupFiles:\s*\[\s*['"].*vitest\.setup\.ts['"]\s*]/.test(src);
+  const setupIncludes =
+    /setupFiles:\s*\[\s*['"].*vitest\.setup\.ts['"]\s*]/.test(src);
   // avoid “spec ” (with trailing space) mistakes
-  const includeOk = /include:\s*\[\s*['"].*\.(?:test|spec)\.tsx?['"]\s*]/.test(src);
+  const includeOk = /include:\s*\[\s*['"].*\.(?:test|spec)\.tsx?['"]\s*]/.test(
+    src
+  );
 
   return {
     kind: 'smart',
@@ -195,14 +215,17 @@ const JSON_RESULTS = {
 };
 
 function pushSmart(res, durationMs) {
-  JSON_RESULTS.results.push({ ...res, duration: +(durationMs / 1000).toFixed(3) });
-  LOG.push(sectionLog(
-    [
-      `> ${res.name}`,
-      `status: ${res.ok ? 'OK' : 'ISSUE'}`,
-      res.details,
-    ].join('\n')
-  ));
+  JSON_RESULTS.results.push({
+    ...res,
+    duration: +(durationMs / 1000).toFixed(3),
+  });
+  LOG.push(
+    sectionLog(
+      [`> ${res.name}`, `status: ${res.ok ? 'OK' : 'ISSUE'}`, res.details].join(
+        '\n'
+      )
+    )
+  );
 }
 
 function runSmartChecks() {
@@ -218,7 +241,15 @@ function runSmartChecks() {
   for (const c of checks) {
     const { out, err, ms } = timeit(c);
     if (err) {
-      pushSmart({ kind: 'smart', name: c.name || 'unknown', ok: false, details: String(err) }, ms);
+      pushSmart(
+        {
+          kind: 'smart',
+          name: c.name || 'unknown',
+          ok: false,
+          details: String(err),
+        },
+        ms
+      );
     } else {
       pushSmart(out, ms);
     }
@@ -229,30 +260,40 @@ function runTooling() {
   LOG.push('\n──────────────────\n Tools & commands\n──────────────────\n');
 
   if (!OPTS.noLint && !OPTS.onlySmart) {
-    JSON_RESULTS.results.push(runCmd(
-      'eslint (report only)',
-      'pnpm',
-      ['-w', 'exec', 'eslint', '.', '--ext', '.ts,.tsx', '--format', 'stylish'],
-    ));
+    JSON_RESULTS.results.push(
+      runCmd('eslint (report only)', 'pnpm', [
+        '-w',
+        'exec',
+        'eslint',
+        '.',
+        '--ext',
+        '.ts,.tsx',
+        '--format',
+        'stylish',
+      ])
+    );
   } else {
     LOG.push('skipped eslint (flag)\n');
   }
 
   if (!OPTS.onlySmart) {
-    JSON_RESULTS.results.push(runCmd(
-      'prisma validate',
-      'pnpm',
-      ['-w', 'exec', 'prisma', 'validate'],
-    ));
+    JSON_RESULTS.results.push(
+      runCmd('prisma validate', 'pnpm', ['-w', 'exec', 'prisma', 'validate'])
+    );
 
     // Type-check: API (only if tsconfig exists)
     const apiTsconfig = path.join(repo, 'apps', 'api', 'tsconfig.json');
     if (exists(apiTsconfig)) {
-      JSON_RESULTS.results.push(runCmd(
-        'tsc --noEmit (api)',
-        'pnpm',
-        ['-w', 'exec', 'tsc', '-p', 'apps/api/tsconfig.json', '--noEmit'],
-      ));
+      JSON_RESULTS.results.push(
+        runCmd('tsc --noEmit (api)', 'pnpm', [
+          '-w',
+          'exec',
+          'tsc',
+          '-p',
+          'apps/api/tsconfig.json',
+          '--noEmit',
+        ])
+      );
     } else {
       JSON_RESULTS.results.push({
         kind: 'command',
@@ -267,11 +308,16 @@ function runTooling() {
     }
 
     // Type-check: WEB
-    JSON_RESULTS.results.push(runCmd(
-      'tsc --noEmit (web)',
-      'pnpm',
-      ['-w', 'exec', 'tsc', '-p', 'web/tsconfig.json', '--noEmit'],
-    ));
+    JSON_RESULTS.results.push(
+      runCmd('tsc --noEmit (web)', 'pnpm', [
+        '-w',
+        'exec',
+        'tsc',
+        '-p',
+        'web/tsconfig.json',
+        '--noEmit',
+      ])
+    );
   }
 }
 
@@ -280,33 +326,23 @@ function runHeavy() {
 
   // Nx/Next build (skip if --fast)
   if (!OPTS.fast) {
-    JSON_RESULTS.results.push(runCmd(
-      'nx build web',
-      'pnpm',
-      ['-w', 'exec', 'nx', 'run', 'web:build'],
-    ));
+    JSON_RESULTS.results.push(
+      runCmd('nx build web', 'pnpm', ['-w', 'exec', 'nx', 'run', 'web:build'])
+    );
   } else {
     LOG.push('skipped nx build (fast mode)\n');
   }
 
   // Vitest (api)
   if (!OPTS.noApi) {
-    JSON_RESULTS.results.push(runCmd(
-      'vitest api',
-      'pnpm',
-      ['-w', 'test:api'],
-    ));
+    JSON_RESULTS.results.push(runCmd('vitest api', 'pnpm', ['-w', 'test:api']));
   } else {
     LOG.push('skipped vitest api (flag)\n');
   }
 
   // Vitest (web)
   if (!OPTS.noWeb) {
-    JSON_RESULTS.results.push(runCmd(
-      'vitest web',
-      'pnpm',
-      ['-w', 'test:web'],
-    ));
+    JSON_RESULTS.results.push(runCmd('vitest web', 'pnpm', ['-w', 'test:web']));
   } else {
     LOG.push('skipped vitest web (flag)\n');
   }
@@ -314,8 +350,7 @@ function runHeavy() {
 
 function writeReports() {
   // Compose human readable log
-  const header =
-`──────────────────────────────────────
+  const header = `──────────────────────────────────────
  # Project scan @ ${stamp}
 ──────────────────────────────────────
 log: ${logPath}
@@ -326,7 +361,11 @@ json: ${jsonPath}
   let commandsLog = '';
   for (const r of JSON_RESULTS.results) {
     if (r.kind !== 'command') continue;
-    commandsLog += `\n> ${r.name}\n$ ${r.cmd}\nexit: ${r.status}\n--- stdout ---\n${firstLines(r.stdout)}\n\n--- stderr ---\n${firstLines(r.stderr)}\n`;
+    commandsLog += `\n> ${r.name}\n$ ${r.cmd}\nexit: ${
+      r.status
+    }\n--- stdout ---\n${firstLines(r.stdout)}\n\n--- stderr ---\n${firstLines(
+      r.stderr
+    )}\n`;
   }
 
   const finalLog = `${header}\n${body}\n${commandsLog}\n`;

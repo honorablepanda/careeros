@@ -43,7 +43,10 @@ function lineCol(src, idx) {
 }
 
 function stripTags(s) {
-  return s.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+  return s
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function findNextControl(src, fromIdx) {
@@ -58,7 +61,13 @@ function findNextControl(src, fromIdx) {
 // ---------- findings ----------
 const findings = [];
 function logFinding(code, file, idx, msg, sample) {
-  findings.push({ code, file, loc: lineCol(sample.src ?? fs.readFileSync(file, 'utf8'), idx), msg, sample: sample.text ?? null });
+  findings.push({
+    code,
+    file,
+    loc: lineCol(sample.src ?? fs.readFileSync(file, 'utf8'), idx),
+    msg,
+    sample: sample.text ?? null,
+  });
 }
 
 function scanFile(file) {
@@ -69,7 +78,13 @@ function scanFile(file) {
     const re = /^\s*from\s+['"][^'"]+['"]\s*;?\s*$/gm;
     let m;
     while ((m = re.exec(src))) {
-      logFinding('DANGLED_FROM', file, m.index, `Dangling "from ..." without "import".`, { src, text: m[0] });
+      logFinding(
+        'DANGLED_FROM',
+        file,
+        m.index,
+        `Dangling "from ..." without "import".`,
+        { src, text: m[0] }
+      );
     }
   }
 
@@ -78,7 +93,13 @@ function scanFile(file) {
     const re = /from\s+['"]@\/trpc\/react['"]/g;
     let m;
     while ((m = re.exec(src))) {
-      logFinding('TRPC_LEGACY_IMPORT', file, m.index, `Use "@/trpc" instead of "@/trpc/react".`, { src, text: m[0] });
+      logFinding(
+        'TRPC_LEGACY_IMPORT',
+        file,
+        m.index,
+        `Use "@/trpc" instead of "@/trpc/react".`,
+        { src, text: m[0] }
+      );
     }
   }
 
@@ -87,26 +108,44 @@ function scanFile(file) {
     const reAnyAnnot = /:\s*any\b/g;
     let m;
     while ((m = reAnyAnnot.exec(src))) {
-      logFinding('TS_ANY', file, m.index, `Explicit ": any" type.`, { src, text: src.slice(m.index, m.index + 40) });
+      logFinding('TS_ANY', file, m.index, `Explicit ": any" type.`, {
+        src,
+        text: src.slice(m.index, m.index + 40),
+      });
     }
     const reAsAny = /\bas\s+any\b/g;
     while ((m = reAsAny.exec(src))) {
-      logFinding('TS_AS_ANY', file, m.index, `Cast "as any".`, { src, text: src.slice(m.index, m.index + 40) });
+      logFinding('TS_AS_ANY', file, m.index, `Cast "as any".`, {
+        src,
+        text: src.slice(m.index, m.index + 40),
+      });
     }
   }
 
   // D) Date usage on possibly unknown fields -> suggest dateValue/formatDate
   {
-    const reDateCall = /new\s+Date\s*\(\s*([^)]+?)\s*\)\s*(?:\.getTime\(\)|\.toLocaleDateString\(\))?/g;
+    const reDateCall =
+      /new\s+Date\s*\(\s*([^)]+?)\s*\)\s*(?:\.getTime\(\)|\.toLocaleDateString\(\))?/g;
     let m;
     while ((m = reDateCall.exec(src))) {
       const inner = m[1];
       // Ignore safe patterns: 0, constants, new Date(), Date.now(), dateValue(), formatDate()
       if (/^0|^\d+$/.test(inner)) continue;
-      if (/dateValue\s*\(/.test(inner) || /formatDate\s*\(/.test(inner)) continue;
+      if (/dateValue\s*\(/.test(inner) || /formatDate\s*\(/.test(inner))
+        continue;
       // If it's clearly a property or unknown and not guarded
-      if (/\w+\.\w+/.test(inner) && !/\?\?\s*0/.test(inner) && !/\bas\s+/.test(inner)) {
-        logFinding('DATE_UNKNOWN', file, m.index, `new Date(${inner}) on possibly unknown field (prefer dateValue/formatDate or proper typing).`, { src, text: m[0] });
+      if (
+        /\w+\.\w+/.test(inner) &&
+        !/\?\?\s*0/.test(inner) &&
+        !/\bas\s+/.test(inner)
+      ) {
+        logFinding(
+          'DATE_UNKNOWN',
+          file,
+          m.index,
+          `new Date(${inner}) on possibly unknown field (prefer dateValue/formatDate or proper typing).`,
+          { src, text: m[0] }
+        );
       }
     }
   }
@@ -123,10 +162,14 @@ function scanFile(file) {
       const htmlFor = (attrs.match(htmlForRe) || [])[2] || null;
 
       // Skip labels that visually wrap their control (inline-flex or nested input/select)
-      const wrapsControl = /inline-flex/.test(cls) || /(input|select|textarea)/i.test(full);
+      const wrapsControl =
+        /inline-flex/.test(cls) || /(input|select|textarea)/i.test(full);
 
       // Find the first control after this label (before the next closing </div> to narrow scope)
-      const nextDivClose = src.indexOf('</div>', idx) === -1 ? src.length : src.indexOf('</div>', idx);
+      const nextDivClose =
+        src.indexOf('</div>', idx) === -1
+          ? src.length
+          : src.indexOf('</div>', idx);
       const next = findNextControl(src, idx + full.length);
       const inScope = next && next.absoluteIdx < nextDivClose ? next : null;
 
@@ -136,15 +179,47 @@ function scanFile(file) {
       }
 
       if (!htmlFor && inScope && !inScope.id) {
-        logFinding('LABEL_MISSING_FOR', file, idx, `Label "${text}" missing htmlFor (and following ${RegExp.$1 || 'control'} missing id).`, { src, text: full });
+        logFinding(
+          'LABEL_MISSING_FOR',
+          file,
+          idx,
+          `Label "${text}" missing htmlFor (and following ${
+            RegExp.$1 || 'control'
+          } missing id).`,
+          { src, text: full }
+        );
       } else if (!htmlFor && inScope && inScope.id) {
-        logFinding('LABEL_MISSING_FOR', file, idx, `Label "${text}" missing htmlFor (control has id="${inScope.id}").`, { src, text: full });
+        logFinding(
+          'LABEL_MISSING_FOR',
+          file,
+          idx,
+          `Label "${text}" missing htmlFor (control has id="${inScope.id}").`,
+          { src, text: full }
+        );
       } else if (htmlFor && !inScope) {
-        logFinding('CONTROL_NOT_FOUND', file, idx, `Label "${text}" has htmlFor="${htmlFor}" but no following control found in the same block.`, { src, text: full });
+        logFinding(
+          'CONTROL_NOT_FOUND',
+          file,
+          idx,
+          `Label "${text}" has htmlFor="${htmlFor}" but no following control found in the same block.`,
+          { src, text: full }
+        );
       } else if (htmlFor && inScope && !inScope.id) {
-        logFinding('CONTROL_MISSING_ID', file, inScope.absoluteIdx, `Control after label "${text}" is missing id (expected id="${htmlFor}").`, { src, text: inScope.raw });
+        logFinding(
+          'CONTROL_MISSING_ID',
+          file,
+          inScope.absoluteIdx,
+          `Control after label "${text}" is missing id (expected id="${htmlFor}").`,
+          { src, text: inScope.raw }
+        );
       } else if (htmlFor && inScope && inScope.id && htmlFor !== inScope.id) {
-        logFinding('LABEL_FOR_MISMATCH', file, idx, `Label "${text}" htmlFor="${htmlFor}" does not match control id="${inScope.id}".`, { src, text: full });
+        logFinding(
+          'LABEL_FOR_MISMATCH',
+          file,
+          idx,
+          `Label "${text}" htmlFor="${htmlFor}" does not match control id="${inScope.id}".`,
+          { src, text: full }
+        );
       }
     }
   }
@@ -167,22 +242,30 @@ const byCode = findings.reduce((acc, it) => {
   return acc;
 }, {});
 
-Object.keys(byCode).sort().forEach(code => {
-  for (const it of byCode[code]) {
-    console.log(`[${code}] ${it.file.replace(/\\/g,'/')}:${it.loc}  ${it.msg}`);
-    if (it.sample) {
-      const s = String(it.sample).split('\n')[0];
-      console.log(`  → ${s.length > 120 ? s.slice(0,120) + '…' : s}`);
+Object.keys(byCode)
+  .sort()
+  .forEach((code) => {
+    for (const it of byCode[code]) {
+      console.log(
+        `[${code}] ${it.file.replace(/\\/g, '/')}:${it.loc}  ${it.msg}`
+      );
+      if (it.sample) {
+        const s = String(it.sample).split('\n')[0];
+        console.log(`  → ${s.length > 120 ? s.slice(0, 120) + '…' : s}`);
+      }
     }
-  }
-  console.log();
-});
+    console.log();
+  });
 
-console.log('────────────────────────────────────────────────────────────────────────');
+console.log(
+  '────────────────────────────────────────────────────────────────────────'
+);
 console.log('Summary:');
 for (const code of Object.keys(byCode).sort()) {
   console.log(`${code.padEnd(24)} ${String(byCode[code].length).padStart(3)}`);
 }
-console.log('────────────────────────────────────────────────────────────────────────');
+console.log(
+  '────────────────────────────────────────────────────────────────────────'
+);
 
 process.exit(1);

@@ -10,18 +10,24 @@ type Row = { [k: string]: unknown };
 export default function TrackerPage() {
   const userId = getUserId(); // TODO: replace with session user id
 
-  const { data, isLoading, error } = trpc.tracker.getApplications.useQuery({ userId: getUserId() }, { keepPreviousData: true });
-
+  const { data, isLoading, error } = trpc.tracker.getApplications.useQuery(
+    { userId: getUserId() },
+    { keepPreviousData: true }
+  );
 
   if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
-  if (!data?.length) return <main className="p-6">No tracked applications.</main>;
+  if (error)
+    return <main className="p-6 text-red-600">Error: {error.message}</main>;
+  if (!data?.length)
+    return <main className="p-6">No tracked applications.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => dateValue(b.updatedAt) - dateValue(a.updatedAt));
+  const rows = [...(data ?? [])].sort(
+    (a, b) => dateValue(b.updatedAt) - dateValue(a.updatedAt)
+  );
 
   return (
     <main className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Tracker</h1>
+      <h1 className="text-2xl font-semibold">Application Tracker</h1>
       <table className="w-full text-sm border" role="table">
         <thead className="bg-gray-50">
           <tr>
@@ -34,10 +40,10 @@ export default function TrackerPage() {
         <tbody>
           {rows.map((r) => (
             <tr key={String(r.id ?? Math.random())} className="border-t">
-                <td className="p-2">{String(r.company ?? '—')}</td>
-                <td className="p-2">{String(r.title ?? '—')}</td>
-                <td className="p-2">{String(r.status ?? '—')}</td>
-                <td className="p-2">{formatDate(r.updatedAt)}</td>
+              <td className="p-2">{String(r.company ?? '—')}</td>
+              <td className="p-2">{String(r.title ?? '—')}</td>
+              <td className="p-2">{String(r.status ?? '—')}</td>
+              <td className="p-2">{formatDate(r.updatedAt)}</td>
             </tr>
           ))}
         </tbody>

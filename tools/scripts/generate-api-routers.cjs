@@ -43,13 +43,32 @@ const presets = [
   'applications', // included but will be skipped if you already created it
 ];
 
-function ensureDir(d) { fs.mkdirSync(d, { recursive: true }); }
-function exists(p) { try { fs.accessSync(p); return true; } catch { return false; } }
-function read(p) { try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } }
-function write(p, s) { ensureDir(path.dirname(p)); fs.writeFileSync(p, s); }
+function ensureDir(d) {
+  fs.mkdirSync(d, { recursive: true });
+}
+function exists(p) {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function read(p) {
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return '';
+  }
+}
+function write(p, s) {
+  ensureDir(path.dirname(p));
+  fs.writeFileSync(p, s);
+}
 const norm = (p) => p.split(path.sep).join('/');
 
-const toPascal = (s) => s.replace(/(^|[-_/])(\w)/g, (_, __, c) => c.toUpperCase());
+const toPascal = (s) =>
+  s.replace(/(^|[-_/])(\w)/g, (_, __, c) => c.toUpperCase());
 const routerConst = (name) => `${name}Router`;
 const routerFile = (name) => path.join(ROUTERS, `${name}.router.ts`);
 
@@ -158,7 +177,10 @@ function main() {
   let list = [];
   const routesArg = arg('routers');
   if (routesArg) {
-    list = routesArg.split(',').map((s) => s.trim()).filter(Boolean);
+    list = routesArg
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean);
   } else if (flag('all')) {
     list = [...presets];
   } else {
@@ -189,9 +211,16 @@ function main() {
 
   if (flag('commit') && created.length) {
     try {
-      cp.execSync(`git add ${ROUTERS.replace(/\\/g, '/')}`, { stdio: 'inherit' });
-      cp.execSync(`git add ${path.join(TRPC, 'root.ts').replace(/\\/g, '/')}`, { stdio: 'inherit' });
-      cp.execSync(`git commit -m "chore(api): generate routers (${created.join(', ')})"`, { stdio: 'inherit' });
+      cp.execSync(`git add ${ROUTERS.replace(/\\/g, '/')}`, {
+        stdio: 'inherit',
+      });
+      cp.execSync(`git add ${path.join(TRPC, 'root.ts').replace(/\\/g, '/')}`, {
+        stdio: 'inherit',
+      });
+      cp.execSync(
+        `git commit -m "chore(api): generate routers (${created.join(', ')})"`,
+        { stdio: 'inherit' }
+      );
       console.log('✓ committed generated routers');
     } catch (e) {
       console.error('git commit failed:', e?.message || e);

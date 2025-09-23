@@ -3,7 +3,9 @@ import React, { useState } from 'react';
 
 export default function ResetPage() {
   const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'submitting' | 'success' | 'error'
+  >('idle');
   const [message, setMessage] = useState<string>('');
 
   async function onSubmit(e: React.FormEvent) {
@@ -23,7 +25,7 @@ export default function ResetPage() {
       });
 
       setStatus('success');
-      setMessage('If that email exists, we\'ve sent a reset link.');
+      setMessage("If that email exists, we've sent a reset link.");
     } catch {
       setStatus('error');
       setMessage('Something went wrong. Please try again.');

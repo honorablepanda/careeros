@@ -8,7 +8,7 @@ type Interview = {
   id: string;
   company?: string;
   role?: string;
-  stage?: string;        // e.g., SCREEN, ONSITE
+  stage?: string; // e.g., SCREEN, ONSITE
   scheduledAt?: string | Date;
   notes?: string;
 };
@@ -18,17 +18,24 @@ export default function InterviewsPage() {
   const hook = (trpc as any)?.interviews?.list?.useQuery;
   const query = hook
     ? hook({ userId })
-    : { data: null, isLoading: false, error: { message: 'Interviews API not available' } };
+    : {
+        data: null,
+        isLoading: false,
+        error: { message: 'Interviews API not available' },
+      };
 
   const { data, isLoading, error } = query as {
-    data: Interview[] | null; isLoading: boolean; error: null | { message: string }
+    data: Interview[] | null;
+    isLoading: boolean;
+    error: null | { message: string };
   };
 
   if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
+  if (error)
+    return <main className="p-6 text-red-600">Error: {error.message}</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) =>
-    dateValue(a.scheduledAt) - dateValue(b.scheduledAt)
+  const rows = [...(data ?? [])].sort(
+    (a, b) => dateValue(a.scheduledAt) - dateValue(b.scheduledAt)
   );
 
   return (
@@ -45,18 +52,22 @@ export default function InterviewsPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map(iv => (
+            {rows.map((iv) => (
               <tr key={iv.id} className="border-t">
                 <td className="p-2">{iv.company ?? '—'}</td>
-<td className="p-2">{iv.stage ?? '—'}</td>
+                <td className="p-2">{iv.stage ?? '—'}</td>
                 <td className="p-2">
-                  {iv.scheduledAt ? new Date(iv.scheduledAt).toLocaleString() : '—'}
+                  {iv.scheduledAt
+                    ? new Date(iv.scheduledAt).toLocaleString()
+                    : '—'}
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
-      ) : <div>No interviews scheduled.</div>}
+      ) : (
+        <div>No interviews scheduled.</div>
+      )}
     </main>
   );
 }

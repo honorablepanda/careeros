@@ -15,7 +15,10 @@ const wrote = (m) => console.log(`✓ ${m}`);
 const warn = (m) => console.log(`\x1b[33m! ${m}\x1b[0m`);
 function ensureFile(file, content, display) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
-  if (fs.existsSync(file) && fs.readFileSync(file, 'utf8').trim() === content.trim()) {
+  if (
+    fs.existsSync(file) &&
+    fs.readFileSync(file, 'utf8').trim() === content.trim()
+  ) {
     ok(`${display} already present (ok)`);
     return;
   }
@@ -23,9 +26,10 @@ function ensureFile(file, content, display) {
   wrote(`wrote ${display}`);
 }
 function openUrl(url) {
-  const cmd = process.platform === 'win32'
-    ? `start "" "${url}"`
-    : process.platform === 'darwin'
+  const cmd =
+    process.platform === 'win32'
+      ? `start "" "${url}"`
+      : process.platform === 'darwin'
       ? `open "${url}"`
       : `xdg-open "${url}"`;
   exec(cmd, () => {});
@@ -109,18 +113,35 @@ export default async function TrackerActivityPage({ searchParams }: { searchPara
 `;
 
 // write the same files into both app roots
-const APP_ROOTS = [
-  path.join(WEB_DIR, 'src', 'app'),
-  path.join(WEB_DIR, 'app'),
-];
+const APP_ROOTS = [path.join(WEB_DIR, 'src', 'app'), path.join(WEB_DIR, 'app')];
 
 function scaffoldAllAppRoots() {
   for (const root of APP_ROOTS) {
-    ensureFile(path.join(root, 'providers.tsx'), PROVIDERS_TSX, relDisp(root, 'providers.tsx'));
-    ensureFile(path.join(root, 'layout.tsx'), LAYOUT_TSX, relDisp(root, 'layout.tsx'));
-    ensureFile(path.join(root, 'page.tsx'), HOME_PAGE_TSX, relDisp(root, 'page.tsx'));
-    ensureFile(path.join(root, 'tracker', '[id]', 'activity', 'page.tsx'), PAGE_ACTIVITY_BY_ID, relDisp(root, 'tracker/[id]/activity/page.tsx'));
-    ensureFile(path.join(root, 'tracker', 'activity', 'page.tsx'), PAGE_ACTIVITY_QS, relDisp(root, 'tracker/activity/page.tsx'));
+    ensureFile(
+      path.join(root, 'providers.tsx'),
+      PROVIDERS_TSX,
+      relDisp(root, 'providers.tsx')
+    );
+    ensureFile(
+      path.join(root, 'layout.tsx'),
+      LAYOUT_TSX,
+      relDisp(root, 'layout.tsx')
+    );
+    ensureFile(
+      path.join(root, 'page.tsx'),
+      HOME_PAGE_TSX,
+      relDisp(root, 'page.tsx')
+    );
+    ensureFile(
+      path.join(root, 'tracker', '[id]', 'activity', 'page.tsx'),
+      PAGE_ACTIVITY_BY_ID,
+      relDisp(root, 'tracker/[id]/activity/page.tsx')
+    );
+    ensureFile(
+      path.join(root, 'tracker', 'activity', 'page.tsx'),
+      PAGE_ACTIVITY_QS,
+      relDisp(root, 'tracker/activity/page.tsx')
+    );
   }
 }
 
@@ -139,33 +160,52 @@ async function seed() {
   }
   const p = new PrismaClient();
   try {
-    const existing = await p.application.findFirst({
-      select: { id: true  },
-      orderBy: { createdAt: 'desc' },
-    }).catch(() => null);
+    const existing = await p.application
+      .findFirst({
+        select: { id: true },
+        orderBy: { createdAt: 'desc' },
+      })
+      .catch(() => null);
 
     let id = existing?.id;
     if (!id) {
       try {
-        const created = await p.application.create({ data: {}, select: { id: true  } });
+        const created = await p.application.create({
+          data: {},
+          select: { id: true },
+        });
         id = created.id;
       } catch {
         const created = await p.application.create({
           data: { notes: 'Seeded via dev-activity script' },
-          select: { id: true  },
+          select: { id: true },
         });
         id = created.id;
       }
     }
 
-    const cnt = await p.applicationActivity.count({ where: { applicationId: id } }).catch(() => 0);
+    const cnt = await p.applicationActivity
+      .count({ where: { applicationId: id } })
+      .catch(() => 0);
     if (cnt === 0) {
-      await p.applicationActivity.create({
-        data: { applicationId: id, type: 'CREATE', payload: { data: { status: 'APPLIED' } } },
-      }).catch(() => {});
-      await p.applicationActivity.create({
-        data: { applicationId: id, type: 'STATUS_CHANGE', payload: { to: 'INTERVIEW' } },
-      }).catch(() => {});
+      await p.applicationActivity
+        .create({
+          data: {
+            applicationId: id,
+            type: 'CREATE',
+            payload: { data: { status: 'APPLIED' } },
+          },
+        })
+        .catch(() => {});
+      await p.applicationActivity
+        .create({
+          data: {
+            applicationId: id,
+            type: 'STATUS_CHANGE',
+            payload: { to: 'INTERVIEW' },
+          },
+        })
+        .catch(() => {});
     }
 
     wrote(`seeded Application: ${id}`);
@@ -178,8 +218,16 @@ async function seed() {
 // ---- TRPC stub -------------------------------------------------------------
 function ensureTrpcStub() {
   const trpcDir = path.join(WEB_DIR, 'src', 'trpc');
-  ensureFile(path.join(trpcDir, 'react.ts'), TRPC_STUB_REACT, 'apps/web/src/trpc/react.ts');
-  ensureFile(path.join(trpcDir, 'index.ts'), TRPC_STUB_INDEX, 'apps/web/src/trpc/index.ts');
+  ensureFile(
+    path.join(trpcDir, 'react.ts'),
+    TRPC_STUB_REACT,
+    'apps/web/src/trpc/react.ts'
+  );
+  ensureFile(
+    path.join(trpcDir, 'index.ts'),
+    TRPC_STUB_INDEX,
+    'apps/web/src/trpc/index.ts'
+  );
 }
 
 // ---- main ------------------------------------------------------------------
@@ -193,10 +241,14 @@ function ensureTrpcStub() {
     : `http://localhost:3000/tracker/activity?id=<an-existing-application-id>`;
 
   console.log('\n> nx run web:serve --filter ./apps/web\n');
-  const child = spawn('pnpm', ['-w', 'exec', 'nx', 'run', 'web:serve', '--filter', './apps/web'], {
-    stdio: 'inherit',
-    shell: true,
-  });
+  const child = spawn(
+    'pnpm',
+    ['-w', 'exec', 'nx', 'run', 'web:serve', '--filter', './apps/web'],
+    {
+      stdio: 'inherit',
+      shell: true,
+    }
+  );
 
   console.log(`→ Opening Activity: ${url}`);
   setTimeout(() => openUrl(url), 3500);

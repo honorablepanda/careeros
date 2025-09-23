@@ -11,7 +11,9 @@ const NEXT_DIR = path.join(WEB, '.next');
 const NX_CACHE = path.join(ROOT, '.nx', 'cache');
 
 function rmrf(p) {
-  try { fs.rmSync(p, { recursive: true, force: true }); } catch {}
+  try {
+    fs.rmSync(p, { recursive: true, force: true });
+  } catch {}
 }
 
 function portFree(port) {
@@ -55,17 +57,25 @@ function printLogs(res) {
 
 function seedIdOrWarn() {
   try {
-    const out = spawnSync('node', [path.join('tools', 'scripts', 'seed-activity.cjs')], {
-      encoding: 'utf8',
-    });
+    const out = spawnSync(
+      'node',
+      [path.join('tools', 'scripts', 'seed-activity.cjs')],
+      {
+        encoding: 'utf8',
+      }
+    );
     if (out.status !== 0) {
-      console.warn('! Seeding failed. You can still run the server, but dynamic route needs a real id.');
+      console.warn(
+        '! Seeding failed. You can still run the server, but dynamic route needs a real id.'
+      );
       if (out.stderr) console.warn(out.stderr.trim());
       return '';
     }
     const id = (out.stdout || '').trim();
     if (!id) {
-      console.warn('! Seed script returned empty id. Dynamic route will need a real id.');
+      console.warn(
+        '! Seed script returned empty id. Dynamic route will need a real id.'
+      );
     }
     return id;
   } catch (e) {
@@ -85,12 +95,28 @@ function seedIdOrWarn() {
     {
       title: 'Nx build (run-style)',
       cmd: 'pnpm',
-      args: ['-w', 'exec', 'nx', 'run', 'web:build', '--skip-nx-cache', '--verbose'],
+      args: [
+        '-w',
+        'exec',
+        'nx',
+        'run',
+        'web:build',
+        '--skip-nx-cache',
+        '--verbose',
+      ],
     },
     {
       title: 'Nx build (target-style)',
       cmd: 'pnpm',
-      args: ['-w', 'exec', 'nx', 'build', 'web', '--skip-nx-cache', '--verbose'],
+      args: [
+        '-w',
+        'exec',
+        'nx',
+        'build',
+        'web',
+        '--skip-nx-cache',
+        '--verbose',
+      ],
     },
   ];
 
@@ -99,15 +125,22 @@ function seedIdOrWarn() {
     printAttempt(a.title, a.cmd, a.args);
     const res = run(a.cmd, a.args, { env });
     printLogs(res);
-    if (res.ok) { built = true; break; }
+    if (res.ok) {
+      built = true;
+      break;
+    }
     console.error(`✗ Build attempt failed (${a.title}).`);
   }
 
   if (!built) {
     console.error('\nBuild failed in all attempts. Common fixes:');
-    console.error('  • Check the actual error above (TS errors, missing imports, etc.)');
+    console.error(
+      '  • Check the actual error above (TS errors, missing imports, etc.)'
+    );
     console.error('  • Try: pnpm -w exec nx show project web');
-    console.error('  • Ensure the "build" target exists for project "web" in project.json/workspace.json');
+    console.error(
+      '  • Ensure the "build" target exists for project "web" in project.json/workspace.json'
+    );
     process.exit(1);
   }
 
@@ -119,7 +152,9 @@ function seedIdOrWarn() {
 
   const port = await pickPort(3000);
   const urlDyn = id ? `http://localhost:${port}/tracker/${id}/activity` : null;
-  const urlQuery = id ? `http://localhost:${port}/tracker/activity?id=${id}` : null;
+  const urlQuery = id
+    ? `http://localhost:${port}/tracker/activity?id=${id}`
+    : null;
 
   console.log(`\n→ Starting dev server on port ${port} …`);
   // Use Nx "serve" target; Next respects PORT env
@@ -138,6 +173,8 @@ function seedIdOrWarn() {
     console.log(`Dynamic route:   ${urlDyn}`);
     console.log(`Querystring alt: ${urlQuery}`);
   } else {
-    console.log('No APP_ID available — run: node tools/scripts/seed-activity.cjs and use its output in the URL.');
+    console.log(
+      'No APP_ID available — run: node tools/scripts/seed-activity.cjs and use its output in the URL.'
+    );
   }
 })();

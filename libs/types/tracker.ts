@@ -3,7 +3,7 @@ export enum ApplicationStatus {
   APPLIED = 'APPLIED',
   INTERVIEWING = 'INTERVIEWING',
   OFFER = 'OFFER',
-  REJECTED = 'REJECTED'
+  REJECTED = 'REJECTED',
 }
 
 export type ApplicationItem = {

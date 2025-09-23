@@ -15,20 +15,20 @@ const path = require('path');
 const cp = require('child_process');
 
 const ROOT = process.cwd();
-const WEB  = path.join(ROOT, 'web');
-const APP  = path.join(WEB, 'src', 'app');
+const WEB = path.join(ROOT, 'web');
+const APP = path.join(WEB, 'src', 'app');
 
-const args   = process.argv.slice(2);
-const flag   = (n) => args.includes(`--${n}`);
+const args = process.argv.slice(2);
+const flag = (n) => args.includes(`--${n}`);
 const argVal = (n) => {
-  const x = args.find(a => a.startsWith(`--${n}=`));
+  const x = args.find((a) => a.startsWith(`--${n}=`));
   return x ? x.split('=').slice(1).join('=').trim() : null;
 };
 
-const FORCE  = flag('force');
-const DRY    = flag('dry');
+const FORCE = flag('force');
+const DRY = flag('dry');
 const COMMIT = flag('commit');
-const ALL    = flag('all');
+const ALL = flag('all');
 const ROUTES_ARG = argVal('routes');
 
 // Presets
@@ -37,14 +37,26 @@ const P = {
     title: 'Networking',
     trpc: { router: 'networking', method: 'list' },
     columns: [
-      { key: 'name',          label: 'Name' },
-      { key: 'company',       label: 'Company' },
-      { key: 'status',        label: 'Status' },
+      { key: 'name', label: 'Name' },
+      { key: 'company', label: 'Company' },
+      { key: 'status', label: 'Status' },
       { key: 'lastContacted', label: 'Last Contacted', isDate: true },
     ],
     sample: [
-      { id: '1', name: 'Aisha Khan', company: 'Acme',   status: 'ACTIVE', lastContacted: new Date().toISOString() },
-      { id: '2', name: 'Ben Ortiz',  company: 'Globex', status: 'PAUSED', lastContacted: new Date().toISOString() },
+      {
+        id: '1',
+        name: 'Aisha Khan',
+        company: 'Acme',
+        status: 'ACTIVE',
+        lastContacted: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        name: 'Ben Ortiz',
+        company: 'Globex',
+        status: 'PAUSED',
+        lastContacted: new Date().toISOString(),
+      },
     ],
     emptyText: 'No contacts yet.',
   },
@@ -52,13 +64,23 @@ const P = {
     title: 'Resume',
     trpc: { router: 'resume', method: 'list' },
     columns: [
-      { key: 'section',  label: 'Section' },
-      { key: 'value',    label: 'Value' },
+      { key: 'section', label: 'Section' },
+      { key: 'value', label: 'Value' },
       { key: 'updatedAt', label: 'Updated', isDate: true },
     ],
     sample: [
-      { id: '1', section: 'Experience', value: 'Frontend Dev @ Acme', updatedAt: new Date().toISOString() },
-      { id: '2', section: 'Education',  value: 'BSc CS',              updatedAt: new Date().toISOString() },
+      {
+        id: '1',
+        section: 'Experience',
+        value: 'Frontend Dev @ Acme',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        section: 'Education',
+        value: 'BSc CS',
+        updatedAt: new Date().toISOString(),
+      },
     ],
     emptyText: 'No resume entries.',
   },
@@ -67,12 +89,22 @@ const P = {
     trpc: { router: 'roadmap', method: 'list' },
     columns: [
       { key: 'milestone', label: 'Milestone' },
-      { key: 'status',    label: 'Status' },
-      { key: 'dueDate',   label: 'Due', isDate: true },
+      { key: 'status', label: 'Status' },
+      { key: 'dueDate', label: 'Due', isDate: true },
     ],
     sample: [
-      { id: '1', milestone: 'Polish portfolio', status: 'IN_PROGRESS', dueDate: new Date().toISOString() },
-      { id: '2', milestone: 'Ship v1',          status: 'PLANNED',     dueDate: new Date().toISOString() },
+      {
+        id: '1',
+        milestone: 'Polish portfolio',
+        status: 'IN_PROGRESS',
+        dueDate: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        milestone: 'Ship v1',
+        status: 'PLANNED',
+        dueDate: new Date().toISOString(),
+      },
     ],
     emptyText: 'No roadmap items.',
   },
@@ -80,13 +112,13 @@ const P = {
     title: 'Metrics',
     trpc: { router: 'metrics', method: 'list' },
     columns: [
-      { key: 'kpi',    label: 'KPI' },
-      { key: 'value',  label: 'Value' },
+      { key: 'kpi', label: 'KPI' },
+      { key: 'value', label: 'Value' },
       { key: 'period', label: 'Period' },
     ],
     sample: [
       { id: '1', kpi: 'Applications', value: 25, period: '30d' },
-      { id: '2', kpi: 'Interviews',   value: 6,  period: '30d' },
+      { id: '2', kpi: 'Interviews', value: 6, period: '30d' },
     ],
     emptyText: 'No metrics yet.',
   },
@@ -94,13 +126,23 @@ const P = {
     title: 'Achievements',
     trpc: { router: 'achievements', method: 'list' },
     columns: [
-      { key: 'title',     label: 'Title' },
-      { key: 'category',  label: 'Category' },
+      { key: 'title', label: 'Title' },
+      { key: 'category', label: 'Category' },
       { key: 'awardedAt', label: 'Date', isDate: true },
     ],
     sample: [
-      { id: '1', title: 'Top Referrer',  category: 'Networking', awardedAt: new Date().toISOString() },
-      { id: '2', title: 'Fastest Apply', category: 'Tracker',    awardedAt: new Date().toISOString() },
+      {
+        id: '1',
+        title: 'Top Referrer',
+        category: 'Networking',
+        awardedAt: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        title: 'Fastest Apply',
+        category: 'Tracker',
+        awardedAt: new Date().toISOString(),
+      },
     ],
     emptyText: 'No achievements yet.',
   },
@@ -108,13 +150,23 @@ const P = {
     title: 'Planner',
     trpc: { router: 'planner', method: 'list' },
     columns: [
-      { key: 'task',    label: 'Task' },
-      { key: 'status',  label: 'Status' },
+      { key: 'task', label: 'Task' },
+      { key: 'status', label: 'Status' },
       { key: 'dueDate', label: 'Due', isDate: true },
     ],
     sample: [
-      { id: '1', task: 'Update resume',     status: 'IN_PROGRESS', dueDate: new Date().toISOString() },
-      { id: '2', task: 'Reach out to Ben',  status: 'PLANNED',     dueDate: new Date().toISOString() },
+      {
+        id: '1',
+        task: 'Update resume',
+        status: 'IN_PROGRESS',
+        dueDate: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        task: 'Reach out to Ben',
+        status: 'PLANNED',
+        dueDate: new Date().toISOString(),
+      },
     ],
     emptyText: 'No tasks scheduled.',
   },
@@ -122,13 +174,23 @@ const P = {
     title: 'Skills',
     trpc: { router: 'skills', method: 'list' },
     columns: [
-      { key: 'name',      label: 'Skill' },
-      { key: 'level',     label: 'Level' },
+      { key: 'name', label: 'Skill' },
+      { key: 'level', label: 'Level' },
       { key: 'updatedAt', label: 'Updated', isDate: true },
     ],
     sample: [
-      { id: '1', name: 'React', level: 'Advanced',    updatedAt: new Date().toISOString() },
-      { id: '2', name: 'SQL',   level: 'Intermediate', updatedAt: new Date().toISOString() },
+      {
+        id: '1',
+        name: 'React',
+        level: 'Advanced',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        name: 'SQL',
+        level: 'Intermediate',
+        updatedAt: new Date().toISOString(),
+      },
     ],
     emptyText: 'No skills yet.',
   },
@@ -137,14 +199,26 @@ const P = {
     // IMPORTANT: this app uses tracker.getApplications in real pages
     trpc: { router: 'tracker', method: 'getApplications' },
     columns: [
-      { key: 'company',   label: 'Company' },
-      { key: 'role',      label: 'Role' },
-      { key: 'status',    label: 'Status' },
+      { key: 'company', label: 'Company' },
+      { key: 'role', label: 'Role' },
+      { key: 'status', label: 'Status' },
       { key: 'updatedAt', label: 'Updated', isDate: true },
     ],
     sample: [
-      { id: '1', company: 'Acme',   role: 'FE Dev', status: 'APPLIED',     updatedAt: new Date().toISOString() },
-      { id: '2', company: 'Globex', role: 'BE Dev', status: 'INTERVIEW',   updatedAt: new Date().toISOString() },
+      {
+        id: '1',
+        company: 'Acme',
+        role: 'FE Dev',
+        status: 'APPLIED',
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: '2',
+        company: 'Globex',
+        role: 'BE Dev',
+        status: 'INTERVIEW',
+        updatedAt: new Date().toISOString(),
+      },
     ],
     emptyText: 'No tracked applications.',
   },
@@ -152,35 +226,54 @@ const P = {
 
 // Already built manually; skip unless --force (generator still supports them)
 const ALREADY_DONE = new Set([
-  'summary','dashboard','applications','profile','goals','settings','notifications','interviews','calendar',
+  'summary',
+  'dashboard',
+  'applications',
+  'profile',
+  'goals',
+  'settings',
+  'notifications',
+  'interviews',
+  'calendar',
 ]);
 
 const ALL_PRESETS = Object.keys(P);
 let ROUTES = [];
 if (ALL) ROUTES = ALL_PRESETS;
-else if (ROUTES_ARG) ROUTES = ROUTES_ARG.split(',').map(s=>s.trim()).filter(Boolean);
+else if (ROUTES_ARG)
+  ROUTES = ROUTES_ARG.split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
 else ROUTES = ALL_PRESETS;
 
-if (!FORCE) ROUTES = ROUTES.filter(r => !ALREADY_DONE.has(r));
+if (!FORCE) ROUTES = ROUTES.filter((r) => !ALREADY_DONE.has(r));
 
 // Helpers
 function writeFileIfNeeded(p, content) {
-  if (fs.existsSync(p) && !FORCE) return { written:false, skipped:true };
-  if (DRY) { console.log(`[dry] write ${p}`); return { written:false, skipped:false }; }
+  if (fs.existsSync(p) && !FORCE) return { written: false, skipped: true };
+  if (DRY) {
+    console.log(`[dry] write ${p}`);
+    return { written: false, skipped: false };
+  }
   fs.mkdirSync(path.dirname(p), { recursive: true });
   fs.writeFileSync(p, content, 'utf8');
-  return { written:true, skipped:false };
+  return { written: true, skipped: false };
 }
 
 function pageTemplateList({ title, router, method, columns, emptyText }) {
-  const head = columns.map(c => `            <th className="p-2 text-left">${c.label}</th>`).join('\n');
-  const cells = columns.map(c => {
-    if (c.isDate) return `                <td className="p-2">{r.${c.key} ? new Date(r.${c.key}).toLocaleDateString() : '—'}</td>`;
-    return `                <td className="p-2">{String(r.${c.key} ?? '—')}</td>`;
-  }).join('\n');
+  const head = columns
+    .map((c) => `            <th className="p-2 text-left">${c.label}</th>`)
+    .join('\n');
+  const cells = columns
+    .map((c) => {
+      if (c.isDate)
+        return `                <td className="p-2">{r.${c.key} ? new Date(r.${c.key}).toLocaleDateString() : '—'}</td>`;
+      return `                <td className="p-2">{String(r.${c.key} ?? '—')}</td>`;
+    })
+    .join('\n');
 
   // sort desc by first date column, else asc by first column
-  const dateCol = columns.find(c => c.isDate)?.key;
+  const dateCol = columns.find((c) => c.isDate)?.key;
   const sortExpr = dateCol
     ? `(a,b) => new Date(b.${dateCol} ?? 0).getTime() - new Date(a.${dateCol} ?? 0).getTime()`
     : `(a,b) => String(a.${columns[0].key} ?? '').localeCompare(String(b.${columns[0].key} ?? ''))`;
@@ -191,7 +284,7 @@ import { trpc } from '@/trpc';
 
 type Row = { [k: string]: any };
 
-export default function ${title.replace(/\s+/g,'')}Page() {
+export default function ${title.replace(/\s+/g, '')}Page() {
   const userId = 'demo-user'; // TODO: replace with session user id
 
   const hook = (trpc as any)?.${router}?.${method}?.useQuery;
@@ -240,13 +333,21 @@ function testTemplateList({ title, router, method, columns, sample }) {
   assertions.push(`const table = screen.getByRole('table');`);
   // use the first non-empty value from first sample row
   const firstRow = sample[0] || {};
-  const firstKey = columns.find(c => String(firstRow[c.key] ?? '') !== '')?.key;
+  const firstKey = columns.find(
+    (c) => String(firstRow[c.key] ?? '') !== ''
+  )?.key;
   if (firstKey) {
-    assertions.push(`expect(within(table).getByText(String(${JSON.stringify(firstRow[firstKey])}))).toBeInTheDocument();`);
+    assertions.push(
+      `expect(within(table).getByText(String(${JSON.stringify(
+        firstRow[firstKey]
+      )}))).toBeInTheDocument();`
+    );
   }
-  assertions.push(`expect(within(table).getAllByRole('row').length).toBeGreaterThan(1);`);
+  assertions.push(
+    `expect(within(table).getAllByRole('row').length).toBeGreaterThan(1);`
+  );
 
-  const mockData = JSON.stringify(sample, null, 2).replace(/</g,'\\u003c');
+  const mockData = JSON.stringify(sample, null, 2).replace(/</g, '\\u003c');
 
   return `import { describe, it, expect, vi } from 'vitest';
 import { render, screen, within } from '@testing-library/react';
@@ -277,12 +378,12 @@ describe('${title} page', () => {
 }
 
 function genList(route, cfg) {
-  const dir  = path.join(APP, route);
+  const dir = path.join(APP, route);
   const page = path.join(dir, 'page.tsx');
   const spec = path.join(dir, 'page.spec.tsx');
 
   const pageCode = pageTemplateList({
-    title:  cfg.title,
+    title: cfg.title,
     router: cfg.trpc.router,
     method: cfg.trpc.method,
     columns: cfg.columns,
@@ -290,7 +391,7 @@ function genList(route, cfg) {
   });
 
   const testCode = testTemplateList({
-    title:  cfg.title,
+    title: cfg.title,
     router: cfg.trpc.router,
     method: cfg.trpc.method,
     columns: cfg.columns,
@@ -299,7 +400,12 @@ function genList(route, cfg) {
 
   const r1 = writeFileIfNeeded(page, pageCode);
   const r2 = writeFileIfNeeded(spec, testCode);
-  return { page, spec, wrote: (r1.written || r2.written), skipped: (r1.skipped && r2.skipped) };
+  return {
+    page,
+    spec,
+    wrote: r1.written || r2.written,
+    skipped: r1.skipped && r2.skipped,
+  };
 }
 
 // Execute
@@ -311,19 +417,35 @@ if (!fs.existsSync(APP)) {
 const results = [];
 for (const route of ROUTES) {
   const cfg = P[route];
-  if (!cfg) { console.warn(`• Unknown route preset: ${route} (skipped)`); continue; }
+  if (!cfg) {
+    console.warn(`• Unknown route preset: ${route} (skipped)`);
+    continue;
+  }
   const out = genList(route, cfg);
   results.push({ route, ...out });
-  const mark = out.skipped ? '⏭  exists' : (out.wrote ? '✅ wrote' : '…');
+  const mark = out.skipped ? '⏭  exists' : out.wrote ? '✅ wrote' : '…';
   console.log(`${mark}  ${route}  -> ${path.relative(ROOT, out.page)}`);
 }
 
 if (COMMIT && !DRY) {
   try {
-    const touched = results.filter(r => r.wrote).flatMap(r => [r.page, r.spec]);
+    const touched = results
+      .filter((r) => r.wrote)
+      .flatMap((r) => [r.page, r.spec]);
     if (touched.length) {
       cp.spawnSync('git', ['add', ...touched], { stdio: 'inherit' });
-      cp.spawnSync('git', ['commit', '-m', `feat(web): small real UI scaffolds for ${results.filter(r=>r.wrote).map(r=>r.route).join(', ')}`], { stdio: 'inherit' });
+      cp.spawnSync(
+        'git',
+        [
+          'commit',
+          '-m',
+          `feat(web): small real UI scaffolds for ${results
+            .filter((r) => r.wrote)
+            .map((r) => r.route)
+            .join(', ')}`,
+        ],
+        { stdio: 'inherit' }
+      );
     } else {
       console.log('Nothing new to commit.');
     }

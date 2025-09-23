@@ -4,7 +4,15 @@ import { router, publicProcedure } from '../trpc';
 // Minimal, legacy-test-friendly router for "skills".
 export const skillsRouter = router({
   list: publicProcedure
-    .input(z.object({ userId: z.string().optional(), where: z.any().optional(), limit: z.number().int().positive().optional() }).passthrough())
+    .input(
+      z
+        .object({
+          userId: z.string().optional(),
+          where: z.any().optional(),
+          limit: z.number().int().positive().optional(),
+        })
+        .passthrough()
+    )
     .query(async ({ ctx, input }) => {
       const prisma: any = (ctx as any)?.prisma;
       const model: any = prisma?.['skills'];

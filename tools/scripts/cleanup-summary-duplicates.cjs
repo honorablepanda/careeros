@@ -17,8 +17,7 @@ if (!fs.existsSync(file)) {
 let src = fs.readFileSync(file, 'utf8');
 
 // Canonical safe block (status-based)
-const SAFE_BLOCK =
-`// 2) "Source" counts (fallback via status, since \`source\` is not in the model).
+const SAFE_BLOCK = `// 2) "Source" counts (fallback via status, since \`source\` is not in the model).
 const appsForSources = await prisma.application.findMany({
   where: { userId },
   select: { status: true },
@@ -50,9 +49,9 @@ src = src.replace(
 const safeBlockRegex =
   /\/\/\s*2\)\s*"Source"\s*counts[\s\S]*?const\s+sourceGrp\s*=\s*Object\.entries\([\s\S]*?\)\s*;\s*/gm;
 
-const matches = [...src.matchAll(safeBlockRegex)].map(m => ({
+const matches = [...src.matchAll(safeBlockRegex)].map((m) => ({
   start: m.index,
-  end: m.index + m[0].length
+  end: m.index + m[0].length,
 }));
 
 if (matches.length > 1) {
@@ -71,7 +70,8 @@ if (src.search(safeBlockRegex) === -1) {
     // Insert after the line containing the anchor
     const lineEnd = src.indexOf('\n', anchor);
     const insertAt = lineEnd === -1 ? src.length : lineEnd + 1;
-    src = src.slice(0, insertAt) + '\n' + SAFE_BLOCK + '\n' + src.slice(insertAt);
+    src =
+      src.slice(0, insertAt) + '\n' + SAFE_BLOCK + '\n' + src.slice(insertAt);
     console.log('• Inserted safe block after "where: { userId }"');
   } else {
     // Fallback: append at end (still valid inside the procedure if top-level used)
@@ -84,14 +84,21 @@ if (src.search(safeBlockRegex) === -1) {
 // remove any *earlier* standalone declarations of appsForSources/sourceCountMap.
 function removeEarlierDecl(name) {
   const decl = new RegExp(`const\\s+${name}\\b[\\s\\S]*?;\\s*`, 'gm');
-  const occurrences = [...src.matchAll(decl)].map(m => ({ start: m.index, end: m.index + m[0].length }));
+  const occurrences = [...src.matchAll(decl)].map((m) => ({
+    start: m.index,
+    end: m.index + m[0].length,
+  }));
   if (occurrences.length > 1) {
     // keep the last, remove previous
     for (let i = occurrences.length - 2; i >= 0; i--) {
       const { start, end } = occurrences[i];
       src = src.slice(0, start) + src.slice(end);
     }
-    console.log(`• Deduped variable "${name}" (${occurrences.length - 1} earlier declaration(s) removed)`);
+    console.log(
+      `• Deduped variable "${name}" (${
+        occurrences.length - 1
+      } earlier declaration(s) removed)`
+    );
   }
 }
 removeEarlierDecl('appsForSources');

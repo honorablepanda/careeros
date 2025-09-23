@@ -10,7 +10,11 @@ export default function ProfilePage() {
   const hook = trpc?.profile?.get?.useQuery;
   const query = hook
     ? hook({ id: userId })
-    : { data: null, isLoading: false, error: { message: 'Profile API not available' } };
+    : {
+        data: null,
+        isLoading: false,
+        error: { message: 'Profile API not available' },
+      };
 
   const { data, isLoading, error } = query as {
     data: null | {
@@ -25,7 +29,8 @@ export default function ProfilePage() {
   };
 
   if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error) return <main className="p-6 text-red-600">Error: {error.message}</main>;
+  if (error)
+    return <main className="p-6 text-red-600">Error: {error.message}</main>;
 
   return (
     <main className="p-6 space-y-6">
@@ -36,7 +41,11 @@ export default function ProfilePage() {
           <div className="w-16 h-16 rounded-full bg-gray-200 overflow-hidden">
             {data.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={data.avatarUrl} alt={data.name || 'avatar'} className="w-full h-full object-cover" />
+              <img
+                src={data.avatarUrl}
+                alt={data.name || 'avatar'}
+                className="w-full h-full object-cover"
+              />
             ) : null}
           </div>
           <div className="space-y-1">

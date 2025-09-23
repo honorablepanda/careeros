@@ -1,0 +1,57 @@
+{
+  "summary": {
+    "OPEN_HANDLE": 3,
+    "PERF": 4
+  },
+  "findings": [
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\auto-wire-activity.cjs",
+      "line": 148,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\dev-activity.cjs",
+      "line": 254,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\patch-next15-activity-pages.cjs",
+      "line": 276,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "PERF",
+      "file": ".nx\\workspace-data\\parsed-lock-file.json",
+      "line": 1,
+      "message": "Large file (1.01 MB)",
+      "snippet": ""
+    },
+    {
+      "type": "PERF",
+      "file": ".nx\\workspace-data\\project-graph.json",
+      "line": 1,
+      "message": "Large file (1.14 MB)",
+      "snippet": ""
+    },
+    {
+      "type": "PERF",
+      "file": "tools\\reports\\scan-2025-09-17-19-04-28.json",
+      "line": 1,
+      "message": "Large file (1.11 MB)",
+      "snippet": ""
+    },
+    {
+      "type": "PERF",
+      "file": "tools\\reports\\scan-2025-09-17-19-05-06.json",
+      "line": 1,
+      "message": "Large file (1.10 MB)",
+      "snippet": ""
+    }
+  ]
+}

@@ -189,7 +189,9 @@ function maybeVerify() {
   maybeInstall();
 
   console.log('\nNext steps:');
-  console.log('  • Commit changes: git add -A && git commit -m "chore(ci): activity checks"');
+  console.log(
+    '  • Commit changes: git add -A && git commit -m "chore(ci): activity checks"'
+  );
   console.log('  • Local quick check: pnpm run ci:web');
   console.log('  • CI (prod-mode) will run on PRs/ pushes.');
   console.log('  • Manual prod-mode run locally: pnpm run ci:web:prod');

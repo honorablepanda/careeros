@@ -10,13 +10,26 @@ const cp = require('child_process');
 const ROOT = process.cwd();
 const scansDir = path.join(ROOT, 'scans');
 
-function has(p) { try { fs.accessSync(p); return true; } catch { return false; } }
-function hasAny(paths) { return paths.some(has); }
+function has(p) {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function hasAny(paths) {
+  return paths.some(has);
+}
 function latestMatch(dir, re) {
   if (!has(dir)) return null;
-  const files = fs.readdirSync(dir).filter(f => re.test(f));
+  const files = fs.readdirSync(dir).filter((f) => re.test(f));
   if (!files.length) return null;
-  files.sort((a,b) => fs.statSync(path.join(dir,b)).mtimeMs - fs.statSync(path.join(dir,a)).mtimeMs);
+  files.sort(
+    (a, b) =>
+      fs.statSync(path.join(dir, b)).mtimeMs -
+      fs.statSync(path.join(dir, a)).mtimeMs
+  );
   return path.join(dir, files[0]);
 }
 
@@ -47,14 +60,14 @@ if (!hasAny([jestTs, jestJs, vitestTs])) {
 
 // Summaries from /scans (best-effort)
 const healthJson = latestMatch(scansDir, /^repo-health-.*\.json$/);
-const trpcJson   = latestMatch(scansDir, /^trpc-scan-report-.*\.json$/);
+const trpcJson = latestMatch(scansDir, /^trpc-scan-report-.*\.json$/);
 
 console.log('\n================ FINAL SCAN SUMMARY ================');
 if (missing.length) {
   console.log('Missing / Blocking:');
   for (const line of missing) console.log('  ' + line);
 } else {
-  console.log('No blocking items í¾‰');
+  console.log('No blocking items ï¿½ï¿½ï¿½');
 }
 console.log(`\nhealth JSON: ${healthJson || '(none found)'}`);
 console.log(`trpc   JSON: ${trpcJson || '(none found)'}`);

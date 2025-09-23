@@ -4,7 +4,11 @@ import { prisma } from '../../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ActivityByIdPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function ActivityByIdPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   // Next 15 may type `params` as a Promise in the generated .next/types.
   // Awaiting keeps us compatible with those types across versions.
   const { id } = await params;
@@ -12,10 +16,12 @@ export default async function ActivityByIdPage({ params }: { params: Promise<{ i
   const [app, activity] = await Promise.all([
     prisma.application.findUnique({
       where: { id },
-      select: { id: true, company: true, status: true  },
+      select: { id: true, company: true, status: true },
     }),
-    prisma.applicationActivity.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' },
-      select: { id: true, type: true, payload: true, createdAt: true  },
+    prisma.applicationActivity.findMany({
+      where: { applicationId: id },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, payload: true, createdAt: true },
     }),
   ]);
 

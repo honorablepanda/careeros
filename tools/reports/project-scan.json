@@ -89,12 +89,7 @@
         "enums": [
           {
             "name": "ApplicationStatus",
-            "values": [
-              "APPLIED",
-              "INTERVIEWING",
-              "OFFER",
-              "REJECTED"
-            ]
+            "values": ["APPLIED", "INTERVIEWING", "OFFER", "REJECTED"]
           }
         ],
         "models": [
@@ -249,12 +244,7 @@
     },
     "applicationStatusEnum": {
       "name": "ApplicationStatus",
-      "values": [
-        "APPLIED",
-        "INTERVIEWING",
-        "OFFER",
-        "REJECTED"
-      ]
+      "values": ["APPLIED", "INTERVIEWING", "OFFER", "REJECTED"]
     },
     "applicationSourceEnum": {
       "name": "ApplicationSource",
@@ -384,9 +374,7 @@
       "web/specs/summary.e2e.spec.ts"
     ]
   },
-  "types": [
-    "libs/types/src/index.ts"
-  ],
+  "types": ["libs/types/src/index.ts"],
   "stubs": [
     {
       "file": "tools/reports/stub-scan-2025-09-12T11-39-59-696Z.md",

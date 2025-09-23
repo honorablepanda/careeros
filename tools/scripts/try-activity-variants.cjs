@@ -39,8 +39,14 @@ function sh(cmd, args, cwd = ROOT) {
 function runStep(title, cmd, args, variantKey) {
   if (!QUIET) console.log(`\n$ ${[cmd, ...args].join(' ')}`);
   const res = sh(cmd, args);
-  fs.writeFileSync(path.join(OUTDIR, `${RUNID}.${variantKey}.${title}.stdout.log`), res.stdout || '');
-  fs.writeFileSync(path.join(OUTDIR, `${RUNID}.${variantKey}.${title}.stderr.log`), res.stderr || '');
+  fs.writeFileSync(
+    path.join(OUTDIR, `${RUNID}.${variantKey}.${title}.stdout.log`),
+    res.stdout || ''
+  );
+  fs.writeFileSync(
+    path.join(OUTDIR, `${RUNID}.${variantKey}.${title}.stderr.log`),
+    res.stderr || ''
+  );
   return res;
 }
 
@@ -127,8 +133,10 @@ export const trackerRouter = router({
 `;
 
 /** Same as canonical, tiny whitespace differences to test strict regex. */
-const VAR_INLINE_CANONICAL_WHITESPACE = VAR_INLINE_CANONICAL
-  .replace("payload: { data: input }", "payload: { data: input }") // no-op but demonstrates pattern
+const VAR_INLINE_CANONICAL_WHITESPACE = VAR_INLINE_CANONICAL.replace(
+  'payload: { data: input }',
+  'payload: { data: input }'
+) // no-op but demonstrates pattern
   .replace("orderBy: { createdAt: 'desc' }", "orderBy: { createdAt: 'desc' }");
 
 /** Named schemas (often causes false negatives in scanner for .passthrough). */
@@ -281,16 +289,36 @@ export const trackerRouter = router({
 
 /** Inline but missing .passthrough() on create input (expected to fail permissive check). */
 const VAR_INLINE_NO_PASSTHROUGH = VAR_INLINE_CANONICAL.replace(
-  ".input(z.object({}).passthrough())",
-  ".input(z.object({}))"
+  '.input(z.object({}).passthrough())',
+  '.input(z.object({}))'
 );
 
 const VARIANTS = [
-  { key: 'inline-canonical', desc: 'Inline schemas, canonical activity payloads (expected PASS)', source: VAR_INLINE_CANONICAL },
-  { key: 'inline-canonical-ws', desc: 'Inline canonical with minor whitespace changes', source: VAR_INLINE_CANONICAL_WHITESPACE },
-  { key: 'named-schemas', desc: 'Uses CreateInput/UpdateInput/ListInput constants (may trip scanner)', source: VAR_NAMED_SCHEMAS },
-  { key: 'legacy-activity', desc: 'Legacy CREATED/by + from/to activity shape (expected FAIL)', source: VAR_LEGACY_ACTIVITY },
-  { key: 'inline-no-passthrough', desc: 'Inline but without .passthrough() on create (expected FAIL)', source: VAR_INLINE_NO_PASSTHROUGH },
+  {
+    key: 'inline-canonical',
+    desc: 'Inline schemas, canonical activity payloads (expected PASS)',
+    source: VAR_INLINE_CANONICAL,
+  },
+  {
+    key: 'inline-canonical-ws',
+    desc: 'Inline canonical with minor whitespace changes',
+    source: VAR_INLINE_CANONICAL_WHITESPACE,
+  },
+  {
+    key: 'named-schemas',
+    desc: 'Uses CreateInput/UpdateInput/ListInput constants (may trip scanner)',
+    source: VAR_NAMED_SCHEMAS,
+  },
+  {
+    key: 'legacy-activity',
+    desc: 'Legacy CREATED/by + from/to activity shape (expected FAIL)',
+    source: VAR_LEGACY_ACTIVITY,
+  },
+  {
+    key: 'inline-no-passthrough',
+    desc: 'Inline but without .passthrough() on create (expected FAIL)',
+    source: VAR_INLINE_NO_PASSTHROUGH,
+  },
 ];
 
 /* ------------------------ Runner ------------------------ */
@@ -321,35 +349,54 @@ for (const v of VARIANTS) {
   // Run tests/verify/deep-scan
   if (DO_API_TESTS) {
     const r = runStep('test-api', 'pnpm', ['-w', 'test:api'], v.key);
-    results.apiTests = (r.status === 0);
+    results.apiTests = r.status === 0;
   }
 
   if (DO_WEB_TESTS) {
     const r = runStep('test-web', 'pnpm', ['-w', 'test:web'], v.key);
-    results.webTests = (r.status === 0);
+    results.webTests = r.status === 0;
   }
 
   if (DO_BUILD) {
     const r = runStep('build', 'pnpm', ['-w', 'build'], v.key);
-    results.build = (r.status === 0);
+    results.build = r.status === 0;
   }
 
-  const vfy = runStep('verify', 'node', ['tools/scripts/verify-activity.cjs', '--json'], v.key);
+  const vfy = runStep(
+    'verify',
+    'node',
+    ['tools/scripts/verify-activity.cjs', '--json'],
+    v.key
+  );
   const vfyJson = parseJsonSafe(vfy.stdout);
   results.verify = vfyJson || { parseError: true };
 
-  const dps = runStep('deep-scan', 'node', ['tools/scripts/deep-scan-activity.cjs', '--json'], v.key);
+  const dps = runStep(
+    'deep-scan',
+    'node',
+    ['tools/scripts/deep-scan-activity.cjs', '--json'],
+    v.key
+  );
   const dpsJson = parseJsonSafe(dps.stdout);
   results.deepScan = dpsJson || { parseError: true };
 
   overall.push(results);
 
   // Human friendly one-liner
-  const api = results.apiTests === null ? '-' : results.apiTests ? 'PASS' : 'FAIL';
-  const web = results.webTests === null ? '-' : results.webTests ? 'PASS' : 'FAIL';
+  const api =
+    results.apiTests === null ? '-' : results.apiTests ? 'PASS' : 'FAIL';
+  const web =
+    results.webTests === null ? '-' : results.webTests ? 'PASS' : 'FAIL';
   const vpass = results.verify?.pass === true ? 'PASS' : 'FAIL';
-  const gOk = results.deepScan?.tracker ? (results.deepScan.tracker.create?.writesExpectedActivity && results.deepScan.tracker.update?.writesExpectedActivity ? 'PASS' : 'FAIL') : 'FAIL';
-  console.log(`Summary: api=${api} | web=${web} | verify=${vpass} | deep-scan-activity=${gOk}`);
+  const gOk = results.deepScan?.tracker
+    ? results.deepScan.tracker.create?.writesExpectedActivity &&
+      results.deepScan.tracker.update?.writesExpectedActivity
+      ? 'PASS'
+      : 'FAIL'
+    : 'FAIL';
+  console.log(
+    `Summary: api=${api} | web=${web} | verify=${vpass} | deep-scan-activity=${gOk}`
+  );
 }
 
 // Write combined JSON
@@ -359,6 +406,8 @@ console.log(`\n✔ Wrote summary JSON -> ${jsonOut}`);
 
 // Restore original file
 fs.copyFileSync(backupPath, FILE);
-console.log(`↩ Restored original router from backup: ${path.basename(backupPath)}`);
+console.log(
+  `↩ Restored original router from backup: ${path.basename(backupPath)}`
+);
 
 console.log('\nDone.');

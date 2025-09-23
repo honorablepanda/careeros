@@ -20,14 +20,17 @@ function ensure(filePath, content) {
 }
 
 function tryPatchNav(filePath) {
-  if (!fs.existsSync(filePath)) return console.log('• nav not found (skip)', filePath);
+  if (!fs.existsSync(filePath))
+    return console.log('• nav not found (skip)', filePath);
   const src = fs.readFileSync(filePath, 'utf8');
-  if (src.includes('/tracker/activity')) return console.log('• nav already has link (ok)');
+  if (src.includes('/tracker/activity'))
+    return console.log('• nav already has link (ok)');
   // naive insert: before the first </ul> or </nav>
   const li = `\n  <li><a href="/tracker/activity">Activity</a></li>\n`;
   let patched = null;
   if (src.includes('</ul>')) patched = src.replace('</ul>', `${li}</ul>`);
-  else if (src.includes('</nav>')) patched = src.replace('</nav>', `${li}</nav>`);
+  else if (src.includes('</nav>'))
+    patched = src.replace('</nav>', `${li}</nav>`);
   if (patched && patched !== src) {
     fs.writeFileSync(filePath, patched, 'utf8');
     console.log('✓ added Activity link to', filePath);

@@ -11,7 +11,9 @@ const filesTouched = [];
 
 // Helpers
 const rel = (...p) => path.join(root, ...p);
-function read(file) { return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null; }
+function read(file) {
+  return fs.existsSync(file) ? fs.readFileSync(file, 'utf8') : null;
+}
 function write(file, content) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, content, 'utf8');
@@ -20,8 +22,12 @@ function write(file, content) {
 function addLineOnce(file, line) {
   const cur = read(file) ?? '';
   if (!cur.includes(line)) {
-    const next = (cur.endsWith('\n') || cur.length === 0) ? cur + line + '\n' : cur + '\n' + line + '\n';
-    if (APPLY) write(file, next); else preview(file, next, cur);
+    const next =
+      cur.endsWith('\n') || cur.length === 0
+        ? cur + line + '\n'
+        : cur + '\n' + line + '\n';
+    if (APPLY) write(file, next);
+    else preview(file, next, cur);
     return true;
   }
   return false;
@@ -35,7 +41,8 @@ function preview(file, next, cur = null) {
 function ensureFile(file, content) {
   const cur = read(file);
   if (cur === null) {
-    if (APPLY) write(file, content); else preview(file, content, '');
+    if (APPLY) write(file, content);
+    else preview(file, content, '');
     return true;
   }
   // already exists; keep it (idempotent)
@@ -85,7 +92,12 @@ export type SummaryOverview = z.infer<typeof SummaryOverviewSchema>;
 `;
 
 if (!fs.existsSync(sharedTypesDir)) {
-  console.warn(`! Expected ${path.relative(root, sharedTypesDir)} to exist. Create the project if needed.`);
+  console.warn(
+    `! Expected ${path.relative(
+      root,
+      sharedTypesDir
+    )} to exist. Create the project if needed.`
+  );
 }
 ensureFile(summaryTypesFile, summaryTypesSrc);
 
@@ -94,23 +106,35 @@ const sharedIndex = rel('shared', 'types', 'src', 'index.ts');
 if (fs.existsSync(sharedIndex)) {
   addLineOnce(sharedIndex, `export * from './summary';`);
 } else {
-  console.warn(`! Missing shared/types/src/index.ts; skipping barrel export (types still usable by path).`);
+  console.warn(
+    `! Missing shared/types/src/index.ts; skipping barrel export (types still usable by path).`
+  );
 }
 
 // 2) API router: infer imports from tracker router
 const routerDir = rel('apps', 'api', 'src', 'router');
 const trackerRouter = rel('apps', 'api', 'src', 'router', 'tracker.ts');
 if (!fs.existsSync(routerDir)) {
-  console.warn(`! Expected ${path.relative(root, routerDir)} to exist. Adjust paths in this script if your layout differs.`);
+  console.warn(
+    `! Expected ${path.relative(
+      root,
+      routerDir
+    )} to exist. Adjust paths in this script if your layout differs.`
+  );
 }
 const trackerSrc = read(trackerRouter) || '';
 const trpcImportMatch =
-  trackerSrc.match(/import\s*{\s*[^}]*publicProcedure[^}]*}\s*from\s*['"]([^'"]+)['"]/)
-  || trackerSrc.match(/import\s*{\s*[^}]*t[^}]*}\s*from\s*['"]([^'"]+)['"]/);
+  trackerSrc.match(
+    /import\s*{\s*[^}]*publicProcedure[^}]*}\s*from\s*['"]([^'"]+)['"]/
+  ) || trackerSrc.match(/import\s*{\s*[^}]*t[^}]*}\s*from\s*['"]([^'"]+)['"]/);
 const trpcImportPath = trpcImportMatch ? trpcImportMatch[1] : '../trpc/trpc';
 
-const prismaNamedImport = trackerSrc.match(/import\s*{\s*prisma\s*}\s*from\s*['"]([^'"]+)['"]/);
-const prismaClientImport = trackerSrc.match(/import\s*{\s*PrismaClient\s*}\s*from\s*['"]@prisma\/client['"]/);
+const prismaNamedImport = trackerSrc.match(
+  /import\s*{\s*prisma\s*}\s*from\s*['"]([^'"]+)['"]/
+);
+const prismaClientImport = trackerSrc.match(
+  /import\s*{\s*PrismaClient\s*}\s*from\s*['"]@prisma\/client['"]/
+);
 
 let prismaImportBlock = `import { prisma } from '../prisma';`;
 let prismaPreamble = '';
@@ -201,26 +225,36 @@ let appRouterSrc = null;
 for (const f of candidateAppRouters) {
   const s = read(f);
   if (s && /export\s+const\s+appRouter\s*=\s*t\.router\(\s*{/.test(s)) {
-    appRouterPath = f; appRouterSrc = s; break;
+    appRouterPath = f;
+    appRouterSrc = s;
+    break;
   }
 }
 if (!appRouterPath) {
-  console.warn('! Could not find appRouter file (looked in apps/api/src/trpc.ts and router/index.ts). Skipping wiring.');
+  console.warn(
+    '! Could not find appRouter file (looked in apps/api/src/trpc.ts and router/index.ts). Skipping wiring.'
+  );
 } else {
   let src = appRouterSrc;
   // Insert import
   const importLine = src.includes(`from './router/summary'`)
     ? null
-    : `import { summaryRouter } from '${path.relative(path.dirname(appRouterPath), summaryRouterFile).replace(/\\/g,'/').replace(/\.ts$/,'')}';`;
+    : `import { summaryRouter } from '${path
+        .relative(path.dirname(appRouterPath), summaryRouterFile)
+        .replace(/\\/g, '/')
+        .replace(/\.ts$/, '')}';`;
   if (importLine) {
     src = importLine + '\n' + src;
   }
   // Add property if missing
   if (!/summary\s*:\s*summaryRouter/.test(src)) {
-    src = src.replace(/(export\s+const\s+appRouter\s*=\s*t\.router\(\s*{\s*)/,
-      `$1\n  summary: summaryRouter,\n`);
+    src = src.replace(
+      /(export\s+const\s+appRouter\s*=\s*t\.router\(\s*{\s*)/,
+      `$1\n  summary: summaryRouter,\n`
+    );
   }
-  if (APPLY) write(appRouterPath, src); else preview(appRouterPath, src, appRouterSrc);
+  if (APPLY) write(appRouterPath, src);
+  else preview(appRouterPath, src, appRouterSrc);
 }
 
 // 3) Web page
@@ -301,24 +335,34 @@ if (PATCH_SMOKE) {
   const ping = rel('tools', 'scripts', 'ping-trpc.cjs');
   const s1 = read(smoke);
   if (s1 && !/summary\.overview/.test(s1)) {
-    const injected = s1.replace(/(\}\);\s*\n?\}\)\(\);?\s*$)/s,
-`  console.log('→ QUERY summary.overview');
+    const injected = s1.replace(
+      /(\}\);\s*\n?\}\)\(\);?\s*$)/s,
+      `  console.log('→ QUERY summary.overview');
   const sum = await client.summary.overview.query({ userId: 'demo-user' });
   console.log(JSON.stringify(sum, null, 2));
-$1`);
-    if (APPLY) write(smoke, injected); else preview(smoke, injected, s1);
+$1`
+    );
+    if (APPLY) write(smoke, injected);
+    else preview(smoke, injected, s1);
   }
   const s2 = read(ping);
   if (s2 && !/summary\.overview/.test(s2)) {
-    const injected = s2.replace(/(\}\n?\)\(\);?\s*$)/s,
-`\n  console.log('→ QUERY summary.overview (GET)');
-  console.log(await queryGET('summary.overview', { userId: 'demo-user' }));\n$1`);
-    if (APPLY) write(ping, injected); else preview(ping, injected, s2);
+    const injected = s2.replace(
+      /(\}\n?\)\(\);?\s*$)/s,
+      `\n  console.log('→ QUERY summary.overview (GET)');
+  console.log(await queryGET('summary.overview', { userId: 'demo-user' }));\n$1`
+    );
+    if (APPLY) write(ping, injected);
+    else preview(ping, injected, s2);
   }
 }
 
 // Done
-console.log(`\n${APPLY ? '✓ Applied' : 'ⓘ Dry-run only'}${PATCH_SMOKE ? ' (with smoke patches)' : ''}.`);
+console.log(
+  `\n${APPLY ? '✓ Applied' : 'ⓘ Dry-run only'}${
+    PATCH_SMOKE ? ' (with smoke patches)' : ''
+  }.`
+);
 if (filesTouched.length) {
   console.log('Touched files:');
   for (const f of filesTouched) console.log(' -', path.relative(root, f));

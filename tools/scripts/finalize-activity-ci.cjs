@@ -91,7 +91,7 @@ function patchPackageJsonScripts(rootPkgPath, port) {
   pkg.scripts ||= {};
   const must = {
     'activity:ci:auto': `node tools/scripts/seed-and-verify-activity.cjs --host http://localhost --port ${port} --out activity-ci-report.json`,
-    'ci:web': `start-server-and-test "pnpm -w exec nx run web:serve" http://localhost:${port} "pnpm run activity:ci:auto"`
+    'ci:web': `start-server-and-test "pnpm -w exec nx run web:serve" http://localhost:${port} "pnpm run activity:ci:auto"`,
   };
   let changed = false;
   for (const [k, v] of Object.entries(must)) {
@@ -101,7 +101,8 @@ function patchPackageJsonScripts(rootPkgPath, port) {
       log(`• scripts["${k}"] set → ${v}`);
     }
   }
-  if (changed) writeJSON(rootPkgPath, pkg); else log('• package.json scripts already OK');
+  if (changed) writeJSON(rootPkgPath, pkg);
+  else log('• package.json scripts already OK');
 }
 
 function ensureWorkflow(port) {
@@ -165,7 +166,7 @@ function ensureDevDeps({ port, upgradeRQ, noInstall }) {
     '@vitejs/plugin-react-swc',
     'jsdom',
     '@testing-library/react',
-    '@testing-library/jest-dom'
+    '@testing-library/jest-dom',
   ].filter((d) => !have(d));
 
   if (wants.length) {
@@ -177,7 +178,14 @@ function ensureDevDeps({ port, upgradeRQ, noInstall }) {
 
   if (upgradeRQ) {
     // optional upgrade
-    if (!have('@tanstack/react-query') || !/^5\./.test((rootPkg.dependencies?.['@tanstack/react-query'] || rootPkg.devDependencies?.['@tanstack/react-query'] || ''))) {
+    if (
+      !have('@tanstack/react-query') ||
+      !/^5\./.test(
+        rootPkg.dependencies?.['@tanstack/react-query'] ||
+          rootPkg.devDependencies?.['@tanstack/react-query'] ||
+          ''
+      )
+    ) {
       log('→ Upgrading @tanstack/react-query to ^5 (optional)');
       try {
         shInherit(`pnpm -w add @tanstack/react-query@^5`);
@@ -195,7 +203,9 @@ function main() {
   // 1) Nx project “web”
   let nxInfoRaw;
   try {
-    nxInfoRaw = sh(`pnpm -w exec nx show project web --json`, { encoding: 'utf8' });
+    nxInfoRaw = sh(`pnpm -w exec nx show project web --json`, {
+      encoding: 'utf8',
+    });
   } catch (e) {
     err('✗ Could not read Nx project "web". Ensure it exists.');
     process.exit(1);
@@ -247,7 +257,9 @@ function main() {
   log('\nNext steps:');
   log(`• Push and watch GitHub Actions → Activity E2E job`);
   log(`• (Optional) Make the CI job required on your main branch`);
-  log('• If you later want to fully delete the archived folder, do it in a follow-up PR');
+  log(
+    '• If you later want to fully delete the archived folder, do it in a follow-up PR'
+  );
 }
 
 main();

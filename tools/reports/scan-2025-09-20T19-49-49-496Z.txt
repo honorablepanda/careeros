@@ -1,0 +1,81 @@
+—— Scan Summary ——
+OPEN_HANDLE  : 8
+PERF         : 2
+SETUP        : 1
+SMELL        : 1
+SUSPECT_CLI  : 1
+TRPC_TEST    : 9
+
+—— Findings (22) ——
+
+[PERF] tools\reports\scan-2025-09-17-19-04-28.json:1
+  Large file (1.16 MB)
+
+[PERF] tools\reports\scan-2025-09-17-19-05-06.json:1
+  Large file (1.15 MB)
+
+[SETUP] web\vitest.setup.ts:1
+  Missing: globalThis.React = React (helps JSX in some paths)
+
+[SUSPECT_CLI] README.md:1
+  CLI command or heredoc embedded in source
+
+[OPEN_HANDLE] scan-results.json:11
+  Found setTimeout(
+
+[OPEN_HANDLE] scan-results.json:18
+  Found setTimeout(
+
+[OPEN_HANDLE] scan-results.json:25
+  Found setTimeout(
+
+[TRPC_TEST] tools\scripts\add-summary-feature.cjs:1
+  Uses trpc hooks but no colocated spec found
+
+[TRPC_TEST] tools\scripts\auto-fix-web-build.cjs:1
+  Uses trpc hooks but no colocated spec found
+
+[OPEN_HANDLE] tools\scripts\auto-wire-activity.cjs:148
+  Found setTimeout(
+
+[OPEN_HANDLE] tools\scripts\dev-activity.cjs:254
+  Found setTimeout(
+
+[OPEN_HANDLE] tools\scripts\patch-next15-activity-pages.cjs:276
+  Found setTimeout(
+
+[TRPC_TEST] tools\scripts\phase3-settings.cjs:1
+  Uses trpc hooks but no colocated spec found
+
+[TRPC_TEST] tools\scripts\phase3-tracker.cjs:1
+  Uses trpc hooks but no colocated spec found
+
+[TRPC_TEST] tools\scripts\scaffold-activity-ui.cjs:1
+  Uses trpc hooks but no colocated spec found
+
+[TRPC_TEST] tools\scripts\scaffold-tracker.cjs:1
+  Uses trpc hooks but no colocated spec found
+
+[SMELL] tools\scripts\scan-project.cjs:83
+  Duplicate const assignment
+
+---
+
+    // Duplicate “const { unmount } = const { unmount } = …”
+    scanRegex(text, /const\s*\{\s*unmount\s*\}\s*=\s*const\s*\{\s*unmount\s*\}/g,
+---
+
+[OPEN_HANDLE] tools\scripts\scan-project.cjs:89
+  Found setTimeout(
+
+[OPEN_HANDLE] tools\scripts\scan-project.cjs:90
+  Found setInterval(
+
+[TRPC_TEST] tools\scripts\scriptsphase3-tracker.cjs:1
+  Uses trpc hooks but no colocated spec found
+
+[TRPC_TEST] web\src\app\tracker\AddApplicationForm.tsx:1
+  Uses trpc hooks but no colocated spec found
+
+[TRPC_TEST] web\test\trpc.mock.ts:1
+  Uses trpc hooks but no colocated spec found

@@ -39,7 +39,9 @@ const readFile = (p) => fs.readFileSync(p, 'utf8');
 function walk(dir, matcher) {
   const out = [];
   (function rec(current) {
-    const entries = fs.existsSync(current) ? fs.readdirSync(current, { withFileTypes: true }) : [];
+    const entries = fs.existsSync(current)
+      ? fs.readdirSync(current, { withFileTypes: true })
+      : [];
     for (const e of entries) {
       const fp = path.join(current, e.name);
       if (e.isDirectory()) rec(fp);
@@ -62,7 +64,10 @@ function run(cmd, args, cwd = root) {
 // -------- scan logic --------
 const pageMatchers = [
   // top-level app dir (app router)
-  (fp) => /(?:^|[\\/])web[\\/](?:src[\\/])?app[\\/].*?page\.(tsx|ts|jsx|js)$/.test(fp),
+  (fp) =>
+    /(?:^|[\\/])web[\\/](?:src[\\/])?app[\\/].*?page\.(tsx|ts|jsx|js)$/.test(
+      fp
+    ),
   // a few app sub-locations you’re using
   (fp) => /(?:^|[\\/])web[\\/]app[\\/].*?\.(tsx|ts)$/.test(fp), // e.g. web/app/tracker/activity/page.tsx (built copies)
 ];
@@ -78,7 +83,8 @@ const allFiles = walk(webDir, (fp) => {
 });
 
 // analysis regexes
-const reTrpcHook = /\btrpc\.([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.(useQuery|useMutation)\b/g;
+const reTrpcHook =
+  /\btrpc\.([a-zA-Z0-9_]+)\.([a-zA-Z0-9_]+)\.(useQuery|useMutation)\b/g;
 const rePrismaSelectRole = /\bselect\s*:\s*{[^}]*\brole\s*:\s*true/gs; // naive flag for role in select
 const reDotRole = /(?<!['"`])\brole\b(?!['"`])\s*[:.]/g; // rough signal of reading a role property
 const reAnyWarning = /@typescript-eslint\/no-explicit-any/; // to highlight files with “any” rule triggers
@@ -109,7 +115,13 @@ for (const fp of allFiles) {
   // Does the file look like a Next page?
   const isPage = /[\\/]app[\\/].*page\.(tsx|ts|jsx|js)$/.test(fp);
 
-  if (trpc.length || prismaRoleSelect || dotRoleHits.length || isPage || hasAnyRule) {
+  if (
+    trpc.length ||
+    prismaRoleSelect ||
+    dotRoleHits.length ||
+    isPage ||
+    hasAnyRule
+  ) {
     findings.push({
       file: rel,
       isPage,
@@ -143,7 +155,12 @@ if (RUN_TSC) {
       'false',
     ]);
   } else {
-    tsc = { status: -1, stdout: '', stderr: 'No tsconfig found for web app.', cmd: 'tsc (skipped)' };
+    tsc = {
+      status: -1,
+      stdout: '',
+      stderr: 'No tsconfig found for web app.',
+      cmd: 'tsc (skipped)',
+    };
   }
 }
 
@@ -188,7 +205,8 @@ const summary = {
     pagesFlagged: findings.filter((f) => f.isPage).length,
     trpcHookSites: findings.reduce((n, f) => n + (f.trpcHooks?.length || 0), 0),
     prismaRoleSelectFiles: findings.filter((f) => f.prismaSelectHasRole).length,
-    roleReadsFiles: findings.filter((f) => (f.roleReads?.length || 0) > 0).length,
+    roleReadsFiles: findings.filter((f) => (f.roleReads?.length || 0) > 0)
+      .length,
   },
   findings,
   tsc,
@@ -217,7 +235,13 @@ const lines = [];
 lines.push('— Pages Scan —');
 lines.push(`Root: ${root}`);
 lines.push(`Web dir: ${webDir}`);
-lines.push(`Mode: ${FAST ? 'FAST (no tsc, no eslint)' : `FULL (tsc=${RUN_TSC}, eslint=${RUN_ESLINT})`}`);
+lines.push(
+  `Mode: ${
+    FAST
+      ? 'FAST (no tsc, no eslint)'
+      : `FULL (tsc=${RUN_TSC}, eslint=${RUN_ESLINT})`
+  }`
+);
 lines.push('');
 lines.push('== Summary ==');
 lines.push(JSON.stringify(summary.counts, null, 2));
@@ -232,9 +256,12 @@ for (const f of findings) {
       .filter((v, i, a) => a.indexOf(v) === i);
     lines.push(`  - trpc hooks: ${hooks.join(', ')}`);
   }
-  if (f.prismaSelectHasRole) lines.push(`  - prisma select contains "role: true" (verify model)`);
-  if (f.roleReads?.length) lines.push(`  - potential ".role" reads (${f.roleReads.length} hits)`);
-  if (f.hasNoExplicitAnyRule) lines.push(`  - file has @typescript-eslint/no-explicit-any warnings`);
+  if (f.prismaSelectHasRole)
+    lines.push(`  - prisma select contains "role: true" (verify model)`);
+  if (f.roleReads?.length)
+    lines.push(`  - potential ".role" reads (${f.roleReads.length} hits)`);
+  if (f.hasNoExplicitAnyRule)
+    lines.push(`  - file has @typescript-eslint/no-explicit-any warnings`);
 }
 lines.push('');
 if (RUN_TSC && summary.tsc) {
@@ -250,7 +277,9 @@ if (RUN_ESLINT && summary.eslint) {
   const top = (summary.eslint.issues || []).slice(0, 50);
   for (const i of top) {
     lines.push(
-      `- ${path.relative(root, i.filePath)}:${i.line}:${i.column} [${i.ruleId || 'rule?'}] ${i.message}`
+      `- ${path.relative(root, i.filePath)}:${i.line}:${i.column} [${
+        i.ruleId || 'rule?'
+      }] ${i.message}`
     );
   }
   lines.push('');

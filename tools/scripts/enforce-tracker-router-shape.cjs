@@ -36,7 +36,9 @@ if (!/export\s+const\s+trackerRouter\s*=/.test(s)) {
   if (!/export\s+const\s+trackerRouter\s*=/.test(s)) {
     const body = s.match(/\{\s*[\s\S]*\}\s*;?\s*$/);
     if (body) {
-      s += `\nexport const trackerRouter = createTRPCRouter(${body[0].trim().replace(/;$/, '')});\n`;
+      s += `\nexport const trackerRouter = createTRPCRouter(${body[0]
+        .trim()
+        .replace(/;$/, '')});\n`;
     }
   }
 }

@@ -27,9 +27,23 @@ const PATHS = {
   sharedTypesSrcDir: path.join(ROOT, 'shared', 'types', 'src'),
 };
 
-function exists(p) { try { return fs.existsSync(p); } catch { return false; } }
-function mkdirp(p) { fs.mkdirSync(p, { recursive: true }); }
-function read(p) { try { return fs.readFileSync(p, 'utf8'); } catch { return null; } }
+function exists(p) {
+  try {
+    return fs.existsSync(p);
+  } catch {
+    return false;
+  }
+}
+function mkdirp(p) {
+  fs.mkdirSync(p, { recursive: true });
+}
+function read(p) {
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return null;
+  }
+}
 function writeIfDiff(p, s) {
   const cur = read(p);
   if (cur !== s) {
@@ -148,7 +162,9 @@ export const appRouter = { tracker: trackerRouter } as any;
 export type AppRouter = typeof appRouter;
 `;
     writeIfDiff(path.join(PATHS.apiRouterDir, 'root.ts'), minimalRoot);
-    console.log('✓ Created minimal apps/api/src/router/root.ts with tracker registration');
+    console.log(
+      '✓ Created minimal apps/api/src/router/root.ts with tracker registration'
+    );
     return;
   }
 
@@ -156,11 +172,15 @@ export type AppRouter = typeof appRouter;
   if (!src) src = '';
   let changed = false;
 
-  if (!src.includes("trackerRouter")) {
+  if (!src.includes('trackerRouter')) {
     const importLine =
       target.endsWith('root.ts') || target.endsWith('app.router.ts')
-        ? (src.includes("from './tracker'") ? '' : "import { trackerRouter } from './tracker';\n")
-        : (src.includes("from '../router/tracker'") ? '' : "import { trackerRouter } from '../router/tracker';\n");
+        ? src.includes("from './tracker'")
+          ? ''
+          : "import { trackerRouter } from './tracker';\n"
+        : src.includes("from '../router/tracker'")
+        ? ''
+        : "import { trackerRouter } from '../router/tracker';\n";
 
     if (importLine) {
       src = importLine + src;
@@ -170,7 +190,10 @@ export type AppRouter = typeof appRouter;
   // Try to ensure a tracker property exists in the exported router object (cheap string heuristic)
   if (!/tracker\s*:\s*trackerRouter/.test(src)) {
     // common pattern: router({ ... })
-    src = src.replace(/router\(\{\s*/m, match => match + 'tracker: trackerRouter,\n');
+    src = src.replace(
+      /router\(\{\s*/m,
+      (match) => match + 'tracker: trackerRouter,\n'
+    );
     // or a plain object export
     if (!/tracker\s*:\s*trackerRouter/.test(src)) {
       src = src.replace(/(\{\s*)([^]*?)(\}\s*[;]?\s*$)/m, (m, a, b, c) => {
@@ -185,7 +208,12 @@ export type AppRouter = typeof appRouter;
     fs.writeFileSync(target, src, 'utf8');
     console.log(`✓ Registered tracker in ${path.relative(ROOT, target)}`);
   } else {
-    console.log(`= tracker already registered in ${path.relative(ROOT, target)} (or could not auto-detect)`);
+    console.log(
+      `= tracker already registered in ${path.relative(
+        ROOT,
+        target
+      )} (or could not auto-detect)`
+    );
   }
 })();
 
@@ -264,7 +292,11 @@ export type ApplicationDTO = {
   ];
   const indexPath = indexCandidates.find(exists) || indexCandidates[0];
   mkdirp(path.dirname(indexPath));
-  ensureLineInFile(indexPath, `export * from './tracker'`, `export * from './tracker'`);
+  ensureLineInFile(
+    indexPath,
+    `export * from './tracker'`,
+    `export * from './tracker'`
+  );
   console.log(`✓ Ensured export in ${path.relative(ROOT, indexPath)}`);
 })();
 

@@ -12,7 +12,11 @@ const path = require('path');
 const repo = process.cwd();
 const exists = (p) => fs.existsSync(p);
 const read = (p) => fs.readFileSync(p, 'utf8');
-const write = (p, s) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, s, 'utf8'); console.log(`✓ wrote ${p}`); };
+const write = (p, s) => {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s, 'utf8');
+  console.log(`✓ wrote ${p}`);
+};
 
 function upsertNextConfig() {
   const p = path.join(repo, 'web/next.config.js');
@@ -69,15 +73,20 @@ export default function MagicLinkHandler() {
   );
 }
 `;
-  if (!exists(resetP)) write(resetP, reset); else console.log('• reset page exists, skipping');
-  if (!exists(magicP)) write(magicP, magic); else console.log('• magic page exists, skipping');
+  if (!exists(resetP)) write(resetP, reset);
+  else console.log('• reset page exists, skipping');
+  if (!exists(magicP)) write(magicP, magic);
+  else console.log('• magic page exists, skipping');
 }
 
 function patchSummaryGroupBy() {
   const p = path.join(repo, 'apps/api/src/router/summary.ts');
   if (!exists(p)) return console.log('• no summary.ts found, skip');
   let src = read(p);
-  if (src.includes('appsForSources = await prisma.application.findMany') || src.includes('select: { status: true }')) {
+  if (
+    src.includes('appsForSources = await prisma.application.findMany') ||
+    src.includes('select: { status: true }')
+  ) {
     return console.log('• summary.ts already patched, skip');
   }
   // Replace first groupBy occurrence with safe status aggregation
@@ -192,7 +201,7 @@ describe('settings page', () => {
   write(p, test);
 }
 
-(function main(){
+(function main() {
   upsertNextConfig();
   ensureAuthPages();
   patchSummaryGroupBy();

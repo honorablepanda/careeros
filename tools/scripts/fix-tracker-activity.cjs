@@ -19,7 +19,10 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = process.cwd();
-const API_ROUTER = path.join(ROOT, 'apps/api/src/trpc/routers/tracker.router.ts');
+const API_ROUTER = path.join(
+  ROOT,
+  'apps/api/src/trpc/routers/tracker.router.ts'
+);
 
 const COLORS = {
   green: (s) => `\x1b[32m${s}\x1b[0m`,
@@ -29,9 +32,21 @@ const COLORS = {
   dim: (s) => `\x1b[2m${s}\x1b[0m`,
 };
 
-function has(p) { try { fs.accessSync(p); return true; } catch { return false; } }
-function read(p) { return fs.readFileSync(p, 'utf8'); }
-function write(p, s) { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, s); }
+function has(p) {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function read(p) {
+  return fs.readFileSync(p, 'utf8');
+}
+function write(p, s) {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s);
+}
 
 if (!has(API_ROUTER)) {
   console.log(COLORS.red(`✗ router not found -> ${API_ROUTER}`));
@@ -65,10 +80,11 @@ if (!/from\s+['"]zod['"]/.test(src)) {
 replaceOnce(
   'createApplication → input(z.object({}).passthrough())',
   /createApplication\s*:\s*publicProcedure[\s\S]*?\.input\s*\([\s\S]*?\)\s*\.mutation/m,
-  (m) => m.replace(
-    /\.input\s*\([\s\S]*?\)\s*\.mutation/,
-    `.input(z.object({}).passthrough()).mutation`
-  )
+  (m) =>
+    m.replace(
+      /\.input\s*\([\s\S]*?\)\s*\.mutation/,
+      `.input(z.object({}).passthrough()).mutation`
+    )
 );
 
 /* If there was no .input at all, inject it */
@@ -102,7 +118,11 @@ if (/createApplication\s*:\s*publicProcedure\s*\.mutation/.test(src)) {
 
   // c) If there's NO activity write at all, rewrite create body to canonical block
   // We look for the createApplication mutation body and ensure the pattern exists
-  if (!/applicationActivity\.create\([\s\S]*applicationId\s*:\s*created\.id[\s\S]*type\s*:\s*'CREATE'[\s\S]*payload\s*:\s*\{\s*data\s*:\s*input\s*\}/m.test(src)) {
+  if (
+    !/applicationActivity\.create\([\s\S]*applicationId\s*:\s*created\.id[\s\S]*type\s*:\s*'CREATE'[\s\S]*payload\s*:\s*\{\s*data\s*:\s*input\s*\}/m.test(
+      src
+    )
+  ) {
     // Replace "return await prismaAny?.application?.create?.({ data: input });"
     // or any 'return prismaAny.application.create' variants with canonical block.
     replaceOnce(
@@ -135,7 +155,7 @@ if (/createApplication\s*:\s*publicProcedure\s*\.mutation/.test(src)) {
 {
   // a) Convert old shapes like { type:'STATUS_CHANGE', from:'APPLIED', to: X, by:'system' }
   replaceOnce(
-    "updateApplication activity: convert old STATUS_CHANGE shape to payload.to",
+    'updateApplication activity: convert old STATUS_CHANGE shape to payload.to',
     /applicationActivity\.create\(\s*\{\s*data\s*:\s*\{\s*applicationId\s*:\s*input\.id\s*,[\s\S]*?type\s*:\s*'STATUS_CHANGE'[\s\S]*?\}\s*\}\s*\)\s*;/m,
     (m) => {
       // capture "to: <expr>" in the old blob; if not found we fallback to nextStatus
@@ -148,7 +168,11 @@ if (/createApplication\s*:\s*publicProcedure\s*\.mutation/.test(src)) {
   );
 
   // b) If no activity write at all, add a canonical post-update block
-  if (!/applicationActivity\.create\([\s\S]*applicationId\s*:\s*input\.id[\s\S]*type\s*:\s*'STATUS_CHANGE'[\s\S]*payload\s*:\s*\{\s*to\s*:\s*[a-zA-Z0-9_.]+\s*\}/m.test(src)) {
+  if (
+    !/applicationActivity\.create\([\s\S]*applicationId\s*:\s*input\.id[\s\S]*type\s*:\s*'STATUS_CHANGE'[\s\S]*payload\s*:\s*\{\s*to\s*:\s*[a-zA-Z0-9_.]+\s*\}/m.test(
+      src
+    )
+  ) {
     // Insert canonical detection for status & activity create after the update call
     replaceOnce(
       'updateApplication activity: ensure canonical block after update',

@@ -30,19 +30,26 @@ const globby = (dir) => {
   return out;
 };
 const read = (p) => fs.readFileSync(p, 'utf8');
-const exists = (p) => { try { fs.accessSync(p); return true; } catch { return false; } };
+const exists = (p) => {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 const COLORS = {
-  g: (s)=>`\x1b[32m${s}\x1b[0m`,
-  r: (s)=>`\x1b[31m${s}\x1b[0m`,
-  y: (s)=>`\x1b[33m${s}\x1b[0m`,
-  dim: (s)=>`\x1b[2m${s}\x1b[0m`,
+  g: (s) => `\x1b[32m${s}\x1b[0m`,
+  r: (s) => `\x1b[31m${s}\x1b[0m`,
+  y: (s) => `\x1b[33m${s}\x1b[0m`,
+  dim: (s) => `\x1b[2m${s}\x1b[0m`,
 };
-const ok = (msg)=> !QUIET && console.log(COLORS.g('✓'), msg);
-const warn = (msg)=> !QUIET && console.log(COLORS.y('⚠'), msg);
-const fail = (msg)=> !QUIET && console.log(COLORS.r('✗'), msg);
-const title = (t)=> !QUIET && console.log(`\n== ${t} ==`);
-const block = (s)=> !QUIET && console.log(COLORS.dim(s));
+const ok = (msg) => !QUIET && console.log(COLORS.g('✓'), msg);
+const warn = (msg) => !QUIET && console.log(COLORS.y('⚠'), msg);
+const fail = (msg) => !QUIET && console.log(COLORS.r('✗'), msg);
+const title = (t) => !QUIET && console.log(`\n== ${t} ==`);
+const block = (s) => !QUIET && console.log(COLORS.dim(s));
 
 const result = {
   api: {
@@ -96,7 +103,7 @@ const ROUTE_FALLBACK_OK = (needle) => {
   return false;
 };
 
-function snippet(norm, i, span=140) {
+function snippet(norm, i, span = 140) {
   const a = Math.max(0, i - span);
   const b = Math.min(norm.length, i + span);
   return norm.slice(a, b);
@@ -104,8 +111,11 @@ function snippet(norm, i, span=140) {
 
 // Find tracker router (prefer apps/api)
 let trackerPath = null;
-const candidates = globby(P('apps')).filter(p => /tracker\.router\.ts$/.test(p));
-trackerPath = candidates.find(p => /apps[\/\\]api[\/\\]/.test(p)) || candidates[0];
+const candidates = globby(P('apps')).filter((p) =>
+  /tracker\.router\.ts$/.test(p)
+);
+trackerPath =
+  candidates.find((p) => /apps[\/\\]api[\/\\]/.test(p)) || candidates[0];
 
 title('API: tracker.router.ts');
 if (!trackerPath) {
@@ -119,50 +129,88 @@ if (!trackerPath) {
   // getApplicationActivity
   {
     const sym = /getApplicationActivity\s*:\s*publicProcedure/i.test(norm);
-    const fm = norm.match(/applicationActivity\s*\.\s*findMany\s*\(\s*\{\s*where\s*:\s*\{\s*applicationId\s*:\s*input\.id\s*\}\s*,\s*orderBy\s*:\s*\{\s*createdAt\s*:\s*'desc'\s*\}\s*\}\s*\)/m);
+    const fm = norm.match(
+      /applicationActivity\s*\.\s*findMany\s*\(\s*\{\s*where\s*:\s*\{\s*applicationId\s*:\s*input\.id\s*\}\s*,\s*orderBy\s*:\s*\{\s*createdAt\s*:\s*'desc'\s*\}\s*\}\s*\)/m
+    );
     if (sym && fm) {
       result.api.getActivityOk = true;
       ok('getApplicationActivity present + ordered by createdAt desc');
       result.api.previews.get = snippet(norm, fm.index);
     } else {
       result.pass = false;
-      fail('getApplicationActivity missing or not calling findMany with createdAt desc');
-      result.api.previews.get = snippet(norm, (norm.indexOf('getApplicationActivity')||0));
+      fail(
+        'getApplicationActivity missing or not calling findMany with createdAt desc'
+      );
+      result.api.previews.get = snippet(
+        norm,
+        norm.indexOf('getApplicationActivity') || 0
+      );
     }
   }
 
   // createApplication: permissive input + CREATE with payload.data
   {
-    const blockMatch = norm.match(/createApplication\s*:\s*publicProcedure[\s\S]*?\.mutation\([\s\S]*?\}\),/m);
+    const blockMatch = norm.match(
+      /createApplication\s*:\s*publicProcedure[\s\S]*?\.mutation\([\s\S]*?\}\),/m
+    );
     if (!blockMatch) {
       result.pass = false;
       fail('createApplication block not found');
     } else {
       const blockSrc = blockMatch[0];
       result.api.previews.create = blockSrc;
-      const permissive = /\.input\(\s*z\.object\(\{\}\)\.passthrough\(\)\s*\)/m.test(blockSrc);
-      const activity = /applicationActivity\s*\.\s*create\s*\(\s*\{\s*data\s*:\s*\{\s*applicationId\s*:\s*.*?,\s*type\s*:\s*'CREATE'\s*,\s*payload\s*:\s*\{\s*data\s*:\s*input\s*\}\s*\}\s*\}\s*\)/m.test(blockSrc);
+      const permissive =
+        /\.input\(\s*z\.object\(\{\}\)\.passthrough\(\)\s*\)/m.test(blockSrc);
+      const activity =
+        /applicationActivity\s*\.\s*create\s*\(\s*\{\s*data\s*:\s*\{\s*applicationId\s*:\s*.*?,\s*type\s*:\s*'CREATE'\s*,\s*payload\s*:\s*\{\s*data\s*:\s*input\s*\}\s*\}\s*\}\s*\)/m.test(
+          blockSrc
+        );
       if (permissive) ok('createApplication: permissive input');
-      else { result.pass = false; fail('createApplication: input is NOT permissive (.passthrough missing)'); }
-      if (activity) ok("createApplication: writes { type: 'CREATE', payload: { data: input } }");
-      else { result.pass = false; fail("createApplication: activity shape mismatch — expected type 'CREATE' with payload.data"); }
+      else {
+        result.pass = false;
+        fail(
+          'createApplication: input is NOT permissive (.passthrough missing)'
+        );
+      }
+      if (activity)
+        ok(
+          "createApplication: writes { type: 'CREATE', payload: { data: input } }"
+        );
+      else {
+        result.pass = false;
+        fail(
+          "createApplication: activity shape mismatch — expected type 'CREATE' with payload.data"
+        );
+      }
       result.api.createOk = permissive && activity;
     }
   }
 
   // updateApplication: STATUS_CHANGE + payload.to
   {
-    const blockMatch =
-      norm.match(/updateApplication\s*:\s*publicProcedure[\s\S]*?\.mutation\([\s\S]*?\}\),/m);
+    const blockMatch = norm.match(
+      /updateApplication\s*:\s*publicProcedure[\s\S]*?\.mutation\([\s\S]*?\}\),/m
+    );
     if (!blockMatch) {
       result.pass = false;
       fail('updateApplication block not found');
     } else {
       const blockSrc = blockMatch[0];
       result.api.previews.update = blockSrc;
-      const statusChange = /applicationActivity\s*\.\s*create\s*\(\s*\{\s*data\s*:\s*\{\s*applicationId\s*:\s*.*?,\s*type\s*:\s*'STATUS_CHANGE'\s*,\s*payload\s*:\s*\{\s*to\s*:\s*.*?\}\s*\}\s*\}\s*\)/m.test(blockSrc);
-      if (statusChange) ok("updateApplication: writes { type: 'STATUS_CHANGE', payload: { to } }");
-      else { result.pass = false; fail("updateApplication: activity shape mismatch — expected STATUS_CHANGE with payload.to"); }
+      const statusChange =
+        /applicationActivity\s*\.\s*create\s*\(\s*\{\s*data\s*:\s*\{\s*applicationId\s*:\s*.*?,\s*type\s*:\s*'STATUS_CHANGE'\s*,\s*payload\s*:\s*\{\s*to\s*:\s*.*?\}\s*\}\s*\}\s*\)/m.test(
+          blockSrc
+        );
+      if (statusChange)
+        ok(
+          "updateApplication: writes { type: 'STATUS_CHANGE', payload: { to } }"
+        );
+      else {
+        result.pass = false;
+        fail(
+          'updateApplication: activity shape mismatch — expected STATUS_CHANGE with payload.to'
+        );
+      }
       result.api.updateOk = statusChange;
     }
   }
@@ -222,9 +270,15 @@ title('Web: TRPC + Activity page');
     const heading = /<h1>\s*Tracker Activity\s*<\/h1>/i.test(s);
     const fallback = /No activity/i.test(s);
     if (heading) ok('activity page: renders <h1>Tracker Activity</h1>');
-    else { fail('activity page: heading missing'); result.pass = false; }
+    else {
+      fail('activity page: heading missing');
+      result.pass = false;
+    }
     if (fallback) ok('activity page: contains "No activity" fallback');
-    else { fail('activity page: "No activity" fallback missing'); result.pass = false; }
+    else {
+      fail('activity page: "No activity" fallback missing');
+      result.pass = false;
+    }
     result.web.activityPageOk = heading && fallback;
   } else {
     fail('activity page missing at web/norm/app/tracker/activity/page.tsx');
@@ -236,10 +290,11 @@ title('Web: TRPC + Activity page');
 // Print all applicationActivity.* refs with context
 title('Repo: applicationActivity.* references');
 {
-  const files = globby(ROOT).filter(p =>
-    /\.(ts|tsx|cjs|mjs|js)$/.test(p) &&
-    !/node_modules/.test(p) &&
-    !/dist\//.test(p)
+  const files = globby(ROOT).filter(
+    (p) =>
+      /\.(ts|tsx|cjs|mjs|js)$/.test(p) &&
+      !/node_modules/.test(p) &&
+      !/dist\//.test(p)
   );
   const refs = [];
   for (const fp of files) {

@@ -17,7 +17,9 @@ const fs = require('fs');
 const path = require('path');
 
 const args = process.argv.slice(2);
-const deadlineArg = (args.find(a => a.startsWith('--deadline=')) || '').split('=')[1];
+const deadlineArg = (args.find((a) => a.startsWith('--deadline=')) || '').split(
+  '='
+)[1];
 const KEEP_REPORT = args.includes('--keep-report');
 const DEADLINE = deadlineArg || '2025-10-01';
 
@@ -26,15 +28,34 @@ const CI_DIR = path.join(ROOT, '.github', 'workflows');
 const CI_FILE = path.join(CI_DIR, 'ci.yml');
 const ROOT_PKG = path.join(ROOT, 'package.json');
 
-function exists(p){ try { return fs.existsSync(p); } catch { return false; } }
-function read(p){ try { return fs.readFileSync(p, 'utf8'); } catch { return null; } }
-function write(p, s){ fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, s, 'utf8'); }
-function backup(p){ if (exists(p)) fs.copyFileSync(p, p + '.bak'); }
+function exists(p) {
+  try {
+    return fs.existsSync(p);
+  } catch {
+    return false;
+  }
+}
+function read(p) {
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return null;
+  }
+}
+function write(p, s) {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s, 'utf8');
+}
+function backup(p) {
+  if (exists(p)) fs.copyFileSync(p, p + '.bak');
+}
 
 function ensureRootScanScript() {
   let pkg = {};
   if (exists(ROOT_PKG)) {
-    try { pkg = JSON.parse(read(ROOT_PKG)); } catch {}
+    try {
+      pkg = JSON.parse(read(ROOT_PKG));
+    } catch {}
   }
   pkg.name ||= '@careeros/source';
   pkg.version ||= '0.0.0';
@@ -50,10 +71,12 @@ function ensureRootScanScript() {
 }
 
 function canonicalCI(deadline, keepReport) {
-  const reportStep = keepReport ? `
+  const reportStep = keepReport
+    ? `
       - name: Stub report (non-blocking)
         run: pnpm run scan:stubs
-` : '';
+`
+    : '';
   return `name: CI
 
 on:
@@ -130,7 +153,10 @@ function ensureCI(deadline, keepReport) {
   const src = read(CI_FILE) || '';
   if (/Stub gate \(enforce after deadline\)/.test(src)) {
     // Update the deadline if different
-    const updated = src.replace(/--fail-after=\d{4}-\d{2}-\d{2}/, `--fail-after=${deadline}`);
+    const updated = src.replace(
+      /--fail-after=\d{4}-\d{2}-\d{2}/,
+      `--fail-after=${deadline}`
+    );
     if (updated !== src) {
       backup(CI_FILE);
       write(CI_FILE, updated);
@@ -140,7 +166,9 @@ function ensureCI(deadline, keepReport) {
     }
     if (keepReport && !/Stub report \(non-blocking\)/.test(updated)) {
       // Insert report step before gate
-      const gateAnchor = updated.indexOf('- name: Stub gate (enforce after deadline)');
+      const gateAnchor = updated.indexOf(
+        '- name: Stub gate (enforce after deadline)'
+      );
       const before = updated.slice(0, gateAnchor);
       const after = updated.slice(gateAnchor);
       const report = `      - name: Stub report (non-blocking)\n        run: pnpm run scan:stubs\n\n`;
@@ -152,7 +180,11 @@ function ensureCI(deadline, keepReport) {
   }
 
   // No stub gate yet: insert before "Web tests" if possible, else append to steps.
-  const gateBlock = `${keepReport ? `      - name: Stub report (non-blocking)\n        run: pnpm run scan:stubs\n\n` : ''}      - name: Stub gate (enforce after deadline)\n        run: pnpm run scan:stubs -- --fail-after=${deadline}\n\n`;
+  const gateBlock = `${
+    keepReport
+      ? `      - name: Stub report (non-blocking)\n        run: pnpm run scan:stubs\n\n`
+      : ''
+  }      - name: Stub gate (enforce after deadline)\n        run: pnpm run scan:stubs -- --fail-after=${deadline}\n\n`;
   let next = src;
   const anchor = '\n      - name: Web tests';
   if (src.includes(anchor)) {
@@ -167,7 +199,9 @@ function ensureCI(deadline, keepReport) {
     write(CI_FILE, next);
     console.log('✓ Inserted stub gate into existing CI workflow');
   } else {
-    console.log('! Could not insert stub gate automatically. Please review .github/workflows/ci.yml');
+    console.log(
+      '! Could not insert stub gate automatically. Please review .github/workflows/ci.yml'
+    );
   }
 }
 

@@ -11,10 +11,19 @@ export default function GoalsPage() {
   const hook = trpc?.goals?.list?.useQuery;
   const query = hook
     ? hook({ userId, status })
-    : { data: null, isLoading: false, error: { message: 'Goals API not available' } };
+    : {
+        data: null,
+        isLoading: false,
+        error: { message: 'Goals API not available' },
+      };
 
   const { data, isLoading, error } = query as {
-    data: null | Array<{ id: string; title: string; status?: string; dueDate?: string | Date }>;
+    data: null | Array<{
+      id: string;
+      title: string;
+      status?: string;
+      dueDate?: string | Date;
+    }>;
     isLoading: boolean;
     error: null | { message: string };
   };
@@ -24,8 +33,15 @@ export default function GoalsPage() {
       <h1 className="text-2xl font-semibold">Goals</h1>
 
       <div className="flex items-center gap-3">
-        <label className="text-sm" htmlFor="statusFilter">Filter status:</label>
-        <select className="border rounded-md px-2 py-1 text-sm" id="statusFilter" value={status ?? ''} onChange={(e)=> setStatus(e.target.value || undefined)}>
+        <label className="text-sm" htmlFor="statusFilter">
+          Filter status:
+        </label>
+        <select
+          className="border rounded-md px-2 py-1 text-sm"
+          id="statusFilter"
+          value={status ?? ''}
+          onChange={(e) => setStatus(e.target.value || undefined)}
+        >
           <option value="">All</option>
           <option value="PLANNED">PLANNED</option>
           <option value="IN_PROGRESS">IN_PROGRESS</option>

@@ -9,19 +9,19 @@ vi.mock('@/trpc', () => ({
           isLoading: false,
           error: null,
           data: [
-  {
-    "id": "1",
-    "title": "Top Referrer",
-    "category": "Networking",
-    "awardedAt": "2025-09-12T17:45:20.970Z"
-  },
-  {
-    "id": "2",
-    "title": "Fastest Apply",
-    "category": "Tracker",
-    "awardedAt": "2025-09-12T17:45:20.970Z"
-  }
-],
+            {
+              id: '1',
+              title: 'Top Referrer',
+              category: 'Networking',
+              awardedAt: '2025-09-12T17:45:20.970Z',
+            },
+            {
+              id: '2',
+              title: 'Fastest Apply',
+              category: 'Tracker',
+              awardedAt: '2025-09-12T17:45:20.970Z',
+            },
+          ],
         }),
       },
     },
@@ -35,7 +35,7 @@ describe('Achievements page', () => {
     render(<Page />);
     expect(screen.getByText('Achievements')).toBeInTheDocument();
     const table = screen.getByRole('table');
-    expect(within(table).getByText(String("Top Referrer"))).toBeInTheDocument();
+    expect(within(table).getByText(String('Top Referrer'))).toBeInTheDocument();
     expect(within(table).getAllByRole('row').length).toBeGreaterThan(1);
   });
 });

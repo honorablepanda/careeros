@@ -40,7 +40,10 @@ function exists(p) {
   }
 }
 function rel(p) {
-  return p.replace(process.cwd(), '').replace(/^[/\\]/, '').replace(/\\/g, '/');
+  return p
+    .replace(process.cwd(), '')
+    .replace(/^[/\\]/, '')
+    .replace(/\\/g, '/');
 }
 
 const ROOT = process.cwd();
@@ -61,7 +64,10 @@ if (exists(projectJson)) {
 if (!sourceRoot && exists(workspaceJson)) {
   const w = readJsonSafe(workspaceJson);
   const webProj = Object.values(w?.projects || {}).find((p) =>
-    (typeof p === 'object' ? p.root : p)?.toString().replace(/\\/g, '/').endsWith('apps/web')
+    (typeof p === 'object' ? p.root : p)
+      ?.toString()
+      .replace(/\\/g, '/')
+      .endsWith('apps/web')
   );
   if (webProj && typeof webProj === 'object' && webProj.sourceRoot) {
     sourceRoot = path.resolve(ROOT, webProj.sourceRoot);
@@ -101,12 +107,16 @@ if (exists(nextConfig)) {
   warn(`Missing ${rel(nextConfig)} (that's ok, Next will use defaults).`);
 }
 if (appDirDisabled) {
-  bad(`experimental.appDir=false detected in next.config.js — App Router will be disabled (your "app/" routes won't work).`);
+  bad(
+    `experimental.appDir=false detected in next.config.js — App Router will be disabled (your "app/" routes won't work).`
+  );
 } else {
   ok(`App Router appears enabled (no "experimental.appDir=false").`);
 }
 if (hasRewrites) {
-  warn(`Detected "rewrites" in next.config.js — verify nothing rewrites "/tracker/:id/activity" or "/tracker/activity".`);
+  warn(
+    `Detected "rewrites" in next.config.js — verify nothing rewrites "/tracker/:id/activity" or "/tracker/activity".`
+  );
 }
 
 // ---------------------------------------------------------------------------
@@ -115,21 +125,32 @@ if (hasRewrites) {
 const checks = [];
 function fileCheck(filePath, description, mustExportDefault = false) {
   if (!exists(filePath)) {
-    checks.push({ ok: false, message: `Missing ${rel(filePath)} (${description}).` });
+    checks.push({
+      ok: false,
+      message: `Missing ${rel(filePath)} (${description}).`,
+    });
     return;
   }
-  checks.push({ ok: true, message: `Found ${rel(filePath)} (${description}).` });
+  checks.push({
+    ok: true,
+    message: `Found ${rel(filePath)} (${description}).`,
+  });
 
   if (mustExportDefault) {
     const code = readTextSafe(filePath) || '';
-    const hasDefault = /export\s+default\s+function|export\s+default\s*\(/.test(code);
+    const hasDefault = /export\s+default\s+function|export\s+default\s*\(/.test(
+      code
+    );
     if (!hasDefault) {
       checks.push({
         ok: false,
         message: `No "export default" React component in ${rel(filePath)}.`,
       });
     } else {
-      checks.push({ ok: true, message: `"export default" present in ${rel(filePath)}.` });
+      checks.push({
+        ok: true,
+        message: `"export default" present in ${rel(filePath)}.`,
+      });
     }
   }
 }
@@ -149,16 +170,32 @@ for (const root of appRoots) {
   fileCheck(path.join(root, 'page.tsx'), 'home page', true);
 
   // Activity routes
-  fileCheck(path.join(root, 'tracker', 'activity', 'page.tsx'), 'querystring activity page', true);
-  fileCheck(path.join(root, 'tracker', '[id]', 'activity', 'page.tsx'), 'dynamic activity page', true);
+  fileCheck(
+    path.join(root, 'tracker', 'activity', 'page.tsx'),
+    'querystring activity page',
+    true
+  );
+  fileCheck(
+    path.join(root, 'tracker', '[id]', 'activity', 'page.tsx'),
+    'dynamic activity page',
+    true
+  );
 }
 
 if (rootsFound.length === 0) {
-  bad(`No app roots found. Checked:\n  - ${rel(appRoots[0])}\n  - ${rel(appRoots[1])}\n  - ${rel(appRoots[2])}`);
+  bad(
+    `No app roots found. Checked:\n  - ${rel(appRoots[0])}\n  - ${rel(
+      appRoots[1]
+    )}\n  - ${rel(appRoots[2])}`
+  );
 } else if (rootsFound.length > 1) {
   warn(
-    `Multiple app roots exist (${rootsFound.map((r) => rel(r)).join(', ')}).\n` +
-      `Depending on Nx/Next wiring, only ONE may be active. Based on sourceRoot, Next likely uses: ${rel(path.join(sourceRoot, 'app'))}`
+    `Multiple app roots exist (${rootsFound
+      .map((r) => rel(r))
+      .join(', ')}).\n` +
+      `Depending on Nx/Next wiring, only ONE may be active. Based on sourceRoot, Next likely uses: ${rel(
+        path.join(sourceRoot, 'app')
+      )}`
   );
 } else {
   ok(`Single app root detected: ${rel(rootsFound[0])}`);
@@ -172,7 +209,12 @@ for (const r of checks) (r.ok ? ok : bad)(r.message);
 // ---------------------------------------------------------------------------
 const trpcReact = path.join(WEB, 'src', 'trpc', 'react.ts');
 if (exists(trpcReact)) ok(`TRPC stub present: ${rel(trpcReact)}`);
-else warn(`Missing TRPC stub: ${rel(trpcReact)} (UI may fail if "@/trpc/react" is imported).`);
+else
+  warn(
+    `Missing TRPC stub: ${rel(
+      trpcReact
+    )} (UI may fail if "@/trpc/react" is imported).`
+  );
 
 // ---------------------------------------------------------------------------
 // 5) Package scripts sanity
@@ -184,9 +226,14 @@ if (!pkg) {
 } else {
   const scripts = pkg.scripts || {};
   const hasDevActivity = !!scripts['dev:activity'];
-  const hasDevWeb = !!scripts['dev:web'] || /web:serve/.test(JSON.stringify(scripts));
-  hasDevActivity ? ok(`package.json script "dev:activity" exists.`) : warn(`Missing "dev:activity" script.`);
-  hasDevWeb ? ok(`package.json dev web script present.`) : warn(`Missing dev web script ("dev:web" or Nx web:serve).`);
+  const hasDevWeb =
+    !!scripts['dev:web'] || /web:serve/.test(JSON.stringify(scripts));
+  hasDevActivity
+    ? ok(`package.json script "dev:activity" exists.`)
+    : warn(`Missing "dev:activity" script.`);
+  hasDevWeb
+    ? ok(`package.json dev web script present.`)
+    : warn(`Missing dev web script ("dev:web" or Nx web:serve).`);
 }
 
 // ---------------------------------------------------------------------------
@@ -196,16 +243,30 @@ console.log('');
 console.log(`${C.cyan}=== Likely 404 Causes & Next Steps ===${C.reset}`);
 
 if (appDirDisabled) {
-  bad(`App Router disabled in next.config.js. Remove "experimental.appDir=false" or move routes to "pages/".`);
+  bad(
+    `App Router disabled in next.config.js. Remove "experimental.appDir=false" or move routes to "pages/".`
+  );
 }
 
 if (rootsFound.length === 0) {
-  bad(`No "app/" directory found under the active source root: ${rel(sourceRoot)}.`);
-  console.log(`Create: ${rel(path.join(sourceRoot, 'app', 'layout.tsx'))} and ${rel(path.join(sourceRoot, 'app', 'tracker', '[id]', 'activity', 'page.tsx'))}`);
+  bad(
+    `No "app/" directory found under the active source root: ${rel(
+      sourceRoot
+    )}.`
+  );
+  console.log(
+    `Create: ${rel(path.join(sourceRoot, 'app', 'layout.tsx'))} and ${rel(
+      path.join(sourceRoot, 'app', 'tracker', '[id]', 'activity', 'page.tsx')
+    )}`
+  );
 }
 
 if (rootsFound.length > 1) {
-  warn(`Multiple app roots — ensure the one under the **active** sourceRoot (${rel(sourceRoot)}) contains the Activity pages.`);
+  warn(
+    `Multiple app roots — ensure the one under the **active** sourceRoot (${rel(
+      sourceRoot
+    )}) contains the Activity pages.`
+  );
 }
 
 const missingCritical = checks.some(
@@ -216,12 +277,18 @@ const missingCritical = checks.some(
       /tracker\/activity\/page\.tsx/.test(c.message))
 );
 if (missingCritical) {
-  bad(`At least one critical route file is missing or lacks "export default". Fix those and retry.`);
+  bad(
+    `At least one critical route file is missing or lacks "export default". Fix those and retry.`
+  );
 } else {
-  ok(`All required route files appear present with default exports (at least in one app root).`);
+  ok(
+    `All required route files appear present with default exports (at least in one app root).`
+  );
   console.log(
     `If you still get 404:\n` +
-      `  1) Verify Nx "sourceRoot" points to the app root you edited: ${rel(sourceRoot)}\n` +
+      `  1) Verify Nx "sourceRoot" points to the app root you edited: ${rel(
+        sourceRoot
+      )}\n` +
       `  2) Ensure dev server is restarted after file changes\n` +
       `  3) Check rewrites in next.config.js aren't intercepting /tracker/*`
   );

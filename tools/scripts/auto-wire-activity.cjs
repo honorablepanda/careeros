@@ -30,10 +30,18 @@ const ROOT = process.cwd();
 
 const stamp = () => new Date().toISOString().replace(/[:.]/g, '-');
 
-function logOK(msg)   { console.log(`✓ ${msg}`); }
-function logInfo(msg) { console.log(`• ${msg}`); }
-function logWarn(msg) { console.log(`! ${msg}`); }
-function logErr(msg)  { console.log(`✗ ${msg}`); }
+function logOK(msg) {
+  console.log(`✓ ${msg}`);
+}
+function logInfo(msg) {
+  console.log(`• ${msg}`);
+}
+function logWarn(msg) {
+  console.log(`! ${msg}`);
+}
+function logErr(msg) {
+  console.log(`✗ ${msg}`);
+}
 
 async function ensureDir(p) {
   await fsp.mkdir(p, { recursive: true });
@@ -60,7 +68,9 @@ async function chooseWebRoot() {
   const webB = path.join(ROOT, 'apps', 'web');
   if (fs.existsSync(webA)) return webA;
   if (fs.existsSync(webB)) return webB;
-  throw new Error('Could not find "web" project (looked for ./web and ./apps/web).');
+  throw new Error(
+    'Could not find "web" project (looked for ./web and ./apps/web).'
+  );
 }
 
 function routeImportToLib(fromFile, webRoot) {
@@ -80,10 +90,13 @@ async function trySeed(appIdHint) {
     let app = null;
 
     if (appIdHint) {
-      app = await prisma.application.findUnique({ where: { id: appIdHint }, select: { id: true  } });
+      app = await prisma.application.findUnique({
+        where: { id: appIdHint },
+        select: { id: true },
+      });
     }
     if (!app) {
-      app = await prisma.application.findFirst({ select: { id: true  } });
+      app = await prisma.application.findFirst({ select: { id: true } });
     }
     if (!app) {
       // Create with minimal likely fields; adjust if your schema requires different ones.
@@ -94,7 +107,7 @@ async function trySeed(appIdHint) {
           role: 'Engineer',
           status: 'APPLIED',
         },
-        select: { id: true  }
+        select: { id: true },
       });
       // Best-effort activity row (if model exists)
       try {
@@ -102,18 +115,29 @@ async function trySeed(appIdHint) {
           data: {
             applicationId: app.id,
             type: 'CREATE',
-            payload: { data: { userId: 'dev-user', company: 'Acme Inc', role: 'Engineer', status: 'APPLIED' } },
+            payload: {
+              data: {
+                userId: 'dev-user',
+                company: 'Acme Inc',
+                role: 'Engineer',
+                status: 'APPLIED',
+              },
+            },
           },
         });
       } catch (e) {
-        logWarn(`Could not create ApplicationActivity (optional): ${e.message}`);
+        logWarn(
+          `Could not create ApplicationActivity (optional): ${e.message}`
+        );
       }
     }
 
     await prisma.$disconnect();
     return app?.id ?? null;
   } catch (e) {
-    logWarn(`Prisma seed skipped (client not available or schema mismatch): ${e.message}`);
+    logWarn(
+      `Prisma seed skipped (client not available or schema mismatch): ${e.message}`
+    );
     return null;
   }
 }
@@ -311,7 +335,13 @@ export default async function ActivityByQueryPage({ searchParams }: Props) {
     await writeFileWithBackup(prismaPath, prismaTs());
 
     // 4) Wire activity pages
-    const dynPage = path.join(appDir, 'tracker', '[id]', 'activity', 'page.tsx');
+    const dynPage = path.join(
+      appDir,
+      'tracker',
+      '[id]',
+      'activity',
+      'page.tsx'
+    );
     const qryPage = path.join(appDir, 'tracker', 'activity', 'page.tsx');
 
     const importDyn = routeImportToLib(dynPage, webRoot); // likely ../../../../lib/prisma
@@ -325,18 +355,26 @@ export default async function ActivityByQueryPage({ searchParams }: Props) {
     if (seededId) {
       logOK(`Seeded or found Application: ${seededId}`);
     } else {
-      logWarn('Could not seed/find an Application id. You can still test with an existing id.');
+      logWarn(
+        'Could not seed/find an Application id. You can still test with an existing id.'
+      );
     }
 
     // 6) Smoke test if dev server is up on :3000
     const testId = seededId ?? 'YOUR_APP_ID';
-    const urlDynamic = `http://localhost:3000/tracker/${encodeURIComponent(testId)}/activity`;
-    const urlQuery = `http://localhost:3000/tracker/activity?id=${encodeURIComponent(testId)}`;
+    const urlDynamic = `http://localhost:3000/tracker/${encodeURIComponent(
+      testId
+    )}/activity`;
+    const urlQuery = `http://localhost:3000/tracker/activity?id=${encodeURIComponent(
+      testId
+    )}`;
 
     logInfo('Checking if dev server is up on http://localhost:3000 …');
     const ping = await fetchIfUp('http://localhost:3000/', 1500);
     if (!ping.ok && ping.status === 0) {
-      logWarn('Dev server not reachable. Start it:  pnpm -w exec nx run web:serve');
+      logWarn(
+        'Dev server not reachable. Start it:  pnpm -w exec nx run web:serve'
+      );
     } else {
       logInfo('Dev server reachable, smoke-testing routes …');
       // Let it warm up slightly
@@ -351,10 +389,14 @@ export default async function ActivityByQueryPage({ searchParams }: Props) {
     }
 
     console.log('\n=== Next steps ===');
-    console.log(`• Start dev server (if not running): pnpm -w exec nx run web:serve`);
+    console.log(
+      `• Start dev server (if not running): pnpm -w exec nx run web:serve`
+    );
     console.log(`• Open: ${urlQuery}`);
     console.log(`• Open: ${urlDynamic}`);
-    console.log('• If you still see no activity, create/update an Application via your API to generate rows, then refresh.');
+    console.log(
+      '• If you still see no activity, create/update an Application via your API to generate rows, then refresh.'
+    );
   } catch (e) {
     logErr(e.stack || e.message);
     process.exit(1);

@@ -61,9 +61,9 @@ async function main() {
     manifest: {
       built: false,
       appPaths: null,
-      routesMatching: []
+      routesMatching: [],
     },
-    suggestions: []
+    suggestions: [],
   };
 
   // 1) Find web project folder
@@ -76,7 +76,7 @@ async function main() {
       'packages/web',
       'apps/site',
       'site',
-    ].map(p => path.join(ROOT, p));
+    ].map((p) => path.join(ROOT, p));
     webPath = candidates.find(exists);
   }
   if (!webPath || !exists(webPath)) {
@@ -94,7 +94,9 @@ async function main() {
   let sourceRoot = pj?.sourceRoot || null;
   if (!sourceRoot) {
     // fallback
-    const guess = path.join(path.relative(ROOT, webPath), 'src').replace(/\\/g, '/');
+    const guess = path
+      .join(path.relative(ROOT, webPath), 'src')
+      .replace(/\\/g, '/');
     sourceRoot = guess;
   }
   const absSourceRoot = path.join(ROOT, sourceRoot);
@@ -110,21 +112,30 @@ async function main() {
   ].filter((p, i, arr) => arr.indexOf(p) === i); // uniq
 
   const foundRoots = rootCandidates.filter(exists);
-  report.rootsFound = foundRoots.map(p => path.relative(ROOT, p));
+  report.rootsFound = foundRoots.map((p) => path.relative(ROOT, p));
 
-  foundRoots.forEach(p => ok(`Found app root: ${path.relative(ROOT, p)}`));
+  foundRoots.forEach((p) => ok(`Found app root: ${path.relative(ROOT, p)}`));
   if (foundRoots.length === 0) {
     bad('No app directory found (looked for src/app and app).');
     add(false, 'No app root folder exists.');
-    report.suggestions.push('Create your app root at {sourceRoot}/app (e.g. apps/web/src/app).');
+    report.suggestions.push(
+      'Create your app root at {sourceRoot}/app (e.g. apps/web/src/app).'
+    );
     return finish(report);
   }
 
   if (foundRoots.length > 1) {
-    warn(`Multiple app roots exist (${report.rootsFound.join(', ')}). Only ONE will be active.`);
+    warn(
+      `Multiple app roots exist (${report.rootsFound.join(
+        ', '
+      )}). Only ONE will be active.`
+    );
     add(false, `Multiple app roots: ${report.rootsFound.join(', ')}`);
     report.suggestions.push(
-      `Keep only one app root. Based on sourceRoot, the active one should be: ${path.join(sourceRoot, 'app')}`
+      `Keep only one app root. Based on sourceRoot, the active one should be: ${path.join(
+        sourceRoot,
+        'app'
+      )}`
     );
   }
 
@@ -137,11 +148,31 @@ async function main() {
 
   // 4) Check critical files for the /tracker/[id]/activity route
   const filesToCheck = [
-    { label: 'root layout', file: path.join(chosenRoot, 'layout.tsx'), requireDefault: true },
-    { label: 'providers (optional)', file: path.join(chosenRoot, 'providers.tsx'), requireDefault: false },
-    { label: 'home page', file: path.join(chosenRoot, 'page.tsx'), requireDefault: true },
-    { label: 'querystring activity page', file: path.join(chosenRoot, 'tracker', 'activity', 'page.tsx'), requireDefault: true },
-    { label: 'dynamic activity page', file: path.join(chosenRoot, 'tracker', '[id]', 'activity', 'page.tsx'), requireDefault: true },
+    {
+      label: 'root layout',
+      file: path.join(chosenRoot, 'layout.tsx'),
+      requireDefault: true,
+    },
+    {
+      label: 'providers (optional)',
+      file: path.join(chosenRoot, 'providers.tsx'),
+      requireDefault: false,
+    },
+    {
+      label: 'home page',
+      file: path.join(chosenRoot, 'page.tsx'),
+      requireDefault: true,
+    },
+    {
+      label: 'querystring activity page',
+      file: path.join(chosenRoot, 'tracker', 'activity', 'page.tsx'),
+      requireDefault: true,
+    },
+    {
+      label: 'dynamic activity page',
+      file: path.join(chosenRoot, 'tracker', '[id]', 'activity', 'page.tsx'),
+      requireDefault: true,
+    },
   ];
 
   for (const f of filesToCheck) {
@@ -150,7 +181,12 @@ async function main() {
       bad(`Missing ${f.label}: ${rel}`);
       report.checks.push({ ok: false, message: `Missing ${f.label}: ${rel}` });
       if (/dynamic activity page/.test(f.label)) {
-        report.suggestions.push(`Create ${path.join(report.chosenRoot, 'tracker/[id]/activity/page.tsx')}`);
+        report.suggestions.push(
+          `Create ${path.join(
+            report.chosenRoot,
+            'tracker/[id]/activity/page.tsx'
+          )}`
+        );
       }
       continue;
     }
@@ -161,11 +197,17 @@ async function main() {
       const src = readFileSafe(f.file);
       if (!hasDefaultExport(src)) {
         bad(`No "export default" in ${rel}`);
-        report.checks.push({ ok: false, message: `No "export default" in ${rel}` });
+        report.checks.push({
+          ok: false,
+          message: `No "export default" in ${rel}`,
+        });
         report.suggestions.push(`Add a default export in ${rel}`);
       } else {
         ok(`"export default" present in ${rel}`);
-        report.checks.push({ ok: true, message: `"export default" present in ${rel}` });
+        report.checks.push({
+          ok: true,
+          message: `"export default" present in ${rel}`,
+        });
       }
     }
   }
@@ -188,7 +230,7 @@ async function main() {
   if (exists(manifestPath)) {
     const manifest = readJSONSafe(manifestPath) || {};
     report.manifest.appPaths = Object.keys(manifest);
-    const matches = Object.keys(manifest).filter(k =>
+    const matches = Object.keys(manifest).filter((k) =>
       /\/tracker(\/\[id\])?\/activity(\/page)?$/i.test(k)
     );
     report.manifest.routesMatching = matches;
@@ -199,10 +241,14 @@ async function main() {
     } else {
       bad('No /tracker/[id]/activity route found in app-paths-manifest.json');
       add(false, 'Route missing from Next app-paths manifest.');
-      report.suggestions.push('Ensure the dynamic page exists and has a default export under the ACTIVE app root.');
+      report.suggestions.push(
+        'Ensure the dynamic page exists and has a default export under the ACTIVE app root.'
+      );
     }
   } else {
-    warn('Manifest not found (dev/Turbopack may not emit it). Run with --build to generate manifests.');
+    warn(
+      'Manifest not found (dev/Turbopack may not emit it). Run with --build to generate manifests.'
+    );
     add(false, 'No manifest file to confirm route presence.');
   }
 
@@ -211,7 +257,10 @@ async function main() {
     `Open: http://localhost:3000/tracker/<AN_ID>/activity  (replace <AN_ID> with a real Application id)`
   );
   report.suggestions.push(
-    `If 404 persists but files look correct, restart dev server and clear Next cache: delete ${path.relative(ROOT, nextDir)}`
+    `If 404 persists but files look correct, restart dev server and clear Next cache: delete ${path.relative(
+      ROOT,
+      nextDir
+    )}`
   );
 
   finish(report);

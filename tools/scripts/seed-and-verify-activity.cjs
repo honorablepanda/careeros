@@ -26,11 +26,14 @@ async function pickApplicationId() {
   if (APP_ID) return APP_ID;
 
   // Try most recent by updatedAt/createdAt; fall back to any.
-  const select = { id: true, userId: true, company: true, role: true, status: true };
-  const tryOrders = [
-    { updatedAt: 'desc' },
-    { createdAt: 'desc' },
-  ];
+  const select = {
+    id: true,
+    userId: true,
+    company: true,
+    role: true,
+    status: true,
+  };
+  const tryOrders = [{ updatedAt: 'desc' }, { createdAt: 'desc' }];
 
   for (const orderBy of tryOrders) {
     try {
@@ -46,12 +49,20 @@ async function seedActivity(appId) {
   // Get the application to mirror into payload.data
   const app = await prisma.application.findUnique({
     where: { id: appId },
-    select: { id: true, userId: true, company: true, title: true, status: true  },
+    select: {
+      id: true,
+      userId: true,
+      company: true,
+      title: true,
+      status: true,
+    },
   });
   if (!app) throw new Error(`Application not found: ${appId}`);
 
-  const existing = await prisma.applicationActivity.findMany({ where: { applicationId: appId }, orderBy: { createdAt: 'desc' },
-    select: { id: true, type: true  },
+  const existing = await prisma.applicationActivity.findMany({
+    where: { applicationId: appId },
+    orderBy: { createdAt: 'desc' },
+    select: { id: true, type: true },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -84,12 +95,16 @@ async function seedActivity(appId) {
   const results = await Promise.allSettled(creates);
   const created = results.filter((r) => r.status === 'fulfilled').length;
 
-  const after = await prisma.applicationActivity.count({ where: { applicationId: appId } });
-  const byType = await prisma.applicationActivity.groupBy({
-    by: ['type'],
+  const after = await prisma.applicationActivity.count({
     where: { applicationId: appId },
-    _count: { _all: true },
-  }).catch(() => []);
+  });
+  const byType = await prisma.applicationActivity
+    .groupBy({
+      by: ['type'],
+      where: { applicationId: appId },
+      _count: { _all: true },
+    })
+    .catch(() => []);
 
   return {
     beforeCount: existing.length,
@@ -130,13 +145,15 @@ async function main() {
 
     // Seed activity
     const seeded = await seedActivity(appId);
-    (seeded.afterCount > seeded.beforeCount)
+    seeded.afterCount > seeded.beforeCount
       ? ok(`Seeded activity rows (+${seeded.afterCount - seeded.beforeCount})`)
       : warn('No new rows inserted (some may already exist)');
     report.results.seed = seeded;
 
     // DB truth check
-    const activityCount = await prisma.applicationActivity.count({ where: { applicationId: appId } });
+    const activityCount = await prisma.applicationActivity.count({
+      where: { applicationId: appId },
+    });
     report.results.db = { activityCount };
 
     if (STRICT && activityCount === 0) {
@@ -150,7 +167,10 @@ async function main() {
     const urlQuery = `${base}/tracker/activity?id=${encodeURIComponent(appId)}`;
     const urlDynamic = `${base}/tracker/${encodeURIComponent(appId)}/activity`;
 
-    const [q, d] = await Promise.all([fetchRoute(urlQuery), fetchRoute(urlDynamic)]);
+    const [q, d] = await Promise.all([
+      fetchRoute(urlQuery),
+      fetchRoute(urlDynamic),
+    ]);
     report.results.web = {
       query: { url: urlQuery, ...q },
       dynamic: { url: urlDynamic, ...d },

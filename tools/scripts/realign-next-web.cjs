@@ -24,7 +24,9 @@ function sh(cmd, opts = {}) {
   }
 }
 
-function ensureDir(p) { fs.mkdirSync(p, { recursive: true }); }
+function ensureDir(p) {
+  fs.mkdirSync(p, { recursive: true });
+}
 function writeIfMissing(file, content) {
   if (fs.existsSync(file)) {
     console.log(`• exists (ok) ${file}`);
@@ -38,13 +40,17 @@ function writeIfMissing(file, content) {
 function detectNxWebProject() {
   const raw = sh('pnpm -w exec nx show project web --json');
   if (!raw) {
-    console.error('Could not read Nx project "web". Try: pnpm -w exec nx show projects');
+    console.error(
+      'Could not read Nx project "web". Try: pnpm -w exec nx show projects'
+    );
     process.exit(1);
   }
   const json = JSON.parse(raw);
   // Nx may return relative paths like "web" or "apps/web"
   const projectPath = path.resolve(ROOT, json.root || 'web');
-  const sourceRoot = json.sourceRoot ? path.resolve(ROOT, json.sourceRoot) : projectPath;
+  const sourceRoot = json.sourceRoot
+    ? path.resolve(ROOT, json.sourceRoot)
+    : projectPath;
   return { projectPath, sourceRoot, json };
 }
 
@@ -128,12 +134,16 @@ export default function ActivityDynamicPage(
   writeIfMissing(dynPath, dynActivity);
 
   console.log('\nNext steps:');
-  console.log('  1) Kill any server on port 3000 (or use another port). On Windows one-liners:');
+  console.log(
+    '  1) Kill any server on port 3000 (or use another port). On Windows one-liners:'
+  );
   console.log('     npx kill-port 3000');
   console.log('  2) Clear Next/Nx cache:');
   console.log('     rimraf ' + path.join(projectPath, '.next') + ' .nx/cache');
   console.log('  3) Serve the Nx "web" project:');
-  console.log('     pnpm -w exec nx run web:serve   # (add --port=3001 if 3000 in use)');
+  console.log(
+    '     pnpm -w exec nx run web:serve   # (add --port=3001 if 3000 in use)'
+  );
   console.log('  4) Try:');
   console.log('     http://localhost:3000/tracker/activity?id=YOUR_APP_ID');
   console.log('     http://localhost:3000/tracker/YOUR_APP_ID/activity');

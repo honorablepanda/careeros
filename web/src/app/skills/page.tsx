@@ -12,7 +12,11 @@ export default function SkillsPage() {
   const hook = trpc?.skills?.list?.useQuery;
   const query = hook
     ? hook({ userId })
-    : { data: null, isLoading: false, error: { message: 'Skills API not available' } };
+    : {
+        data: null,
+        isLoading: false,
+        error: { message: 'Skills API not available' },
+      };
 
   const { data, isLoading, error } = query as {
     data: null | Row[];
@@ -21,10 +25,13 @@ export default function SkillsPage() {
   };
 
   if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
+  if (error)
+    return <main className="p-6 text-red-600">Error: {error.message}</main>;
   if (!data?.length) return <main className="p-6">No skills yet.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => dateValue(b.updatedAt) - dateValue(a.updatedAt));
+  const rows = [...(data ?? [])].sort(
+    (a, b) => dateValue(b.updatedAt) - dateValue(a.updatedAt)
+  );
 
   return (
     <main className="p-6 space-y-4">
@@ -40,9 +47,9 @@ export default function SkillsPage() {
         <tbody>
           {rows.map((r) => (
             <tr key={String(r.id ?? Math.random())} className="border-t">
-                <td className="p-2">{String(r.name ?? '—')}</td>
-                <td className="p-2">{String(r.level ?? '—')}</td>
-                <td className="p-2">{formatDate(r.updatedAt)}</td>
+              <td className="p-2">{String(r.name ?? '—')}</td>
+              <td className="p-2">{String(r.level ?? '—')}</td>
+              <td className="p-2">{formatDate(r.updatedAt)}</td>
             </tr>
           ))}
         </tbody>

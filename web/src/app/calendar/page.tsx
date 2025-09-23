@@ -17,17 +17,24 @@ export default function CalendarPage() {
   const hook = trpc?.calendar?.list?.useQuery;
   const query = hook
     ? hook({ userId })
-    : { data: null, isLoading: false, error: { message: 'Calendar API not available' } };
+    : {
+        data: null,
+        isLoading: false,
+        error: { message: 'Calendar API not available' },
+      };
 
   const { data, isLoading, error } = query as {
-    data: CalEvent[] | null; isLoading: boolean; error: null | { message: string }
+    data: CalEvent[] | null;
+    isLoading: boolean;
+    error: null | { message: string };
   };
 
   if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
+  if (error)
+    return <main className="p-6 text-red-600">Error: {error.message}</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) =>
-    dateValue(a.startsAt) - dateValue(b.startsAt)
+  const rows = [...(data ?? [])].sort(
+    (a, b) => dateValue(a.startsAt) - dateValue(b.startsAt)
   );
 
   return (
@@ -35,7 +42,7 @@ export default function CalendarPage() {
       <h1 className="text-2xl font-semibold">Calendar</h1>
       {rows.length ? (
         <ul className="space-y-2" role="list">
-          {rows.map(ev => (
+          {rows.map((ev) => (
             <li key={ev.id} className="rounded-lg border p-3">
               <div className="text-sm font-medium">{ev.title}</div>
               <div className="text-xs text-gray-500">
@@ -46,7 +53,9 @@ export default function CalendarPage() {
             </li>
           ))}
         </ul>
-      ) : <div>No upcoming events.</div>}
+      ) : (
+        <div>No upcoming events.</div>
+      )}
     </main>
   );
 }

@@ -28,16 +28,21 @@ const cp = require('child_process');
 // --- arg parsing (no deps) ---
 const argv = process.argv.slice(2);
 function getArg(name, def) {
-  const i = argv.findIndex(a => a === `--${name}`);
+  const i = argv.findIndex((a) => a === `--${name}`);
   if (i >= 0) return argv[i + 1];
-  const flag = argv.find(a => a.startsWith(`--${name}=`));
+  const flag = argv.find((a) => a.startsWith(`--${name}=`));
   if (flag) return flag.split('=').slice(1).join('=');
   return def;
 }
-function hasFlag(name) { return argv.includes(`--${name}`); }
+function hasFlag(name) {
+  return argv.includes(`--${name}`);
+}
 
 const APP_ID = getArg('id', process.env.APP_ID || '');
-const HOST = (getArg('host', 'http://localhost') || 'http://localhost').replace(/\/$/, '');
+const HOST = (getArg('host', 'http://localhost') || 'http://localhost').replace(
+  /\/$/,
+  ''
+);
 const PORT = Number(getArg('port', '3000'));
 const OUTPUT_JSON = hasFlag('json');
 const VERBOSE = hasFlag('verbose');
@@ -47,22 +52,31 @@ const issues = [];
 const log = (...a) => console.log(...a);
 const info = (m) => console.log('•', m);
 const ok = (m) => console.log('✓', m);
-const warn = (m) => { console.warn('!', m); };
-const fail = (m) => { console.error('✗', m); issues.push(m); };
+const warn = (m) => {
+  console.warn('!', m);
+};
+const fail = (m) => {
+  console.error('✗', m);
+  issues.push(m);
+};
 
 // --- helpers ---
 function jsonOut(obj) {
   console.log(JSON.stringify(obj, null, 2));
 }
-function rel(p) { return path.relative(process.cwd(), p); }
+function rel(p) {
+  return path.relative(process.cwd(), p);
+}
 
 function hasDefaultExport(file) {
   try {
     const s = fs.readFileSync(file, 'utf8');
     // crude but effective default export detection
-    return /export\s+default\s+(async\s+)?function\s+/m.test(s)
-        || /export\s+default\s+\w+/m.test(s)
-        || /export\s+default\s*\(/m.test(s);
+    return (
+      /export\s+default\s+(async\s+)?function\s+/m.test(s) ||
+      /export\s+default\s+\w+/m.test(s) ||
+      /export\s+default\s*\(/m.test(s)
+    );
   } catch {
     return false;
   }
@@ -72,10 +86,16 @@ function hasDefaultExport(file) {
 function detectWebProject() {
   // Try: nx show project web --json
   try {
-    const out = cp.execSync('pnpm -w exec nx show project web --json', { stdio: ['ignore', 'pipe', 'ignore'] }).toString();
+    const out = cp
+      .execSync('pnpm -w exec nx show project web --json', {
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
+      .toString();
     const j = JSON.parse(out);
     const root = path.resolve(process.cwd(), j.root);
-    const sourceRoot = j.sourceRoot ? path.resolve(process.cwd(), j.sourceRoot) : root;
+    const sourceRoot = j.sourceRoot
+      ? path.resolve(process.cwd(), j.sourceRoot)
+      : root;
     const appDir = path.join(sourceRoot, 'app');
     return { webPath: root, sourceRoot, appDir, via: 'nx' };
   } catch {
@@ -90,7 +110,9 @@ function detectWebProject() {
   for (const appDir of candidates) {
     if (fs.existsSync(appDir)) {
       const maybeSrc = appDir.endsWith(path.join('src', 'app'));
-      const projectRoot = maybeSrc ? path.dirname(path.dirname(appDir)) : path.dirname(appDir);
+      const projectRoot = maybeSrc
+        ? path.dirname(path.dirname(appDir))
+        : path.dirname(appDir);
       const sourceRoot = maybeSrc ? path.dirname(appDir) : projectRoot;
       return { webPath: projectRoot, sourceRoot, appDir, via: 'fallback' };
     }
@@ -111,9 +133,15 @@ async function fetchText(url, opts = {}) {
 
   const proj = detectWebProject();
   if (!proj) {
-    fail('Could not detect a Next.js app directory for the web project (tried apps/web/src/app, apps/web/app, web/app).');
+    fail(
+      'Could not detect a Next.js app directory for the web project (tried apps/web/src/app, apps/web/app, web/app).'
+    );
   } else {
-    ok(`Detected web project: ${rel(proj.webPath)} (app dir: ${rel(proj.appDir)})`);
+    ok(
+      `Detected web project: ${rel(proj.webPath)} (app dir: ${rel(
+        proj.appDir
+      )})`
+    );
   }
 
   // Route files to check
@@ -168,11 +196,16 @@ async function fetchText(url, opts = {}) {
     try {
       const { PrismaClient } = require('@prisma/client');
       const p = new PrismaClient();
-      const app = await p.application.findUnique({ where: { id: APP_ID }, select: { id: true  } });
+      const app = await p.application.findUnique({
+        where: { id: APP_ID },
+        select: { id: true },
+      });
       applicationExists = !!app;
       if (applicationExists) ok(`Application exists in DB: ${APP_ID}`);
       else fail(`No Application found with id ${APP_ID} (Prisma)`);
-      activityCount = await p.applicationActivity.count({ where: { applicationId: APP_ID } });
+      activityCount = await p.applicationActivity.count({
+        where: { applicationId: APP_ID },
+      });
       prismaChecked = true;
       await p.$disconnect();
       info(`Prisma activity count: ${activityCount}`);
@@ -185,8 +218,16 @@ async function fetchText(url, opts = {}) {
   const results = {};
   if (serverOk && proj) {
     const endpoints = [
-      { role: 'query', url: `${HOST}:${PORT}/tracker/activity?id=${encodeURIComponent(APP_ID)}` },
-      { role: 'dynamic', url: `${HOST}:${PORT}/tracker/${encodeURIComponent(APP_ID)}/activity` },
+      {
+        role: 'query',
+        url: `${HOST}:${PORT}/tracker/activity?id=${encodeURIComponent(
+          APP_ID
+        )}`,
+      },
+      {
+        role: 'dynamic',
+        url: `${HOST}:${PORT}/tracker/${encodeURIComponent(APP_ID)}/activity`,
+      },
     ];
 
     for (const ep of endpoints) {

@@ -11,7 +11,11 @@ export default function MetricsPage() {
   const hook = trpc?.metrics?.list?.useQuery;
   const query = hook
     ? hook({ userId })
-    : { data: null, isLoading: false, error: { message: 'Metrics API not available' } };
+    : {
+        data: null,
+        isLoading: false,
+        error: { message: 'Metrics API not available' },
+      };
 
   const { data, isLoading, error } = query as {
     data: null | Row[];
@@ -20,10 +24,13 @@ export default function MetricsPage() {
   };
 
   if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
+  if (error)
+    return <main className="p-6 text-red-600">Error: {error.message}</main>;
   if (!data?.length) return <main className="p-6">No metrics yet.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => String(a.kpi ?? '').localeCompare(String(b.kpi ?? '')));
+  const rows = [...(data ?? [])].sort((a, b) =>
+    String(a.kpi ?? '').localeCompare(String(b.kpi ?? ''))
+  );
 
   return (
     <main className="p-6 space-y-4">
@@ -39,9 +46,9 @@ export default function MetricsPage() {
         <tbody>
           {rows.map((r) => (
             <tr key={String(r.id ?? Math.random())} className="border-t">
-                <td className="p-2">{String(r.kpi ?? '—')}</td>
-                <td className="p-2">{String(r.value ?? '—')}</td>
-                <td className="p-2">{String(r.period ?? '—')}</td>
+              <td className="p-2">{String(r.kpi ?? '—')}</td>
+              <td className="p-2">{String(r.value ?? '—')}</td>
+              <td className="p-2">{String(r.period ?? '—')}</td>
             </tr>
           ))}
         </tbody>

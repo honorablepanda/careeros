@@ -17,9 +17,19 @@ const DO_COMMIT = process.argv.includes('--commit');
 const DO_PUSH = process.argv.includes('--push');
 
 const P = (...p) => path.join(ROOT, ...p);
-const has = (p) => { try { fs.accessSync(p); return true; } catch { return false; } };
+const has = (p) => {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
 const read = (p) => fs.readFileSync(p, 'utf8');
-const write = (p, s) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, s); };
+const write = (p, s) => {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s);
+};
 const same = (a, b) => a.replace(/\r\n/g, '\n') === b.replace(/\r\n/g, '\n');
 
 function upsertFile(filePath, desired, label) {
@@ -30,7 +40,9 @@ function upsertFile(filePath, desired, label) {
       return false;
     }
     if (!FORCE) {
-      console.log(`⏭  exists ${label} -> ${filePath} (use --force to overwrite)`);
+      console.log(
+        `⏭  exists ${label} -> ${filePath} (use --force to overwrite)`
+      );
       return false;
     }
   }
@@ -165,7 +177,10 @@ function patchTrackerPage() {
 
   // import getUserId
   if (!/from ['"]@\/lib\/user['"]/.test(s)) {
-    s = s.replace(/^(\s*import\s+\*\s+as\s+React[^\n]*\n)/, `$1import { getUserId } from '@/lib/user';\n`);
+    s = s.replace(
+      /^(\s*import\s+\*\s+as\s+React[^\n]*\n)/,
+      `$1import { getUserId } from '@/lib/user';\n`
+    );
     changed = true;
   }
   // replace 'demo-user'
@@ -174,7 +189,11 @@ function patchTrackerPage() {
     changed = true;
   }
   // ensure real hook usage if a resilient fallback was used
-  if (/const hook = \(trpc as any\)\?\.tracker\?\.getApplications\?\.useQuery/.test(s)) {
+  if (
+    /const hook = \(trpc as any\)\?\.tracker\?\.getApplications\?\.useQuery/.test(
+      s
+    )
+  ) {
     s = s.replace(
       /const hook =[\s\S]*?;\n\s*const query =[\s\S]*?;\n\s*const \{ data, isLoading, error \} = query as[^\n]*\n/,
       `const { data, isLoading, error } = trpc.tracker.getApplications.useQuery({ userId: getUserId() }, { keepPreviousData: true });\n`
@@ -255,8 +274,12 @@ function run(cmd) {
 function maybeCommit() {
   if (!DO_COMMIT) return;
   try {
-    run(`git add "${TRACKER_TYPES}" "${TRACKER_ROUTER}" "${TRACKER_TEST}" "${TRACKER_PAGE}"`);
-    run(`git commit -m "feat(tracker): Phase 3 finalizer (types, router CRUD, UI hook, tests)"`);
+    run(
+      `git add "${TRACKER_TYPES}" "${TRACKER_ROUTER}" "${TRACKER_TEST}" "${TRACKER_PAGE}"`
+    );
+    run(
+      `git commit -m "feat(tracker): Phase 3 finalizer (types, router CRUD, UI hook, tests)"`
+    );
     console.log('✓ committed Phase 3 tracker changes');
   } catch (e) {
     console.warn('⏭  commit skipped:', e?.message || e);

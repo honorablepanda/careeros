@@ -130,7 +130,8 @@ function applyFixes(source, fileAbs) {
     // Avoid touching identifiers named 'role' in props typing by requiring dot access.
     // Also avoid replacing string literals.
     content = content.replace(/(\.[ \t]*)role\b/g, '$1title');
-    if (content !== before) changes.push('replaced property access .role → .title');
+    if (content !== before)
+      changes.push('replaced property access .role → .title');
   }
 
   // 3) If file uses trpc.auth.*, make it type-safe by using `anyTrpc`
@@ -141,14 +142,19 @@ function applyFixes(source, fileAbs) {
   {
     if (/\btrpc\.auth\./.test(content)) {
       // find end of import block (first blank line after last import)
-      const importBlockMatch = content.match(/^(?:import[\s\S]*?\n)(?!import)/m);
+      const importBlockMatch = content.match(
+        /^(?:import[\s\S]*?\n)(?!import)/m
+      );
       let injected = false;
       if (importBlockMatch) {
         const injectLine = `\n// Routed through anyTrpc to tolerate missing routers during type-check/build\n// eslint-disable-next-line @typescript-eslint/no-explicit-any\nconst anyTrpc = (trpc as any);\n`;
         const before = content;
         // If already injected, don't duplicate
         if (!/const\s+anyTrpc\s*=\s*\(trpc\s+as\s+any\)/.test(content)) {
-          content = before.replace(importBlockMatch[0], importBlockMatch[0] + injectLine);
+          content = before.replace(
+            importBlockMatch[0],
+            importBlockMatch[0] + injectLine
+          );
           injected = content !== before;
         }
       }
@@ -168,7 +174,8 @@ function applyFixes(source, fileAbs) {
       /update\.mutate\s*\(\s*form\s*\)/g,
       'update.mutate((form as unknown) as any)'
     );
-    if (content !== before) changes.push('cast update.mutate(form) → any (settings page)');
+    if (content !== before)
+      changes.push('cast update.mutate(form) → any (settings page)');
   }
 
   return { content, changes };
@@ -240,7 +247,11 @@ function applyFixes(source, fileAbs) {
 
 function writeLogAndExit(code) {
   try {
-    fs.writeFileSync(path.join(ROOT, LOG_PATH), logLines.join('\n') + '\n', 'utf8');
+    fs.writeFileSync(
+      path.join(ROOT, LOG_PATH),
+      logLines.join('\n') + '\n',
+      'utf8'
+    );
     console.log(`\nLog written: ${LOG_PATH}`);
   } catch (e) {
     console.error(`! Failed to write log: ${e.message}`);

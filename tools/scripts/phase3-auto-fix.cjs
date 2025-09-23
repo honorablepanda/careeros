@@ -36,7 +36,8 @@ function patchSummary(src) {
 
   // --- Patch A: Replace statusMap reduce<> with a for..of aggregation (avoids "Untyped function calls may not accept type arguments")
   // Match the entire "const statusMap = statuses.reduce<...>(...);" block, being tolerant of whitespace/newlines.
-  const reduceBlockRe = /const\s+statusMap\s*=\s*statuses\.reduce\s*<\s*Record\s*<\s*string\s*,\s*number\s*>\s*>\s*\(\s*\(\s*acc\s*,\s*\{\s*status\s*\}\s*\)\s*=>\s*\{\s*([\s\S]*?)\}\s*\)\s*;?/m;
+  const reduceBlockRe =
+    /const\s+statusMap\s*=\s*statuses\.reduce\s*<\s*Record\s*<\s*string\s*,\s*number\s*>\s*>\s*\(\s*\(\s*acc\s*,\s*\{\s*status\s*\}\s*\)\s*=>\s*\{\s*([\s\S]*?)\}\s*\)\s*;?/m;
 
   if (reduceBlockRe.test(out)) {
     out = out.replace(
@@ -47,11 +48,14 @@ for (const { status } of statuses) {
   statusMap[key] = (statusMap[key] ?? 0) + 1;
 }`
     );
-    console.log('• summary.ts: replaced statuses.reduce<...> with for..of accumulator');
+    console.log(
+      '• summary.ts: replaced statuses.reduce<...> with for..of accumulator'
+    );
     changed = true;
   } else {
     // Fallback: catch any reduce with generic OR reduce without initial value
-    const anyReduceRe = /const\s+statusMap\s*=\s*statuses\.reduce\s*\(\s*\(\s*acc\s*,\s*\{\s*status\s*\}\s*\)\s*=>\s*\{\s*([\s\S]*?)\}\s*\)\s*;?/m;
+    const anyReduceRe =
+      /const\s+statusMap\s*=\s*statuses\.reduce\s*\(\s*\(\s*acc\s*,\s*\{\s*status\s*\}\s*\)\s*=>\s*\{\s*([\s\S]*?)\}\s*\)\s*;?/m;
     if (anyReduceRe.test(out)) {
       out = out.replace(
         anyReduceRe,
@@ -61,12 +65,14 @@ for (const { status } of statuses) {
   statusMap[key] = (statusMap[key] ?? 0) + 1;
 }`
       );
-      console.log('• summary.ts: replaced statuses.reduce(...) with for..of accumulator');
+      console.log(
+        '• summary.ts: replaced statuses.reduce(...) with for..of accumulator'
+      );
       changed = true;
     }
   }
 
-  // --- Patch B: Replace Object.entries(statusMap).map(([status, count]) => ({ status, count })) 
+  // --- Patch B: Replace Object.entries(statusMap).map(([status, count]) => ({ status, count }))
   // with Object.keys(statusMap).map(status => ({ status, count: statusMap[status] ?? 0 }))
   const entriesMapRe =
     /const\s+statusCounts\s*:\s*StatusCount\[\]\s*=\s*Object\.entries\(\s*statusMap\s*\)\.map\(\s*\(\s*\[\s*status\s*,\s*count\s*\]\s*\)\s*=>\s*\(\s*\{\s*status\s*,\s*count\s*\}\s*\)\s*\)\s*;?/m;
@@ -79,7 +85,9 @@ for (const { status } of statuses) {
   count: statusMap[status] ?? 0,
 }));`
     );
-    console.log('• summary.ts: swapped Object.entries(...) for Object.keys(...) to keep count:number');
+    console.log(
+      '• summary.ts: swapped Object.entries(...) for Object.keys(...) to keep count:number'
+    );
     changed = true;
   }
 
@@ -91,13 +99,12 @@ function patchVitestConfig(src) {
   let out = src;
 
   // Fix include: src/**/*.{test,spec }.{ts,tsx}  ->  src/**/*.{test,spec}.{ts,tsx}
-  out = out.replace(
-    /(\{\s*test\s*,\s*spec)\s+\}\.\{ts,tsx\}/g,
-    '$1}.{ts,tsx}'
-  );
+  out = out.replace(/(\{\s*test\s*,\s*spec)\s+\}\.\{ts,tsx\}/g, '$1}.{ts,tsx}');
 
   if (out !== src) {
-    console.log('• vitest.config.ts: fixed include glob (removed stray space after "spec")');
+    console.log(
+      '• vitest.config.ts: fixed include glob (removed stray space after "spec")'
+    );
     changed = true;
   }
 
@@ -111,7 +118,10 @@ function patchVitestConfig(src) {
 }
 
 function run(cmd, args) {
-  return cp.spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32' });
+  return cp.spawnSync(cmd, args, {
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
 }
 
 // ---- Run patches

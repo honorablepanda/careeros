@@ -4,11 +4,14 @@ import { prisma } from '../../../lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ActivityPage(props: { searchParams?: Record<string, string | string[] | undefined> }) {
+export default async function ActivityPage(props: {
+  searchParams?: Record<string, string | string[] | undefined>;
+}) {
   // Next 15 can type searchParams as a Promise in generated types.
-  const sp = props?.searchParams && typeof props.searchParams.then === 'function'
-    ? await props.searchParams
-    : props?.searchParams;
+  const sp =
+    props?.searchParams && typeof props.searchParams.then === 'function'
+      ? await props.searchParams
+      : props?.searchParams;
 
   const idRaw: unknown = sp?.id;
   const id = typeof idRaw === 'string' ? idRaw.trim() : '';
@@ -18,7 +21,7 @@ export default async function ActivityPage(props: { searchParams?: Record<string
     const recent = await prisma.applicationActivity.findMany({
       orderBy: { createdAt: 'desc' },
       take: 10,
-      select: { id: true, type: true, payload: true, createdAt: true  },
+      select: { id: true, type: true, payload: true, createdAt: true },
     });
 
     return (
@@ -27,10 +30,13 @@ export default async function ActivityPage(props: { searchParams?: Record<string
           Tracker Activity
         </h1>
         <p style={{ marginBottom: 16, color: '#666' }}>
-          Provide an <code>?id=...</code> query parameter to view a specific application’s activity.
+          Provide an <code>?id=...</code> query parameter to view a specific
+          application’s activity.
         </p>
 
-        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>Recent Activity</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>
+          Recent Activity
+        </h2>
         {recent.length === 0 ? (
           <p>— No recent activity —</p>
         ) : (
@@ -75,10 +81,12 @@ export default async function ActivityPage(props: { searchParams?: Record<string
   const [app, activity] = await Promise.all([
     prisma.application.findUnique({
       where: { id },
-      select: { id: true, company: true, status: true  }, // no 'role' – not in schema
+      select: { id: true, company: true, status: true }, // no 'role' – not in schema
     }),
-    prisma.applicationActivity.findMany({ where: { applicationId: id }, orderBy: { createdAt: 'desc' },
-      select: { id: true, type: true, payload: true, createdAt: true  },
+    prisma.applicationActivity.findMany({
+      where: { applicationId: id },
+      orderBy: { createdAt: 'desc' },
+      select: { id: true, type: true, payload: true, createdAt: true },
     }),
   ]);
 
@@ -96,8 +104,12 @@ export default async function ActivityPage(props: { searchParams?: Record<string
       ) : (
         <section>
           <div style={{ marginBottom: 16 }}>
-            <div><strong>Company:</strong> {app.company}</div>
-            <div><strong>Status:</strong> {app.status}</div>
+            <div>
+              <strong>Company:</strong> {app.company}
+            </div>
+            <div>
+              <strong>Status:</strong> {app.status}
+            </div>
           </div>
 
           <h2 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>

@@ -1,9 +1,11 @@
 const fs = require('fs');
 const path = require('path');
 
-const file = path.join('apps','api','src','trpc','root.ts');
+const file = path.join('apps', 'api', 'src', 'trpc', 'root.ts');
 if (!fs.existsSync(file)) {
-  console.error('! Missing apps/api/src/trpc/root.ts — adjust path if your root is elsewhere.');
+  console.error(
+    '! Missing apps/api/src/trpc/root.ts — adjust path if your root is elsewhere.'
+  );
   process.exit(1);
 }
 let s = fs.readFileSync(file, 'utf8');
@@ -18,15 +20,14 @@ if (!/trackerRouter/.test(s)) {
 }
 
 // Ensure createTRPCRouter call includes { tracker: trackerRouter }
-s = s.replace(
-  /createTRPCRouter\s*\(\s*\{\s*([\s\S]*?)\}\s*\)/m,
-  (m, inner) => {
-    if (/[\s{,]tracker\s*:\s*trackerRouter[\s},]/.test(inner)) return m; // already wired
-    const cleaned = inner.trim();
-    const prefix = cleaned.length ? cleaned.replace(/[\s\r\n]+$/,'') + ',\n  ' : '';
-    return `createTRPCRouter({\n  ${prefix}tracker: trackerRouter\n})`;
-  }
-);
+s = s.replace(/createTRPCRouter\s*\(\s*\{\s*([\s\S]*?)\}\s*\)/m, (m, inner) => {
+  if (/[\s{,]tracker\s*:\s*trackerRouter[\s},]/.test(inner)) return m; // already wired
+  const cleaned = inner.trim();
+  const prefix = cleaned.length
+    ? cleaned.replace(/[\s\r\n]+$/, '') + ',\n  '
+    : '';
+  return `createTRPCRouter({\n  ${prefix}tracker: trackerRouter\n})`;
+});
 
 // Ensure we export AppRouter type (scanner often checks this too)
 if (!/export\s+type\s+AppRouter\s*=\s*typeof\s+appRouter/.test(s)) {

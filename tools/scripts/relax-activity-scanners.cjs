@@ -47,6 +47,6 @@ const norm = src.replace(/\\r\\n/g, '\\n').replace(/\\r/g, '\\n');`
   'tools/scripts/verify-activity.cjs',
   'tools/scripts/deep-scan-activity.cjs',
   'tools/scripts/scan-tracker-activity.cjs',
-].forEach(p => {
+].forEach((p) => {
   if (fs.existsSync(p)) robustify(p);
 });

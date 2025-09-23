@@ -1,0 +1,166 @@
+{
+  "summary": {
+    "PERF": 2,
+    "SETUP": 1,
+    "SUSPECT_CLI": 1,
+    "OPEN_HANDLE": 8,
+    "TRPC_TEST": 9,
+    "SMELL": 1
+  },
+  "findings": [
+    {
+      "type": "PERF",
+      "file": "tools\\reports\\scan-2025-09-17-19-04-28.json",
+      "line": 1,
+      "message": "Large file (1.16 MB)",
+      "snippet": ""
+    },
+    {
+      "type": "PERF",
+      "file": "tools\\reports\\scan-2025-09-17-19-05-06.json",
+      "line": 1,
+      "message": "Large file (1.15 MB)",
+      "snippet": ""
+    },
+    {
+      "type": "SETUP",
+      "file": "web\\vitest.setup.ts",
+      "line": 1,
+      "message": "Missing: globalThis.React = React (helps JSX in some paths)",
+      "snippet": ""
+    },
+    {
+      "type": "SUSPECT_CLI",
+      "file": "README.md",
+      "line": 1,
+      "message": "CLI command or heredoc embedded in source",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "scan-results.json",
+      "line": 11,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "scan-results.json",
+      "line": 18,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "scan-results.json",
+      "line": 25,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "tools\\scripts\\add-summary-feature.cjs",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "tools\\scripts\\auto-fix-web-build.cjs",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\auto-wire-activity.cjs",
+      "line": 148,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\dev-activity.cjs",
+      "line": 254,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\patch-next15-activity-pages.cjs",
+      "line": 276,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "tools\\scripts\\phase3-settings.cjs",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "tools\\scripts\\phase3-tracker.cjs",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "tools\\scripts\\scaffold-activity-ui.cjs",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "tools\\scripts\\scaffold-tracker.cjs",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "SMELL",
+      "file": "tools\\scripts\\scan-project.cjs",
+      "line": 83,
+      "message": "Duplicate const assignment",
+      "snippet": "\n    // Duplicate “const { unmount } = const { unmount } = …”\n    scanRegex(text, /const\\s*\\{\\s*unmount\\s*\\}\\s*=\\s*const\\s*\\{\\s*unmount\\s*\\}/g,"
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\scan-project.cjs",
+      "line": 89,
+      "message": "Found setTimeout(",
+      "snippet": ""
+    },
+    {
+      "type": "OPEN_HANDLE",
+      "file": "tools\\scripts\\scan-project.cjs",
+      "line": 90,
+      "message": "Found setInterval(",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "tools\\scripts\\scriptsphase3-tracker.cjs",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "web\\src\\app\\tracker\\AddApplicationForm.tsx",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    },
+    {
+      "type": "TRPC_TEST",
+      "file": "web\\test\\trpc.mock.ts",
+      "line": 1,
+      "message": "Uses trpc hooks but no colocated spec found",
+      "snippet": ""
+    }
+  ]
+}

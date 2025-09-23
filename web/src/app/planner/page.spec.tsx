@@ -9,19 +9,19 @@ vi.mock('@/trpc', () => ({
           isLoading: false,
           error: null,
           data: [
-  {
-    "id": "1",
-    "task": "Update resume",
-    "status": "IN_PROGRESS",
-    "dueDate": "2025-09-12T17:45:20.970Z"
-  },
-  {
-    "id": "2",
-    "task": "Reach out to Ben",
-    "status": "PLANNED",
-    "dueDate": "2025-09-12T17:45:20.970Z"
-  }
-],
+            {
+              id: '1',
+              task: 'Update resume',
+              status: 'IN_PROGRESS',
+              dueDate: '2025-09-12T17:45:20.970Z',
+            },
+            {
+              id: '2',
+              task: 'Reach out to Ben',
+              status: 'PLANNED',
+              dueDate: '2025-09-12T17:45:20.970Z',
+            },
+          ],
         }),
       },
     },
@@ -35,7 +35,9 @@ describe('Planner page', () => {
     render(<Page />);
     expect(screen.getByText('Planner')).toBeInTheDocument();
     const table = screen.getByRole('table');
-    expect(within(table).getByText(String("Update resume"))).toBeInTheDocument();
+    expect(
+      within(table).getByText(String('Update resume'))
+    ).toBeInTheDocument();
     expect(within(table).getAllByRole('row').length).toBeGreaterThan(1);
   });
 });

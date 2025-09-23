@@ -1,12 +1,12 @@
 # pnpm-workspace.yaml (repo root)
 packages:
-  - "web"
-  - "apps/*"        # <- this is what makes pnpm see apps/api
-  - "web-e2e"       # keep ONLY if it has a package.json
-  - "api-e2e"       # keep ONLY if it has a package.json
-  - "shared/*"
-  - "libs/*"
-  - "tools/*"
+  - 'web'
+  - 'apps/*' # <- this is what makes pnpm see apps/api
+  - 'web-e2e' # keep ONLY if it has a package.json
+  - 'api-e2e' # keep ONLY if it has a package.json
+  - 'shared/*'
+  - 'libs/*'
+  - 'tools/*'
 
 onlyBuiltDependencies:
-  - "@prisma/client"
+  - '@prisma/client'

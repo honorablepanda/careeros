@@ -13,9 +13,12 @@ type LatestItem = {
 
 export default function DashboardPage() {
   // summary router may be absent in this build; call defensively
-const _summaryHook = (trpc as any)?.summary?.get?.useQuery;
-const { data, isLoading, error } =
-  (_summaryHook?.() as any) ?? { data: null, isLoading: false, error: null };
+  const _summaryHook = (trpc as any)?.summary?.get?.useQuery;
+  const { data, isLoading, error } = (_summaryHook?.() as any) ?? {
+    data: null,
+    isLoading: false,
+    error: null,
+  };
 
   if (isLoading) {
     return (

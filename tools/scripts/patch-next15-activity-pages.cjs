@@ -8,25 +8,40 @@ const path = require('path');
 
 const ROOT = process.cwd();
 
-function logOK(m){console.log(`✓ ${m}`);}
-function logI(m){console.log(`• ${m}`);}
-function logW(m){console.log(`! ${m}`);}
-function logX(m){console.log(`✗ ${m}`);}
-const rel = p => path.relative(ROOT, p).replace(/\\/g,'/');
+function logOK(m) {
+  console.log(`✓ ${m}`);
+}
+function logI(m) {
+  console.log(`• ${m}`);
+}
+function logW(m) {
+  console.log(`! ${m}`);
+}
+function logX(m) {
+  console.log(`✗ ${m}`);
+}
+const rel = (p) => path.relative(ROOT, p).replace(/\\/g, '/');
 
 async function chooseWebRoot() {
   const a = path.join(ROOT, 'web');
   const b = path.join(ROOT, 'apps', 'web');
   if (fs.existsSync(a)) return a;
   if (fs.existsSync(b)) return b;
-  throw new Error('Could not locate "web" project (looked for ./web and ./apps/web).');
+  throw new Error(
+    'Could not locate "web" project (looked for ./web and ./apps/web).'
+  );
 }
 
-async function ensureDir(p){ await fsp.mkdir(p, { recursive: true }); }
+async function ensureDir(p) {
+  await fsp.mkdir(p, { recursive: true });
+}
 
 function importPathToLib(fromFile, webRoot) {
   const to = path.join(webRoot, 'lib', 'prisma.ts');
-  const rp = path.relative(path.dirname(fromFile), to).replace(/\\/g,'/').replace(/\.ts$/,'');
+  const rp = path
+    .relative(path.dirname(fromFile), to)
+    .replace(/\\/g, '/')
+    .replace(/\.ts$/, '');
   return rp.startsWith('.') ? rp : `./${rp}`;
 }
 
@@ -184,14 +199,12 @@ export default async function ActivityByQueryPage({ searchParams }: Props) {
 }
 
 async function addHydrationSuppressToLayout(layoutPath) {
-  if (!fs.existsSync(layoutPath)) return { changed: false, reason: 'layout.tsx not found' };
+  if (!fs.existsSync(layoutPath))
+    return { changed: false, reason: 'layout.tsx not found' };
   let src = await fsp.readFile(layoutPath, 'utf8');
   // Add suppressHydrationWarning to <body> (or to <html> if you prefer)
   if (/\<body([^>]*)\>/.test(src) && !/suppressHydrationWarning/.test(src)) {
-    src = src.replace(
-      /\<body([^>]*)\>/,
-      '<body$1 suppressHydrationWarning>'
-    );
+    src = src.replace(/\<body([^>]*)\>/, '<body$1 suppressHydrationWarning>');
     await fsp.writeFile(layoutPath, src, 'utf8');
     return { changed: true };
   }
@@ -213,17 +226,42 @@ async function seedOrFindAppId() {
   try {
     const { PrismaClient } = require('@prisma/client');
     const p = new PrismaClient();
-    const found = await p.application.findFirst({ select: { id: true  }, orderBy: { updatedAt: 'desc' } }).catch(()=>null);
-    if (found?.id) { await p.$disconnect(); return found.id; }
-    const created = await p.application.create({
-      data: { userId: 'dev-user', company: 'Acme Inc', role: 'Engineer', status: 'APPLIED' },
-      select: { id: true  }
-    }).catch(()=>null);
+    const found = await p.application
+      .findFirst({ select: { id: true }, orderBy: { updatedAt: 'desc' } })
+      .catch(() => null);
+    if (found?.id) {
+      await p.$disconnect();
+      return found.id;
+    }
+    const created = await p.application
+      .create({
+        data: {
+          userId: 'dev-user',
+          company: 'Acme Inc',
+          role: 'Engineer',
+          status: 'APPLIED',
+        },
+        select: { id: true },
+      })
+      .catch(() => null);
     if (created?.id) {
       // best-effort activity
-      await p.applicationActivity?.create?.({
-        data: { applicationId: created.id, type: 'CREATE', payload: { data: { userId: 'dev-user', company: 'Acme Inc', role: 'Engineer', status: 'APPLIED' } } }
-      }).catch(()=>{});
+      await p.applicationActivity
+        ?.create?.({
+          data: {
+            applicationId: created.id,
+            type: 'CREATE',
+            payload: {
+              data: {
+                userId: 'dev-user',
+                company: 'Acme Inc',
+                role: 'Engineer',
+                status: 'APPLIED',
+              },
+            },
+          },
+        })
+        .catch(() => {});
     }
     await p.$disconnect();
     return created?.id ?? null;
@@ -251,7 +289,13 @@ async function fetchIfUp(url, timeoutMs = 2500) {
 
     const appDir = path.join(webRoot, 'app');
     const layoutPath = path.join(appDir, 'layout.tsx');
-    const dynPath = path.join(appDir, 'tracker', '[id]', 'activity', 'page.tsx');
+    const dynPath = path.join(
+      appDir,
+      'tracker',
+      '[id]',
+      'activity',
+      'page.tsx'
+    );
     const qryPath = path.join(appDir, 'tracker', 'activity', 'page.tsx');
 
     // Patch pages to Next 15 async params/searchParams & hydration-safe dates
@@ -263,29 +307,44 @@ async function fetchIfUp(url, timeoutMs = 2500) {
 
     // Suppress hydration mismatches from extensions on <body>
     const res = await addHydrationSuppressToLayout(layoutPath);
-    if (res.changed) logOK(`added suppressHydrationWarning to ${rel(layoutPath)}`);
+    if (res.changed)
+      logOK(`added suppressHydrationWarning to ${rel(layoutPath)}`);
     else logI(`layout.tsx hydration suppression: ${res.reason}`);
 
     const id = await seedOrFindAppId();
     if (id) logOK(`Using Application id: ${id}`);
-    else logW('No Application id found/seeded (Prisma optional). You can still open the pages with an existing id.');
+    else
+      logW(
+        'No Application id found/seeded (Prisma optional). You can still open the pages with an existing id.'
+      );
 
     // Smoke check
-    const dynUrl = `http://localhost:3000/tracker/${encodeURIComponent(id ?? 'YOUR_APP_ID')}/activity`;
-    const qryUrl = `http://localhost:3000/tracker/activity?id=${encodeURIComponent(id ?? 'YOUR_APP_ID')}`;
+    const dynUrl = `http://localhost:3000/tracker/${encodeURIComponent(
+      id ?? 'YOUR_APP_ID'
+    )}/activity`;
+    const qryUrl = `http://localhost:3000/tracker/activity?id=${encodeURIComponent(
+      id ?? 'YOUR_APP_ID'
+    )}`;
 
     logI('Checking dev server on :3000 …');
     const ping = await fetchIfUp('http://localhost:3000/');
     if (ping.status === 0) {
-      logW('Dev server not reachable. Start it with: pnpm -w exec nx run web:serve');
+      logW(
+        'Dev server not reachable. Start it with: pnpm -w exec nx run web:serve'
+      );
     } else {
-      const [r1, r2] = await Promise.all([fetchIfUp(dynUrl), fetchIfUp(qryUrl)]);
+      const [r1, r2] = await Promise.all([
+        fetchIfUp(dynUrl),
+        fetchIfUp(qryUrl),
+      ]);
       (r1.status === 200 ? logOK : logW)(`HTTP ${r1.status} → ${r1.url}`);
       (r2.status === 200 ? logOK : logW)(`HTTP ${r2.status} → ${r2.url}`);
     }
 
     console.log('\nNext steps:');
-    console.log('  • Restart the dev server if it was running (so files are picked up).');
+    console.log(
+      '  • Restart the dev server if it was running (so files are picked up).'
+    );
     console.log('    pnpm -w exec nx run web:serve');
     console.log(`  • Open: ${qryUrl}`);
     console.log(`  • Open: ${dynUrl}`);

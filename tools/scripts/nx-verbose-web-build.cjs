@@ -10,9 +10,26 @@ const PROJECT_JSON = path.join(WEB, 'project.json');
 const NEXT_DIR = path.join(WEB, '.next');
 const NX_CACHE = path.join(ROOT, '.nx', 'cache');
 
-function exists(p) { try { fs.accessSync(p); return true; } catch { return false; } }
-function readJson(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } }
-function rmrf(p) { try { fs.rmSync(p, { recursive: true, force: true }); } catch {} }
+function exists(p) {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function readJson(p) {
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return null;
+  }
+}
+function rmrf(p) {
+  try {
+    fs.rmSync(p, { recursive: true, force: true });
+  } catch {}
+}
 
 function logHeader(title) {
   console.log('\n' + '—'.repeat(80));
@@ -23,7 +40,13 @@ function logHeader(title) {
 function run(cmd, args, opts = {}) {
   const res = spawnSync(cmd, args, {
     stdio: 'inherit', // <- stream all logs to your terminal
-    env: { ...process.env, NX_DAEMON: 'false', NX_VERBOSE_LOGGING: 'true', FORCE_COLOR: '1', ...opts.env },
+    env: {
+      ...process.env,
+      NX_DAEMON: 'false',
+      NX_VERBOSE_LOGGING: 'true',
+      FORCE_COLOR: '1',
+      ...opts.env,
+    },
     cwd: opts.cwd || ROOT,
     shell: process.platform === 'win32', // helpful on Windows for pnpm -w exec
   });
@@ -35,20 +58,30 @@ function run(cmd, args, opts = {}) {
   console.log(`Node:   ${process.version}`);
   console.log(`Root:   ${ROOT}`);
   console.log(`Web:    ${WEB}`);
-  console.log(`Exists: project.json=${exists(PROJECT_JSON)}, .next=${exists(NEXT_DIR)}, nx cache=${exists(NX_CACHE)}`);
+  console.log(
+    `Exists: project.json=${exists(PROJECT_JSON)}, .next=${exists(
+      NEXT_DIR
+    )}, nx cache=${exists(NX_CACHE)}`
+  );
 
   logHeader('Inspecting apps/web/project.json (if present)');
   if (exists(PROJECT_JSON)) {
     const pj = readJson(PROJECT_JSON);
     if (pj) {
-      console.log(JSON.stringify({
-        name: pj.name,
-        root: pj.root,
-        sourceRoot: pj.sourceRoot,
-        targets: pj.targets ? Object.keys(pj.targets) : [],
-        build: pj.targets?.build,
-        serve: pj.targets?.serve,
-      }, null, 2));
+      console.log(
+        JSON.stringify(
+          {
+            name: pj.name,
+            root: pj.root,
+            sourceRoot: pj.sourceRoot,
+            targets: pj.targets ? Object.keys(pj.targets) : [],
+            build: pj.targets?.build,
+            serve: pj.targets?.serve,
+          },
+          null,
+          2
+        )
+      );
     } else {
       console.log('(!) Could not parse apps/web/project.json');
     }
@@ -57,10 +90,14 @@ function run(cmd, args, opts = {}) {
   }
 
   logHeader('nx show project web --json');
-  run('pnpm', ['-w', 'exec', 'nx', 'show', 'project', 'web', '--json']) || console.log('↑ If this failed, project "web" might be named differently or misconfigured.');
+  run('pnpm', ['-w', 'exec', 'nx', 'show', 'project', 'web', '--json']) ||
+    console.log(
+      '↑ If this failed, project "web" might be named differently or misconfigured.'
+    );
 
   logHeader('nx show project web (human-friendly)');
-  run('pnpm', ['-w', 'exec', 'nx', 'show', 'project', 'web']) || console.log('↑ Failed.');
+  run('pnpm', ['-w', 'exec', 'nx', 'show', 'project', 'web']) ||
+    console.log('↑ Failed.');
 
   logHeader('Clearing Next & Nx cache');
   rmrf(NEXT_DIR);
@@ -68,8 +105,20 @@ function run(cmd, args, opts = {}) {
   console.log('Cleared apps/web/.next and .nx/cache');
 
   // 1) Try Nx (run-style)
-  logHeader('Attempt 1: pnpm -w exec nx run web:build --skip-nx-cache --verbose');
-  if (run('pnpm', ['-w', 'exec', 'nx', 'run', 'web:build', '--skip-nx-cache', '--verbose'])) {
+  logHeader(
+    'Attempt 1: pnpm -w exec nx run web:build --skip-nx-cache --verbose'
+  );
+  if (
+    run('pnpm', [
+      '-w',
+      'exec',
+      'nx',
+      'run',
+      'web:build',
+      '--skip-nx-cache',
+      '--verbose',
+    ])
+  ) {
     console.log('✓ Build ok (run-style)');
     return;
   }
@@ -77,7 +126,17 @@ function run(cmd, args, opts = {}) {
 
   // 2) Try Nx (target-style)
   logHeader('Attempt 2: pnpm -w exec nx build web --skip-nx-cache --verbose');
-  if (run('pnpm', ['-w', 'exec', 'nx', 'build', 'web', '--skip-nx-cache', '--verbose'])) {
+  if (
+    run('pnpm', [
+      '-w',
+      'exec',
+      'nx',
+      'build',
+      'web',
+      '--skip-nx-cache',
+      '--verbose',
+    ])
+  ) {
     console.log('✓ Build ok (target-style)');
     return;
   }
@@ -86,20 +145,28 @@ function run(cmd, args, opts = {}) {
   // 3) Try plain Next (bypasses Nx). This isolates whether Nx wiring is the culprit.
   logHeader('Attempt 3: Plain Next build inside apps/web (bypass Nx)');
   if (!exists(path.join(WEB, 'package.json'))) {
-    console.log('(!) apps/web/package.json missing — plain Next build may not work if web app relies on root deps only.');
+    console.log(
+      '(!) apps/web/package.json missing — plain Next build may not work if web app relies on root deps only.'
+    );
   }
   if (run('pnpm', ['-w', 'exec', 'next', 'build'], { cwd: WEB })) {
-    console.log('✓ next build succeeded in apps/web (Nx config may be the issue).');
+    console.log(
+      '✓ next build succeeded in apps/web (Nx config may be the issue).'
+    );
     return;
   }
-  console.log('✗ Attempt 3 failed: next build also failed. Check the error above (TS/ESLint/imports, etc.).');
+  console.log(
+    '✗ Attempt 3 failed: next build also failed. Check the error above (TS/ESLint/imports, etc.).'
+  );
 
   logHeader('What to look for next');
-  console.log([
-    '• If ALL attempts failed: the error you saw above is the root cause (e.g., TypeScript error, missing import).',
-    '• If ONLY Nx failed but Next succeeded: inspect apps/web/project.json targets.build.executor and options.',
-    '• Verify project name: run "pnpm -w exec nx show projects" and confirm "web" exists.',
-    '• If project name differs, replace "web" in the commands with the real name.',
-    '• Ensure project.json has a "build" target and it points to a Next.js executor (e.g., @nx/next:build).',
-  ].join('\n'));
+  console.log(
+    [
+      '• If ALL attempts failed: the error you saw above is the root cause (e.g., TypeScript error, missing import).',
+      '• If ONLY Nx failed but Next succeeded: inspect apps/web/project.json targets.build.executor and options.',
+      '• Verify project name: run "pnpm -w exec nx show projects" and confirm "web" exists.',
+      '• If project name differs, replace "web" in the commands with the real name.',
+      '• Ensure project.json has a "build" target and it points to a Next.js executor (e.g., @nx/next:build).',
+    ].join('\n')
+  );
 })();

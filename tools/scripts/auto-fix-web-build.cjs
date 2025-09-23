@@ -10,11 +10,18 @@ const path = require('path');
 const repo = process.cwd();
 const exists = (p) => fs.existsSync(p);
 const read = (p) => fs.readFileSync(p, 'utf8');
-const write = (p, s) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, s, 'utf8'); console.log(`✓ wrote ${p}`); };
+const write = (p, s) => {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s, 'utf8');
+  console.log(`✓ wrote ${p}`);
+};
 
 function patchSummaryRouter() {
   const p = path.join(repo, 'apps/api/src/router/summary.ts');
-  if (!exists(p)) { console.log(`⚠ skipped: ${p} not found`); return; }
+  if (!exists(p)) {
+    console.log(`⚠ skipped: ${p} not found`);
+    return;
+  }
   let src = read(p);
 
   // If already patched, skip
@@ -25,7 +32,9 @@ function patchSummaryRouter() {
 
   // Try to detect the variable name for the group result (default to "sourceGrp")
   let varName = 'sourceGrp';
-  const varMatch = src.match(/const\s+([A-Za-z0-9_$]+)\s*=\s*await\s+prisma\.application\.groupBy\s*\(/);
+  const varMatch = src.match(
+    /const\s+([A-Za-z0-9_$]+)\s*=\s*await\s+prisma\.application\.groupBy\s*\(/
+  );
   if (varMatch) varName = varMatch[1];
 
   // Replace the whole groupBy(...) assignment block with safer code
@@ -67,17 +76,20 @@ prisma.application.groupBy`
       );
       src += `\n\n${replacement}\n`;
       write(p, src);
-      console.log('• Inserted safe block and commented original groupBy (fallback path)');
+      console.log(
+        '• Inserted safe block and commented original groupBy (fallback path)'
+      );
     } else {
-      console.log('⚠ Could not detect groupBy block. No changes made to summary.ts');
+      console.log(
+        '⚠ Could not detect groupBy block. No changes made to summary.ts'
+      );
     }
   }
 }
 
 function ensureNextConfig() {
   const p = path.join(repo, 'web/next.config.js');
-  const snippet =
-`const path = require('path');
+  const snippet = `const path = require('path');
 /** @type {import('next').NextConfig} */
 module.exports = {
   experimental: {
@@ -99,7 +111,9 @@ module.exports = {
         `module.exports = {\n  experimental: { outputFileTracingRoot: require('path').join(__dirname, '..') },`
       );
       write(p, src);
-      console.log('• Injected outputFileTracingRoot into existing next.config.js');
+      console.log(
+        '• Injected outputFileTracingRoot into existing next.config.js'
+      );
     } else {
       // fallback: overwrite with known-good config
       write(p, snippet);
@@ -114,8 +128,7 @@ function ensureAuthPages() {
   const resetP = path.join(repo, 'web/src/app/reset/page.tsx');
   const magicP = path.join(repo, 'web/src/app/magic/page.tsx');
 
-  const resetContent =
-`'use client';
+  const resetContent = `'use client';
 import { useState } from 'react';
 import { trpc } from '@/trpc';
 
@@ -152,8 +165,7 @@ export default function ResetPage() {
 }
 `;
 
-  const magicContent =
-`'use client';
+  const magicContent = `'use client';
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { trpc } from '@/trpc';
@@ -183,11 +195,19 @@ export default function MagicLinkHandler() {
 }
 `;
 
-  if (!exists(resetP)) { write(resetP, resetContent); } else { console.log('• reset page exists, skipping'); }
-  if (!exists(magicP)) { write(magicP, magicContent); } else { console.log('• magic page exists, skipping'); }
+  if (!exists(resetP)) {
+    write(resetP, resetContent);
+  } else {
+    console.log('• reset page exists, skipping');
+  }
+  if (!exists(magicP)) {
+    write(magicP, magicContent);
+  } else {
+    console.log('• magic page exists, skipping');
+  }
 }
 
-(function main(){
+(function main() {
   patchSummaryRouter();
   ensureNextConfig();
   ensureAuthPages(); // harmless if already present

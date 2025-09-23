@@ -61,10 +61,7 @@
       "isPage": false,
       "trpcHooks": [],
       "prismaSelectHasRole": false,
-      "roleReads": [
-        325,
-        400
-      ],
+      "roleReads": [325, 400],
       "hasNoExplicitAnyRule": false
     },
     {
@@ -134,10 +131,7 @@
       "isPage": false,
       "trpcHooks": [],
       "prismaSelectHasRole": false,
-      "roleReads": [
-        323,
-        441
-      ],
+      "roleReads": [323, 441],
       "hasNoExplicitAnyRule": false
     },
     {
@@ -270,10 +264,7 @@
       "isPage": false,
       "trpcHooks": [],
       "prismaSelectHasRole": false,
-      "roleReads": [
-        330,
-        446
-      ],
+      "roleReads": [330, 446],
       "hasNoExplicitAnyRule": false
     },
     {

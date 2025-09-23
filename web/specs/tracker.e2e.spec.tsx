@@ -19,7 +19,9 @@ describe('TrackerPage (E2E-ish UI)', () => {
   it('allows adding a new application via the mock mutate (noop if UI absent)', () => {
     render(<TrackerPage />);
 
-    const addButtons = screen.queryAllByRole('button', { name: /add application/i });
+    const addButtons = screen.queryAllByRole('button', {
+      name: /add application/i,
+    });
     if (addButtons.length) {
       fireEvent.click(addButtons[0]);
       // Extend with assertions when the UI reflects the new item

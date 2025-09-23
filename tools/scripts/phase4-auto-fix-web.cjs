@@ -12,9 +12,19 @@ const repo = process.cwd();
 const vitestSetup = path.join(repo, 'web/vitest.setup.ts');
 const activityPage = path.join(repo, 'web/app/tracker/[id]/activity/page.tsx');
 
-function read(p){ return fs.existsSync(p) ? fs.readFileSync(p,'utf8') : null; }
-function write(p,s){ fs.mkdirSync(path.dirname(p),{recursive:true}); fs.writeFileSync(p,s,'utf8'); console.log('✓ wrote',p); }
-function backup(p){ const b=p+'.'+Date.now()+'.bak'; fs.copyFileSync(p,b); console.log('  backup:',b); }
+function read(p) {
+  return fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null;
+}
+function write(p, s) {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s, 'utf8');
+  console.log('✓ wrote', p);
+}
+function backup(p) {
+  const b = p + '.' + Date.now() + '.bak';
+  fs.copyFileSync(p, b);
+  console.log('  backup:', b);
+}
 
 function ensureTrpcMock(src) {
   // If there's already a vi.mock for "@/trpc", replace it; else, append one.
@@ -54,14 +64,21 @@ vi.mock('@/trpc', () => {
 
   if (hasMock) {
     // Replace the whole mock block (best-effort) or append a fresh one at end.
-    let out = src.replace(/vi\.mock\(['"]@\/trpc['"][\s\S]*?\);\s*/m, block + '\n');
+    let out = src.replace(
+      /vi\.mock\(['"]@\/trpc['"][\s\S]*?\);\s*/m,
+      block + '\n'
+    );
     if (out === src) out = src.trimEnd() + '\n' + block + '\n';
     if (out !== src) {
-      console.log('• vitest.setup.ts: refreshed "@/trpc" mock (ensures update.useMutation)');
+      console.log(
+        '• vitest.setup.ts: refreshed "@/trpc" mock (ensures update.useMutation)'
+      );
       return out;
     }
   } else {
-    console.log('• vitest.setup.ts: added "@/trpc" mock (settings.get + settings.update)');
+    console.log(
+      '• vitest.setup.ts: added "@/trpc" mock (settings.get + settings.update)'
+    );
     return src.trimEnd() + '\n' + block + '\n';
   }
   console.log('• vitest.setup.ts: "@/trpc" mock already present (no change)');
@@ -90,7 +107,9 @@ function patchActivityPage(src) {
   const before = out;
   out = out.replace(/\bapplication\.role\b/g, '(application as any)?.role');
   if (out !== before) {
-    console.log('• activity page: made application.role access optional and untyped-safe');
+    console.log(
+      '• activity page: made application.role access optional and untyped-safe'
+    );
     changed = true;
   }
 
@@ -98,14 +117,20 @@ function patchActivityPage(src) {
 }
 
 function run(cmd, args) {
-  return cp.spawnSync(cmd, args, { stdio: 'inherit', shell: process.platform === 'win32' });
+  return cp.spawnSync(cmd, args, {
+    stdio: 'inherit',
+    shell: process.platform === 'win32',
+  });
 }
 
 // --- vitest.setup.ts
 if (fs.existsSync(vitestSetup)) {
   const src = read(vitestSetup);
   const next = ensureTrpcMock(src);
-  if (next !== src) { backup(vitestSetup); write(vitestSetup, next); }
+  if (next !== src) {
+    backup(vitestSetup);
+    write(vitestSetup, next);
+  }
 } else {
   console.log('! Not found:', vitestSetup);
 }
@@ -114,8 +139,10 @@ if (fs.existsSync(vitestSetup)) {
 if (fs.existsSync(activityPage)) {
   const src = read(activityPage);
   const { changed, out } = patchActivityPage(src);
-  if (changed) { backup(activityPage); write(activityPage, out); }
-  else console.log('• activity page: no change needed');
+  if (changed) {
+    backup(activityPage);
+    write(activityPage, out);
+  } else console.log('• activity page: no change needed');
 } else {
   console.log('! Not found:', activityPage);
 }

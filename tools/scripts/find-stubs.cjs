@@ -40,57 +40,96 @@ fs.mkdirSync(REPORT_DIR, { recursive: true });
 const args = process.argv.slice(2);
 const has = (flag) => args.includes(flag);
 const val = (key, def = null) => {
-  const a = args.find(a => a.startsWith(`${key}=`));
+  const a = args.find((a) => a.startsWith(`${key}=`));
   return a ? a.split('=').slice(1).join('=').trim() : def;
 };
 
-const OUT_PREFIX = val('--out-prefix') ||
-  path.join(REPORT_DIR, `stub-scan-${new Date().toISOString().replace(/[:.]/g, '-')}`);
+const OUT_PREFIX =
+  val('--out-prefix') ||
+  path.join(
+    REPORT_DIR,
+    `stub-scan-${new Date().toISOString().replace(/[:.]/g, '-')}`
+  );
 
 const WANT_CSV = has('--csv');
-const WANT_MD  = has('--md');
+const WANT_MD = has('--md');
 const SUGGEST_DELETES = has('--suggest-deletes');
-const ONLY = (val('--only','') || '')
-  .split(',').map(s => s.trim()).filter(Boolean).reduce((a,t)=> (a[t]=true,a), {});
-const EXTRA_IGNORES = (val('--ignore','') || '')
-  .split(',').map(s => s.trim()).filter(Boolean);
+const ONLY = (val('--only', '') || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean)
+  .reduce((a, t) => ((a[t] = true), a), {});
+const EXTRA_IGNORES = (val('--ignore', '') || '')
+  .split(',')
+  .map((s) => s.trim())
+  .filter(Boolean);
 
 const SINCE = val('--since', null);
 const FAIL_ON_FIND = has('--fail-on-find');
-const THRESHOLD = parseInt(val('--threshold','NaN'), 10);
+const THRESHOLD = parseInt(val('--threshold', 'NaN'), 10);
 const LIMIT = Number.isFinite(THRESHOLD) ? THRESHOLD : null;
 
 // Default ignore dirs & files (Windows-safe)
 const IGNORE_DIRS = new Set([
-  'node_modules', '.git', '.nx', '.next', '.turbo', '.cache', 'dist', 'build', 'coverage',
+  'node_modules',
+  '.git',
+  '.nx',
+  '.next',
+  '.turbo',
+  '.cache',
+  'dist',
+  'build',
+  'coverage',
   // archived/backups we created earlier
   'apps/web._archived_2025-09-15T18-56-10-787Z',
   '.app_backup', // fallthrough
 ]);
 const IGNORE_BASENAMES = new Set([
   // output folders
-  'reports', 'scans',
+  'reports',
+  'scans',
 ]);
 
 // File extensions we care about
-const EXTS = new Set(['.ts','.tsx','.js','.jsx','.mjs','.cjs','.json','.yml','.yaml','.md','.sql']);
+const EXTS = new Set([
+  '.ts',
+  '.tsx',
+  '.js',
+  '.jsx',
+  '.mjs',
+  '.cjs',
+  '.json',
+  '.yml',
+  '.yaml',
+  '.md',
+  '.sql',
+]);
 
 // Patterns (minimatch-lite: only * and ** supported)
 const mm = (pat) => {
   // very small glob: ** -> [\\s\\S]*, * -> [^/]*, escape others
-  const esc = s => s.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&');
-  const re = '^' + pat.split('**').map(p => esc(p).replace(/\\\*/g, '[^/]*')).join('[\\s\\S]*') + '$';
+  const esc = (s) => s.replace(/[-/\\^$+?.()|[\]{}]/g, '\\$&');
+  const re =
+    '^' +
+    pat
+      .split('**')
+      .map((p) => esc(p).replace(/\\\*/g, '[^/]*'))
+      .join('[\\s\\S]*') +
+    '$';
   return new RegExp(re);
 };
 const EXTRA_IGNORE_RES = EXTRA_IGNORES.map(mm);
 
 // Matchers
 const MATCHERS = [
-  { type: 'MARKER',          re: /\b(TODO|FIXME|HACK|STUB|PLACEHOLDER|WIP|TEMP)\b/i },
-  { type: 'NOT_IMPLEMENTED', re: /throw\s+new\s+Error\(\s*['"`]\s*(not\s+implemented|unimplemented)\s*['"`]\s*\)/i },
-  { type: 'TS_BANDAID',      re: /@ts-(ignore|expect-error)/ },
-  { type: 'CAST_ANY',        re: /\bas\s+any\b/ },
-  { type: 'DOUBLE_CAST',     re: /\bas\s+unknown\s+as\b/ },
+  { type: 'MARKER', re: /\b(TODO|FIXME|HACK|STUB|PLACEHOLDER|WIP|TEMP)\b/i },
+  {
+    type: 'NOT_IMPLEMENTED',
+    re: /throw\s+new\s+Error\(\s*['"`]\s*(not\s+implemented|unimplemented)\s*['"`]\s*\)/i,
+  },
+  { type: 'TS_BANDAID', re: /@ts-(ignore|expect-error)/ },
+  { type: 'CAST_ANY', re: /\bas\s+any\b/ },
+  { type: 'DOUBLE_CAST', re: /\bas\s+unknown\s+as\b/ },
 ];
 const STUB_SPEC_NAME = /(sanity|health|placeholder|stub|smoke)/i;
 
@@ -102,11 +141,15 @@ function isBinary(buf) {
 function listCandidates() {
   if (!SINCE) return null;
   try {
-    const out = cp.execSync(`git diff --name-only ${SINCE} --`, { cwd: ROOT, stdio: ['ignore','pipe','ignore'] })
+    const out = cp
+      .execSync(`git diff --name-only ${SINCE} --`, {
+        cwd: ROOT,
+        stdio: ['ignore', 'pipe', 'ignore'],
+      })
       .toString('utf8')
       .split(/\r?\n/)
       .filter(Boolean)
-      .map(s => s.replace(/\\/g,'/'));
+      .map((s) => s.replace(/\\/g, '/'));
     return new Set(out);
   } catch {
     return null;
@@ -139,7 +182,10 @@ function shouldIgnore(rel) {
 function walk(dir, acc) {
   for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
     const abs = path.join(dir, ent.name);
-    const rel = abs.replace(ROOT, '').replace(/^[\\/]/,'').replace(/\\/g,'/');
+    const rel = abs
+      .replace(ROOT, '')
+      .replace(/^[\\/]/, '')
+      .replace(/\\/g, '/');
     if (ent.isDirectory()) {
       if (shouldIgnore(rel)) continue;
       walk(abs, acc);
@@ -157,11 +203,16 @@ function scanFile(abs) {
   let buf;
   try {
     buf = fs.readFileSync(abs);
-  } catch { return null; }
+  } catch {
+    return null;
+  }
   if (isBinary(buf)) return null;
 
   const text = buf.toString('utf8');
-  const rel = abs.replace(ROOT, '').replace(/^[\\/]/,'').replace(/\\/g,'/');
+  const rel = abs
+    .replace(ROOT, '')
+    .replace(/^[\\/]/, '')
+    .replace(/\\/g, '/');
 
   // gather matches
   const hits = [];
@@ -174,9 +225,9 @@ function scanFile(abs) {
   // regex line passes per matcher (first 3 per type)
   for (const m of MATCHERS) {
     let count = 0;
-    for (let i=0; i<lines.length; i++) {
+    for (let i = 0; i < lines.length; i++) {
       if (m.re.test(lines[i])) {
-        pushHit(m.type, i+1, lines[i]);
+        pushHit(m.type, i + 1, lines[i]);
         if (++count >= 3) break;
       }
     }
@@ -188,23 +239,31 @@ function scanFile(abs) {
     const expectCount = (text.match(/\bexpect\s*\(/g) || []).length;
     if (expectCount <= 1 || STUB_SPEC_NAME.test(path.basename(rel))) {
       // mark SPEC_STUB at first line that contains 'describe' or 'it' (if any)
-      const idx = lines.findIndex(l => /\b(describe|it|test)\b/.test(l));
-      pushHit('SPEC_STUB', idx >= 0 ? idx+1 : 1, lines[Math.max(0, idx)]);
+      const idx = lines.findIndex((l) => /\b(describe|it|test)\b/.test(l));
+      pushHit('SPEC_STUB', idx >= 0 ? idx + 1 : 1, lines[Math.max(0, idx)]);
     }
   }
 
   if (!hits.length) return null;
 
   // classify group for convenience
-  const type =
-    /apps\/api\/src\/trpc\/routers\/.+\.router\.ts$/.test(rel) ? 'api-router' :
-    /apps\/api\/src\//.test(rel) ? 'api' :
-    /^web\/src\//.test(rel) || /apps\/web\/src\//.test(rel) ? 'web' :
-    /^web\//.test(rel) ? 'web' :
-    /libs\//.test(rel) ? 'lib' : 'other';
+  const type = /apps\/api\/src\/trpc\/routers\/.+\.router\.ts$/.test(rel)
+    ? 'api-router'
+    : /apps\/api\/src\//.test(rel)
+    ? 'api'
+    : /^web\/src\//.test(rel) || /apps\/web\/src\//.test(rel)
+    ? 'web'
+    : /^web\//.test(rel)
+    ? 'web'
+    : /libs\//.test(rel)
+    ? 'lib'
+    : 'other';
 
   // extract simple snippet (first matching lines)
-  const snippet = hits.slice(0,3).map(h => `L${h.line}: ${h.text.slice(0,160)}`).join(' | ');
+  const snippet = hits
+    .slice(0, 3)
+    .map((h) => `L${h.line}: ${h.text.slice(0, 160)}`)
+    .join(' | ');
 
   return { file: rel, group: type, hits, snippet, isSpec };
 }
@@ -219,34 +278,43 @@ const stubSpecs = [];
 for (const f of files) {
   const r = scanFile(f);
   if (!r) continue;
-  findings.push(...r.hits.map(h => ({
-    file: r.file,
-    group: r.group,
-    type: h.type,
-    line: h.line,
-    text: h.text
-  })));
-  if (r.isSpec && r.hits.some(h => h.type === 'SPEC_STUB')) {
+  findings.push(
+    ...r.hits.map((h) => ({
+      file: r.file,
+      group: r.group,
+      type: h.type,
+      line: h.line,
+      text: h.text,
+    }))
+  );
+  if (r.isSpec && r.hits.some((h) => h.type === 'SPEC_STUB')) {
     stubSpecs.push(r.file);
   }
 }
 
 // sort for readability
-findings.sort((a,b) =>
-  (a.group.localeCompare(b.group)) ||
-  (a.file.localeCompare(b.file)) ||
-  (a.type.localeCompare(b.type)) ||
-  (a.line - b.line)
+findings.sort(
+  (a, b) =>
+    a.group.localeCompare(b.group) ||
+    a.file.localeCompare(b.file) ||
+    a.type.localeCompare(b.type) ||
+    a.line - b.line
 );
 
 // write JSON (always)
 const report = {
   when: new Date().toISOString(),
-  root: ROOT.replace(/\\/g,'/'),
+  root: ROOT.replace(/\\/g, '/'),
   scanned: files.length,
   findingsCount: findings.length,
-  byType: findings.reduce((m,f)=> (m[f.type]=(m[f.type]||0)+1, m), {}),
-  byGroup: findings.reduce((m,f)=> (m[f.group]=(m[f.group]||0)+1, m), {}),
+  byType: findings.reduce(
+    (m, f) => ((m[f.type] = (m[f.type] || 0) + 1), m),
+    {}
+  ),
+  byGroup: findings.reduce(
+    (m, f) => ((m[f.group] = (m[f.group] || 0) + 1), m),
+    {}
+  ),
   findings,
   stubSpecs,
   since: SINCE,
@@ -258,8 +326,12 @@ fs.writeFileSync(jsonPath, JSON.stringify(report, null, 2), 'utf8');
 if (WANT_CSV) {
   const rows = ['file,line,group,type,snippet'];
   for (const f of findings) {
-    const sn = (f.text || '').replace(/"/g,'""');
-    rows.push(`"${f.file.replace(/"/g,'""')}",${f.line},"${f.group}","${f.type}","${sn}"`);
+    const sn = (f.text || '').replace(/"/g, '""');
+    rows.push(
+      `"${f.file.replace(/"/g, '""')}",${f.line},"${f.group}","${
+        f.type
+      }","${sn}"`
+    );
   }
   fs.writeFileSync(`${OUT_PREFIX}.csv`, rows.join('\n'), 'utf8');
 }
@@ -269,12 +341,18 @@ if (WANT_MD) {
   const stamp = path.basename(OUT_PREFIX).replace(/^stub-scan-/, '');
   let md = `# Stub Scan Report (${stamp})\n\n`;
   md += `**Total findings:** ${findings.length}\n\n`;
-  const bt = Object.entries(report.byType).map(([k,v]) => `${k}: ${v}`).join(', ') || 'none';
-  const bg = Object.entries(report.byGroup).map(([k,v]) => `${k}: ${v}`).join(', ') || 'none';
+  const bt =
+    Object.entries(report.byType)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ') || 'none';
+  const bg =
+    Object.entries(report.byGroup)
+      .map(([k, v]) => `${k}: ${v}`)
+      .join(', ') || 'none';
   md += `**By type:** ${bt}\n\n**By group:** ${bg}\n\n`;
   if (stubSpecs.length) {
     md += `## Obvious stub specs (${stubSpecs.length})\n`;
-    md += stubSpecs.map(s => `- ${s}`).join('\n') + '\n\n';
+    md += stubSpecs.map((s) => `- ${s}`).join('\n') + '\n\n';
   }
   md += `## Findings\n`;
   for (const f of findings.slice(0, 1000)) {
@@ -285,23 +363,34 @@ if (WANT_MD) {
 }
 
 // console summary
-const outs = [`✓ Wrote ${path.relative(ROOT, jsonPath).replace(/\\/g,'/')}`];
-if (WANT_CSV) outs.push(path.relative(ROOT, `${OUT_PREFIX}.csv`).replace(/\\/g,'/'));
-if (WANT_MD)  outs.push(path.relative(ROOT, `${OUT_PREFIX}.md`).replace(/\\/g,'/'));
+const outs = [`✓ Wrote ${path.relative(ROOT, jsonPath).replace(/\\/g, '/')}`];
+if (WANT_CSV)
+  outs.push(path.relative(ROOT, `${OUT_PREFIX}.csv`).replace(/\\/g, '/'));
+if (WANT_MD)
+  outs.push(path.relative(ROOT, `${OUT_PREFIX}.md`).replace(/\\/g, '/'));
 console.log(outs.join('\n  - '));
 
 // suggest deletes
 if (SUGGEST_DELETES && stubSpecs.length) {
-  const chunk = (arr, n) => arr.length ? [arr.slice(0,n), ...chunk(arr.slice(n), n)] : [];
-  console.log('\n# Suggested commands to remove obvious stub tests (review before running):');
+  const chunk = (arr, n) =>
+    arr.length ? [arr.slice(0, n), ...chunk(arr.slice(n), n)] : [];
+  console.log(
+    '\n# Suggested commands to remove obvious stub tests (review before running):'
+  );
   for (const group of chunk(stubSpecs, 10)) {
-    console.log('git rm ' + group.map(p => `"${p.replace(/"/g,'\\"')}"`).join(' '));
+    console.log(
+      'git rm ' + group.map((p) => `"${p.replace(/"/g, '\\"')}"`).join(' ')
+    );
   }
 }
 
 // CI gating
 const total = findings.length;
 if ((FAIL_ON_FIND && total > 0) || (LIMIT !== null && total > LIMIT)) {
-  console.error(`✗ Stub scan threshold exceeded (found=${total}${LIMIT!==null?`, limit=${LIMIT}`:''})`);
+  console.error(
+    `✗ Stub scan threshold exceeded (found=${total}${
+      LIMIT !== null ? `, limit=${LIMIT}` : ''
+    })`
+  );
   process.exit(2);
 }

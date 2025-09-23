@@ -20,7 +20,7 @@ function bool(name) {
 }
 
 async function main() {
-  const host = (arg('--host', 'http://localhost')).replace(/\/$/, '');
+  const host = arg('--host', 'http://localhost').replace(/\/$/, '');
   const port = arg('--port', '3000');
   let id = arg('--id', '');
 
@@ -37,7 +37,9 @@ async function main() {
   }
 
   if (!id) {
-    console.error('Missing --id and unable to get one from tools/scripts/seed-activity.cjs');
+    console.error(
+      'Missing --id and unable to get one from tools/scripts/seed-activity.cjs'
+    );
     process.exit(2);
   }
 
@@ -51,7 +53,7 @@ async function main() {
     port: Number(port),
     id,
     urls: { query: urlQuery, dynamic: urlDynamic },
-    results: {}
+    results: {},
   };
 
   async function hit(url) {
@@ -80,13 +82,13 @@ async function main() {
         role,
         statusText: status,
         hasActivity,
-        bodyPreview
+        bodyPreview,
       };
     } catch (err) {
       return {
         ok: false,
         status: 0,
-        error: String(err)
+        error: String(err),
       };
     }
   }

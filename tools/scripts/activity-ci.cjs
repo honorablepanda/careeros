@@ -24,12 +24,19 @@ const INPUT_ID = arg('--id', null);
 const STRICT = process.argv.includes('--strict'); // fail if "no activity" is detected
 
 const ROOT = process.cwd();
-const scripts = p => path.join(ROOT, 'tools', 'scripts', p);
+const scripts = (p) => path.join(ROOT, 'tools', 'scripts', p);
 const outFile = path.join(ROOT, 'activity-ci-report.json');
 
-function log(msg) { console.log(msg); }
-function warn(msg) { console.warn(msg); }
-function die(msg, code = 1) { console.error(msg); process.exit(code); }
+function log(msg) {
+  console.log(msg);
+}
+function warn(msg) {
+  console.warn(msg);
+}
+function die(msg, code = 1) {
+  console.error(msg);
+  process.exit(code);
+}
 
 function run(cmd, opts = {}) {
   const res = spawnSync(cmd[0], cmd.slice(1), { encoding: 'utf8', ...opts });
@@ -50,7 +57,11 @@ function extractLastJsonBlock(text) {
       depth--;
       if (depth === 0) {
         const slice = text.slice(lastOpen, i + 1);
-        try { return JSON.parse(slice); } catch (_) { /* fallthrough */ }
+        try {
+          return JSON.parse(slice);
+        } catch (_) {
+          /* fallthrough */
+        }
       }
     }
   }
@@ -80,7 +91,9 @@ async function httpHead(url) {
     issues.push('scan-web-activity: could not parse JSON output');
   } else {
     // Collect any failed checks
-    const failed = (scanJson.checks || []).filter(c => c.ok === false).map(c => c.message);
+    const failed = (scanJson.checks || [])
+      .filter((c) => c.ok === false)
+      .map((c) => c.message);
     issues.push(...failed);
   }
 
@@ -91,7 +104,8 @@ async function httpHead(url) {
     try {
       const seeded = run(['node', scripts('seed-activity.cjs')]);
       appId = (seeded.stdout || '').trim();
-      if (!appId) issues.push('seed-activity: did not return an application id');
+      if (!appId)
+        issues.push('seed-activity: did not return an application id');
     } catch (e) {
       issues.push(`seed-activity: ${e.message}`);
     }
@@ -102,7 +116,9 @@ async function httpHead(url) {
   const base = `${HOST}:${PORT}`;
   const head = await httpHead(`${base}/`);
   if (!head.ok) {
-    issues.push(`server not reachable at ${base}${head.error ? ` (${head.error})` : ''}`);
+    issues.push(
+      `server not reachable at ${base}${head.error ? ` (${head.error})` : ''}`
+    );
   }
 
   // If we already have structural/server issues, stop here (before fetch)
@@ -113,7 +129,7 @@ async function httpHead(url) {
       scan: scanJson || null,
       results: null,
       issues,
-      steps
+      steps,
     };
     fs.writeFileSync(outFile, JSON.stringify(report, null, 2));
     warn('❌ Issues detected. See activity-ci-report.json for details.');
@@ -127,9 +143,12 @@ async function httpHead(url) {
     const fetched = run([
       'node',
       scripts('fetch-activity-pages.cjs'),
-      '--id', appId,
-      '--host', HOST,
-      '--port', String(PORT)
+      '--id',
+      appId,
+      '--host',
+      HOST,
+      '--port',
+      String(PORT),
     ]);
     fetchJson = JSON.parse(fetched.stdout || '{}');
   } catch (e) {
@@ -140,15 +159,25 @@ async function httpHead(url) {
   if (fetchJson?.results) {
     const { query, dynamic } = fetchJson.results;
     if (!query || query.status !== 200) {
-      issues.push(`query route returned ${query ? query.status : 'N/A'} (${fetchJson?.results?.query?.url || ''})`);
+      issues.push(
+        `query route returned ${query ? query.status : 'N/A'} (${
+          fetchJson?.results?.query?.url || ''
+        })`
+      );
     }
     if (!dynamic || dynamic.status !== 200) {
-      issues.push(`dynamic route returned ${dynamic ? dynamic.status : 'N/A'} (${fetchJson?.results?.dynamic?.url || ''})`);
+      issues.push(
+        `dynamic route returned ${dynamic ? dynamic.status : 'N/A'} (${
+          fetchJson?.results?.dynamic?.url || ''
+        })`
+      );
     }
     // Optional: treat "no activity rows" as an issue in strict mode
     if (STRICT) {
-      if (query?.hasNoActivity) issues.push('query route shows — No activity yet —');
-      if (dynamic?.hasNoActivity) issues.push('dynamic route shows — No activity yet —');
+      if (query?.hasNoActivity)
+        issues.push('query route shows — No activity yet —');
+      if (dynamic?.hasNoActivity)
+        issues.push('dynamic route shows — No activity yet —');
     }
   } else {
     issues.push('fetch-activity-pages: no results in JSON');
@@ -160,7 +189,7 @@ async function httpHead(url) {
     scan: scanJson,
     results: fetchJson?.results || null,
     issues,
-    steps
+    steps,
   };
   fs.writeFileSync(outFile, JSON.stringify(finalReport, null, 2));
 
@@ -169,6 +198,8 @@ async function httpHead(url) {
     return die(issues.join('\n'), 2);
   }
 
-  log('✅ Activity flow looks good. See activity-ci-report.json for the report.');
+  log(
+    '✅ Activity flow looks good. See activity-ci-report.json for the report.'
+  );
   process.exit(0);
 })();

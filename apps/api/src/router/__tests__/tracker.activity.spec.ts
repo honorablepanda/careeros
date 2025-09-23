@@ -28,7 +28,11 @@ describe('tracker activity', () => {
   it('createApplication writes CREATE activity when possible', async () => {
     const ctx = makeCtx();
     const caller = trackerRouter.createCaller(ctx);
-    await caller.createApplication({ userId: 'u1', company: 'Acme', role: 'FE' } as any);
+    await caller.createApplication({
+      userId: 'u1',
+      company: 'Acme',
+      role: 'FE',
+    } as any);
     expect(ctx.prisma.application.create).toHaveBeenCalled();
     expect(ctx.prisma.applicationActivity.create).toHaveBeenCalledWith({
       data: {
@@ -42,7 +46,10 @@ describe('tracker activity', () => {
   it('updateApplication writes STATUS_CHANGE when status present', async () => {
     const ctx = makeCtx();
     const caller = trackerRouter.createCaller(ctx);
-    await caller.updateApplication({ id: 'a1', data: { status: 'INTERVIEW' } } as any);
+    await caller.updateApplication({
+      id: 'a1',
+      data: { status: 'INTERVIEW' },
+    } as any);
     expect(ctx.prisma.application.update).toHaveBeenCalledWith({
       where: { id: 'a1' },
       data: { status: 'INTERVIEW' },

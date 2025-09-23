@@ -12,7 +12,11 @@ export default function AchievementsPage() {
   const hook = trpc?.achievements?.list?.useQuery;
   const query = hook
     ? hook({ userId })
-    : { data: null, isLoading: false, error: { message: 'Achievements API not available' } };
+    : {
+        data: null,
+        isLoading: false,
+        error: { message: 'Achievements API not available' },
+      };
 
   const { data, isLoading, error } = query as {
     data: null | Row[];
@@ -21,10 +25,13 @@ export default function AchievementsPage() {
   };
 
   if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error)     return <main className="p-6 text-red-600">Error: {error.message}</main>;
+  if (error)
+    return <main className="p-6 text-red-600">Error: {error.message}</main>;
   if (!data?.length) return <main className="p-6">No achievements yet.</main>;
 
-  const rows = [...(data ?? [])].sort((a,b) => dateValue(b.awardedAt) - dateValue(a.awardedAt));
+  const rows = [...(data ?? [])].sort(
+    (a, b) => dateValue(b.awardedAt) - dateValue(a.awardedAt)
+  );
 
   return (
     <main className="p-6 space-y-4">
@@ -40,9 +47,11 @@ export default function AchievementsPage() {
         <tbody>
           {rows.map((r) => (
             <tr key={String(r.id ?? Math.random())} className="border-t">
-                <td className="p-2">{String(r.title ?? '—')}</td>
-                <td className="p-2">{String(r.category ?? '—')}</td>
-                <td className="p-2">{r.awardedAt ? formatDate(r.awardedAt) : '—'}</td>
+              <td className="p-2">{String(r.title ?? '—')}</td>
+              <td className="p-2">{String(r.category ?? '—')}</td>
+              <td className="p-2">
+                {r.awardedAt ? formatDate(r.awardedAt) : '—'}
+              </td>
             </tr>
           ))}
         </tbody>

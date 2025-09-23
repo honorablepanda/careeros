@@ -2,7 +2,10 @@
 const fs = require('fs');
 const path = require('path');
 
-const p = path.join(process.cwd(), 'apps/api/src/trpc/routers/tracker.router.ts');
+const p = path.join(
+  process.cwd(),
+  'apps/api/src/trpc/routers/tracker.router.ts'
+);
 if (!fs.existsSync(p)) {
   console.error('File not found:', p);
   process.exit(1);
@@ -11,7 +14,9 @@ let s = fs.readFileSync(p, 'utf8');
 
 // Backup once per run
 const backup = p + '.bak';
-try { if (!fs.existsSync(backup)) fs.copyFileSync(p, backup); } catch {}
+try {
+  if (!fs.existsSync(backup)) fs.copyFileSync(p, backup);
+} catch {}
 
 const ensureValueImport = () => {
   // Convert any type-only import to value import
@@ -25,11 +30,16 @@ const ensureValueImport = () => {
       /import\s+\{\s*([^}]+)\s*\}\s+from\s+'@prisma\/client';/g,
       (_m, g1) => {
         const names = new Set(
-          g1.split(',').map(x => x.trim()).filter(Boolean)
+          g1
+            .split(',')
+            .map((x) => x.trim())
+            .filter(Boolean)
         );
         names.add('Prisma');
         names.add('$Enums');
-        return `import { ${Array.from(names).join(', ')} } from '@prisma/client';`;
+        return `import { ${Array.from(names).join(
+          ', '
+        )} } from '@prisma/client';`;
       }
     );
   } else {
@@ -49,8 +59,10 @@ const fixStatusDefault = () => {
     (_m, u, d) => `${u}.default($Enums.ApplicationStatus.APPLIED)`
   );
   // Last resort: stray ".default(.ApplicationStatus.APPLIED)" → correct
-  s = s.replace(/\.default\(\s*\.ApplicationStatus\.APPLIED\s*\)/g,
-                `.default($Enums.ApplicationStatus.APPLIED)`);
+  s = s.replace(
+    /\.default\(\s*\.ApplicationStatus\.APPLIED\s*\)/g,
+    `.default($Enums.ApplicationStatus.APPLIED)`
+  );
 };
 
 const mapInterviewingLiteral = () => {
@@ -71,4 +83,6 @@ fixStatusDefault();
 mapInterviewingLiteral();
 
 fs.writeFileSync(p, s, 'utf8');
-console.log('✓ Repaired tracker.router.ts to use $Enums and a valid .default(...) for status.');
+console.log(
+  '✓ Repaired tracker.router.ts to use $Enums and a valid .default(...) for status.'
+);

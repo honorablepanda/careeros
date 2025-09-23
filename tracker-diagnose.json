@@ -1,0 +1,61 @@
+[36m▶ deep-diagnose-tracker[0m
+[90mrepo root: [0m
+[90mcandidates:[0m [
+  'apps/api/src/router/tracker.router.ts',
+  'apps/api/src/router/tracker.router.js',
+  'apps/api/src/trpc/routers/tracker.router.ts',
+  'apps/api/src/trpc/routers/tracker.router.tsx',
+  'apps/api/src/trpc/routers/tracker.router.js',
+  'apps/api/src/trpc/routers/tracker.router.mjs'
+]
+[32m✓ Found concrete export in apps/api/src/router/tracker.router.ts[0m
+
+[34m— Details —[0m
+[35mStart: apps/api/src/router/tracker.router.ts[0m
+  ↳ apps/api/src/router/tracker.router.ts  [32m[HAS export const trackerRouter][0m
+[32mResult: apps/api/src/router/tracker.router.ts[0m
+
+[90mSnippet of the concrete export:[0m
+… '../trpc/routers/tracker.router';
+
+// Re-declare the symbol so scanners matching "export const trackerRouter" succeed.
+export const trackerRouter = realTrackerRouter;
+export type TrackerRouter = typeof trackerRouter;
+
+
+{
+  "checkedCandidates": [
+    "apps/api/src/router/tracker.router.ts",
+    "apps/api/src/router/tracker.router.js",
+    "apps/api/src/trpc/routers/tracker.router.ts",
+    "apps/api/src/trpc/routers/tracker.router.tsx",
+    "apps/api/src/trpc/routers/tracker.router.js",
+    "apps/api/src/trpc/routers/tracker.router.mjs"
+  ],
+  "foundFiles": [
+    "apps/api/src/router/tracker.router.ts",
+    "apps/api/src/trpc/routers/tracker.router.ts"
+  ],
+  "tracker": {
+    "legacyPathExists": true,
+    "realPathExists": true,
+    "chase": [
+      {
+        "start": "apps/api/src/router/tracker.router.ts",
+        "resolvedFile": "apps/api/src/router/tracker.router.ts",
+        "reason": "export const trackerRouter …",
+        "trail": [
+          {
+            "file": "apps/api/src/router/tracker.router.ts",
+            "via": null,
+            "hasAnyExportConstTracker": true,
+            "exportKinds": [
+              "var"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "hints": []
+}

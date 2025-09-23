@@ -9,8 +9,18 @@ vi.mock('@/trpc', () => ({
           isLoading: false,
           error: null,
           data: [
-            { id: 'g1', title: 'Polish CV', status: 'DONE', dueDate: new Date().toISOString() },
-            { id: 'g2', title: 'Apply to 10 roles', status: 'IN_PROGRESS', dueDate: new Date().toISOString() },
+            {
+              id: 'g1',
+              title: 'Polish CV',
+              status: 'DONE',
+              dueDate: new Date().toISOString(),
+            },
+            {
+              id: 'g2',
+              title: 'Apply to 10 roles',
+              status: 'IN_PROGRESS',
+              dueDate: new Date().toISOString(),
+            },
           ],
         }),
       },

@@ -6,9 +6,10 @@ const { exec } = require('child_process');
 const path = require('path');
 
 function open(url) {
-  const cmd = process.platform === 'win32'
-    ? `start "" "${url}"`
-    : process.platform === 'darwin'
+  const cmd =
+    process.platform === 'win32'
+      ? `start "" "${url}"`
+      : process.platform === 'darwin'
       ? `open "${url}"`
       : `xdg-open "${url}"`;
   exec(cmd, (err) => {

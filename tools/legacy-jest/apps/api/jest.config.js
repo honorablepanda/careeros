@@ -5,27 +5,33 @@ module.exports = {
   displayName: 'api',
   testEnvironment: 'node',
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest', {
-      swcrc: false,
-      sourceMaps: 'inline',
-      jsc: {
-        target: 'es2022',
-        parser: { syntax: 'typescript', tsx: false, decorators: true },
-        transform: { decoratorMetadata: true }
+    '^.+\\.(t|j)sx?$': [
+      '@swc/jest',
+      {
+        swcrc: false,
+        sourceMaps: 'inline',
+        jsc: {
+          target: 'es2022',
+          parser: { syntax: 'typescript', tsx: false, decorators: true },
+          transform: { decoratorMetadata: true },
+        },
+        module: { type: 'commonjs' },
       },
-      module: { type: 'commonjs' }
-    }]
+    ],
   },
-  transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\](?!.*(superjson)[/\\\\])'],
-  moduleNameMapper: (
+  transformIgnorePatterns: [
+    '[/\\\\]node_modules[/\\\\](?!.*(superjson)[/\\\\])',
+  ],
+  moduleNameMapper:
     tsconfig.compilerOptions && tsconfig.compilerOptions.paths
-      ? pathsToModuleNameMapper(tsconfig.compilerOptions.paths, { prefix: '<rootDir>/../../' })
-      : {}
-  ),
+      ? pathsToModuleNameMapper(tsconfig.compilerOptions.paths, {
+          prefix: '<rootDir>/../../',
+        })
+      : {},
   setupFilesAfterEnv: [],
   testMatch: [
     '<rootDir>/src/**/*.spec.ts',
-    '<rootDir>/src/**/__tests__/**/*.spec.ts'
+    '<rootDir>/src/**/__tests__/**/*.spec.ts',
   ],
   coverageDirectory: '../../coverage/apps/api',
 };

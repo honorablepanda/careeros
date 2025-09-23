@@ -9,19 +9,19 @@ vi.mock('@/trpc', () => ({
           isLoading: false,
           error: null,
           data: [
-  {
-    "id": "1",
-    "name": "React",
-    "level": "Advanced",
-    "updatedAt": "2025-09-12T17:45:20.970Z"
-  },
-  {
-    "id": "2",
-    "name": "SQL",
-    "level": "Intermediate",
-    "updatedAt": "2025-09-12T17:45:20.970Z"
-  }
-],
+            {
+              id: '1',
+              name: 'React',
+              level: 'Advanced',
+              updatedAt: '2025-09-12T17:45:20.970Z',
+            },
+            {
+              id: '2',
+              name: 'SQL',
+              level: 'Intermediate',
+              updatedAt: '2025-09-12T17:45:20.970Z',
+            },
+          ],
         }),
       },
     },
@@ -35,7 +35,7 @@ describe('Skills page', () => {
     render(<Page />);
     expect(screen.getByText('Skills')).toBeInTheDocument();
     const table = screen.getByRole('table');
-    expect(within(table).getByText(String("React"))).toBeInTheDocument();
+    expect(within(table).getByText(String('React'))).toBeInTheDocument();
     expect(within(table).getAllByRole('row').length).toBeGreaterThan(1);
   });
 });

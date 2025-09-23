@@ -19,25 +19,14 @@
   "tsconfig": {
     "basePath": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\tsconfig.base.json",
     "aliases": {
-      "@careeros/prisma": [
-        "shared/prisma/src/index.ts"
-      ],
-      "@careeros/trpc": [
-        "shared/trpc/src/index.ts"
-      ],
-      "@careeros/types": [
-        "shared/types/src/index.ts"
-      ]
+      "@careeros/prisma": ["shared/prisma/src/index.ts"],
+      "@careeros/trpc": ["shared/trpc/src/index.ts"],
+      "@careeros/types": ["shared/types/src/index.ts"]
     }
   },
   "tracker": {
     "pagePath": "C:\\Users\\kashi\\Desktop\\COS\\careeros\\web\\src\\app\\tracker\\page.tsx",
-    "imports": [
-      "react",
-      "next/link",
-      "@careeros/trpc",
-      "@careeros/types"
-    ],
+    "imports": ["react", "next/link", "@careeros/trpc", "@careeros/types"],
     "trpcImports": [
       {
         "binding": "{ trpc }",
@@ -53,9 +42,7 @@
       {
         "type": "missing-mocks",
         "message": "Spec is not mocking trpc for the exact import path(s) used by the page.",
-        "missingFor": [
-          "@careeros/trpc"
-        ]
+        "missingFor": ["@careeros/trpc"]
       }
     ],
     "suggestions": [

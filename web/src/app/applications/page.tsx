@@ -17,8 +17,15 @@ export default function ApplicationsPage() {
       <h1 className="text-2xl font-semibold">Applications</h1>
 
       <div className="flex items-center gap-3">
-        <label className="text-sm" htmlFor="statusFilter">Filter status:</label>
-        <select className="border rounded-md px-2 py-1 text-sm" id="statusFilter" value={status ?? ''} onChange={(e)=> setStatus(e.target.value || undefined)}>
+        <label className="text-sm" htmlFor="statusFilter">
+          Filter status:
+        </label>
+        <select
+          className="border rounded-md px-2 py-1 text-sm"
+          id="statusFilter"
+          value={status ?? ''}
+          onChange={(e) => setStatus(e.target.value || undefined)}
+        >
           <option value="">All</option>
           <option value="APPLIED">APPLIED</option>
           <option value="INTERVIEWING">INTERVIEWING</option>

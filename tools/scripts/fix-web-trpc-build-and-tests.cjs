@@ -23,11 +23,7 @@ function sh(cmd, cwd = ROOT) {
 }
 
 function upsertDeps() {
-  const deps = [
-    '@trpc/react-query',
-    '@tanstack/react-query',
-    '@trpc/client',
-  ];
+  const deps = ['@trpc/react-query', '@tanstack/react-query', '@trpc/client'];
   const webPkgExists = fs.existsSync(PKG_WEB);
 
   // Read whichever package.json we’ll install into to detect if missing
@@ -43,7 +39,7 @@ function upsertDeps() {
   if (missing.length) {
     console.log(
       `→ Installing deps ${missing.join(', ')} ` +
-      (webPkgExists ? 'to ./web' : 'to workspace root')
+        (webPkgExists ? 'to ./web' : 'to workspace root')
     );
     const cmd = webPkgExists
       ? `pnpm -F ./web add ${missing.join(' ')}`
@@ -70,7 +66,9 @@ export const trpc = {
   },
 };
 `;
-  const cur = fs.existsSync(MOCK_TRPC) ? fs.readFileSync(MOCK_TRPC, 'utf8') : '';
+  const cur = fs.existsSync(MOCK_TRPC)
+    ? fs.readFileSync(MOCK_TRPC, 'utf8')
+    : '';
   if (cur !== content) {
     fs.writeFileSync(MOCK_TRPC, content, 'utf8');
     console.log(`✓ wrote ${path.relative(ROOT, MOCK_TRPC)}`);
@@ -105,7 +103,11 @@ function patchJestConfig() {
   }
 
   // Map '@/trpc' to our mock (so tests don’t pull the real client)
-  if (!/['"]\^@\/trpc\$['"]\s*:\s*['"]<rootDir>\/specs\/__mocks__\/trpc\.ts['"]/.test(src)) {
+  if (
+    !/['"]\^@\/trpc\$['"]\s*:\s*['"]<rootDir>\/specs\/__mocks__\/trpc\.ts['"]/.test(
+      src
+    )
+  ) {
     src = src.replace(/moduleNameMapper\s*:\s*\{/, (m) => {
       return `${m}
     '^@/trpc$': '<rootDir>/specs/__mocks__/trpc.ts',`;
@@ -113,7 +115,11 @@ function patchJestConfig() {
   }
 
   // Keep old mapping for @careeros/trpc (some specs may still import it)
-  if (!/['"]@careeros\/trpc['"]\s*:\s*['"]<rootDir>\/specs\/__mocks__\/trpc\.ts['"]/.test(src)) {
+  if (
+    !/['"]@careeros\/trpc['"]\s*:\s*['"]<rootDir>\/specs\/__mocks__\/trpc\.ts['"]/.test(
+      src
+    )
+  ) {
     src = src.replace(/moduleNameMapper\s*:\s*\{/, (m) => {
       return `${m}
     '@careeros/trpc': '<rootDir>/specs/__mocks__/trpc.ts',`;
@@ -122,7 +128,9 @@ function patchJestConfig() {
 
   if (src !== before) {
     fs.writeFileSync(JEST_WEB, src, 'utf8');
-    console.log(`✓ patched ${path.relative(ROOT, JEST_WEB)} (moduleNameMapper)`);
+    console.log(
+      `✓ patched ${path.relative(ROOT, JEST_WEB)} (moduleNameMapper)`
+    );
   } else {
     console.log(`= up-to-date ${path.relative(ROOT, JEST_WEB)}`);
   }
@@ -135,9 +143,15 @@ function patchJestConfig() {
   patchJestConfig();
 
   console.log('→ Reinstall & run tests/build');
-  try { sh('pnpm -w install'); } catch {}
-  try { sh('pnpm run test:web'); } catch {}
-  try { sh('pnpm -w build'); } catch {}
+  try {
+    sh('pnpm -w install');
+  } catch {}
+  try {
+    sh('pnpm run test:web');
+  } catch {}
+  try {
+    sh('pnpm -w build');
+  } catch {}
 
   console.log('Done.');
 })();

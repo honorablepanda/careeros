@@ -18,7 +18,7 @@ let changed = false;
 
 // 1) web/jest.config.ts (only if missing)
 changed |= ensure(
-  path.join('web','jest.config.ts'),
+  path.join('web', 'jest.config.ts'),
   `import nextJest from 'next/jest';
 
 const createJestConfig = nextJest({ dir: './' });
@@ -40,23 +40,27 @@ export default createJestConfig(customJestConfig);
 
 // 2) web/tsconfig.spec.json
 changed |= ensure(
-  path.join('web','tsconfig.spec.json'),
-  JSON.stringify({
-    extends: "./tsconfig.json",
-    compilerOptions: { types: ["jest","node"], noEmit: true },
-    include: ["specs/**/*", "test/**/*"]
-  }, null, 2)
+  path.join('web', 'tsconfig.spec.json'),
+  JSON.stringify(
+    {
+      extends: './tsconfig.json',
+      compilerOptions: { types: ['jest', 'node'], noEmit: true },
+      include: ['specs/**/*', 'test/**/*'],
+    },
+    null,
+    2
+  )
 );
 
 // 3) web/test/setupTests.ts
 changed |= ensure(
-  path.join('web','test','setupTests.ts'),
+  path.join('web', 'test', 'setupTests.ts'),
   `import '@testing-library/jest-dom';\n`
 );
 
 // 4) web/test/trpc.mock.ts  (moduleNameMapper points here)
 changed |= ensure(
-  path.join('web','test','trpc.mock.ts'),
+  path.join('web', 'test', 'trpc.mock.ts'),
   `// Minimal trpc mock used in unit tests
 export const trpc = {
   tracker: {
@@ -73,7 +77,7 @@ export default trpc;
 
 // 5) Smoke specs that the scan expects
 changed |= ensure(
-  path.join('web','specs','index.spec.tsx'),
+  path.join('web', 'specs', 'index.spec.tsx'),
   `import { render, screen } from '@testing-library/react';
 function Home() { return <h1>CareerOS</h1>; }
 test('renders home title', () => {
@@ -84,7 +88,7 @@ test('renders home title', () => {
 );
 
 changed |= ensure(
-  path.join('web','specs','tracker.spec.tsx'),
+  path.join('web', 'specs', 'tracker.spec.tsx'),
   `import { render, screen } from '@testing-library/react';
 import React from 'react';
 

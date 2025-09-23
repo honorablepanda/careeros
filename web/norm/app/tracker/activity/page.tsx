@@ -12,7 +12,11 @@ export default function ActivityPage() {
     <main className="p-6 space-y-4">
       <h1>Tracker Activity</h1>
       {items?.length ? (
-        <ul>{items.map((it, i) => <li key={i}>{JSON.stringify(it)}</li>)}</ul>
+        <ul>
+          {items.map((it, i) => (
+            <li key={i}>{JSON.stringify(it)}</li>
+          ))}
+        </ul>
       ) : (
         <p>No activity</p>
       )}

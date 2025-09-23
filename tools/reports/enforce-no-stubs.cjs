@@ -9,10 +9,23 @@ const path = require('path');
 const ROOT = process.cwd();
 const INCLUDE_EXT = new Set(['.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs']);
 const IGNORE_DIRS = new Set([
-  'node_modules', '.next', 'dist', 'build', '.turbo', '.nx',
-  '.git', 'coverage', '.cache', '.storybook', '.idea',
+  'node_modules',
+  '.next',
+  'dist',
+  'build',
+  '.turbo',
+  '.nx',
+  '.git',
+  'coverage',
+  '.cache',
+  '.storybook',
+  '.idea',
   // test-ish dirs
-  '__tests__', '__mocks__', '__fixtures__', 'specs', 'e2e',
+  '__tests__',
+  '__mocks__',
+  '__fixtures__',
+  'specs',
+  'e2e',
 ]);
 const IGNORE_FILE_PATTERNS = [
   /\.spec\.(t|j)sx?$/i,
@@ -26,7 +39,10 @@ const MARKERS = [
   { type: 'HACK', re: /\bHACK\b/i },
   { type: 'STUB', re: /\bSTUB\b/i },
   { type: 'PLACEHOLDER', re: /\bPLACEHOLDER\b/i },
-  { type: 'NOT_IMPLEMENTED', re: /throw\s+new\s+Error\(['"`]\s*(not\s+implemented|unimplemented)\s*['"`]\)/i },
+  {
+    type: 'NOT_IMPLEMENTED',
+    re: /throw\s+new\s+Error\(['"`]\s*(not\s+implemented|unimplemented)\s*['"`]\)/i,
+  },
   { type: 'TS_BANDAID', re: /@ts-(ignore|expect-error)/ },
   // if you *do* want to block casts in prod code, keep CAST_ANY enabled:
   { type: 'CAST_ANY', re: /\bas\s+any\b/ },
@@ -35,9 +51,9 @@ const MARKERS = [
 
 function shouldIgnoreFile(rel) {
   if (!INCLUDE_EXT.has(path.extname(rel))) return true;
-  if (IGNORE_FILE_PATTERNS.some(rx => rx.test(rel))) return true;
+  if (IGNORE_FILE_PATTERNS.some((rx) => rx.test(rel))) return true;
   const parts = rel.split(/[\\/]+/);
-  return parts.some(p => IGNORE_DIRS.has(p));
+  return parts.some((p) => IGNORE_DIRS.has(p));
 }
 
 function* walk(dir) {
@@ -56,12 +72,21 @@ function* walk(dir) {
 const findings = [];
 for (const rel of walk(ROOT)) {
   let src = '';
-  try { src = fs.readFileSync(rel, 'utf8'); } catch { continue; }
+  try {
+    src = fs.readFileSync(rel, 'utf8');
+  } catch {
+    continue;
+  }
   const lines = src.split(/\r?\n/);
   lines.forEach((line, i) => {
     for (const m of MARKERS) {
       if (m.re.test(line)) {
-        findings.push({ file: rel, line: i + 1, type: m.type, text: line.trim().slice(0, 200) });
+        findings.push({
+          file: rel,
+          line: i + 1,
+          type: m.type,
+          text: line.trim().slice(0, 200),
+        });
       }
     }
   });
@@ -72,7 +97,8 @@ if (findings.length) {
   for (const f of findings.slice(0, 200)) {
     console.error(`- ${f.file}:${f.line} — ${f.type} — ${f.text}`);
   }
-  if (findings.length > 200) console.error(`…and ${findings.length - 200} more`);
+  if (findings.length > 200)
+    console.error(`…and ${findings.length - 200} more`);
   process.exit(1);
 }
 

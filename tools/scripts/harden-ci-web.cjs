@@ -21,14 +21,14 @@ const cwd = process.cwd();
 const pkgPath = path.join(cwd, 'package.json');
 
 const argv = process.argv.slice(2);
-const getFlag = (name, def=false) => {
-  const on = argv.some(a => a === `--${name}`);
-  const off = argv.some(a => a === `--no-${name}`);
-  return off ? false : (on ? true : def);
+const getFlag = (name, def = false) => {
+  const on = argv.some((a) => a === `--${name}`);
+  const off = argv.some((a) => a === `--no-${name}`);
+  return off ? false : on ? true : def;
 };
 const getOpt = (name, def) => {
-  const i = argv.findIndex(a => a === `--${name}`);
-  return i >= 0 && argv[i+1] ? argv[i+1] : def;
+  const i = argv.findIndex((a) => a === `--${name}`);
+  return i >= 0 && argv[i + 1] ? argv[i + 1] : def;
 };
 
 const DRY = getFlag('dry-run', false);
@@ -36,13 +36,23 @@ const RUN = getFlag('run', true);
 const CLEAN = getFlag('clean', true);
 const PORT = getOpt('port', '3000');
 
-function log(msg){ console.log(msg); }
-function info(msg){ console.log('• ' + msg); }
-function ok(msg){ console.log('✓ ' + msg); }
-function warn(msg){ console.warn('! ' + msg); }
-function fail(msg){ console.error('✗ ' + msg); }
+function log(msg) {
+  console.log(msg);
+}
+function info(msg) {
+  console.log('• ' + msg);
+}
+function ok(msg) {
+  console.log('✓ ' + msg);
+}
+function warn(msg) {
+  console.warn('! ' + msg);
+}
+function fail(msg) {
+  console.error('✗ ' + msg);
+}
 
-function sh(cmd, opts={}) {
+function sh(cmd, opts = {}) {
   info(`$ ${cmd}`);
   if (DRY) return;
   cp.execSync(cmd, { stdio: 'inherit', ...opts });
@@ -59,8 +69,8 @@ function writeJSON(p, obj) {
 function hasDep(pkg, name) {
   return Boolean(
     pkg.dependencies?.[name] ||
-    pkg.devDependencies?.[name] ||
-    pkg.optionalDependencies?.[name]
+      pkg.devDependencies?.[name] ||
+      pkg.optionalDependencies?.[name]
   );
 }
 
@@ -76,7 +86,9 @@ function patchCiScript(pkg) {
   if (!pkg.scripts['activity:ci:auto']) {
     // keep your existing script name if it differs, but in your repo it exists already
     // we won’t invent a new one — just warn if missing.
-    warn('script "activity:ci:auto" not found — ensure seed-and-verify script exists.');
+    warn(
+      'script "activity:ci:auto" not found — ensure seed-and-verify script exists.'
+    );
   }
 
   pkg.scripts['ci:web'] = desired;
@@ -95,32 +107,54 @@ function ensureCrossEnv(pkg) {
 
 function maybeWarnReactQuery(pkg) {
   // If @tanstack/react-query v5 present + @trpc/react-query v10 → warn
-  const rq = (pkg.dependencies?.['@tanstack/react-query'] || pkg.devDependencies?.['@tanstack/react-query'] || '').trim();
-  const trpcRQ = (pkg.dependencies?.['@trpc/react-query'] || pkg.devDependencies?.['@trpc/react-query'] || '').trim();
-  const isRQ5 = rq.startsWith('5') || rq.startsWith('^5') || rq.startsWith('~5') || rq.includes('^5.');
+  const rq = (
+    pkg.dependencies?.['@tanstack/react-query'] ||
+    pkg.devDependencies?.['@tanstack/react-query'] ||
+    ''
+  ).trim();
+  const trpcRQ = (
+    pkg.dependencies?.['@trpc/react-query'] ||
+    pkg.devDependencies?.['@trpc/react-query'] ||
+    ''
+  ).trim();
+  const isRQ5 =
+    rq.startsWith('5') ||
+    rq.startsWith('^5') ||
+    rq.startsWith('~5') ||
+    rq.includes('^5.');
   const isTRPC10 = trpcRQ.startsWith('10') || trpcRQ.startsWith('^10');
 
   if (isRQ5 && isTRPC10) {
-    warn('Detected @tanstack/react-query v5 with @trpc/react-query v10 — peer mismatch. Consider: pnpm -w add @tanstack/react-query@^4');
+    warn(
+      'Detected @tanstack/react-query v5 with @trpc/react-query v10 — peer mismatch. Consider: pnpm -w add @tanstack/react-query@^4'
+    );
   }
 }
 
 function cleanCaches() {
-  if (!CLEAN) { info('skip cache cleanup (--no-clean)'); return; }
+  if (!CLEAN) {
+    info('skip cache cleanup (--no-clean)');
+    return;
+  }
   const paths = [
     '.nx/workspace-data',
     'web/.next',
-    'apps/web/.next' // legacy, harmless if missing
+    'apps/web/.next', // legacy, harmless if missing
   ];
   for (const p of paths) {
-    if (DRY) { info(`[dry-run] rimraf ${p}`); continue; }
+    if (DRY) {
+      info(`[dry-run] rimraf ${p}`);
+      continue;
+    }
     try {
       if (fs.existsSync(path.join(cwd, p))) {
         info(`rimraf ${p}`);
         // cross-platform rimraf: use node to remove recursively
         fs.rmSync(path.join(cwd, p), { recursive: true, force: true });
       }
-    } catch (e) { /* ignore */ }
+    } catch (e) {
+      /* ignore */
+    }
   }
 }
 

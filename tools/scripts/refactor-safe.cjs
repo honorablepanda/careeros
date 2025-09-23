@@ -6,14 +6,21 @@ const path = require('path');
 function writeFileIfDiff(file, content) {
   const dir = path.dirname(file);
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === content) return false;
+  if (fs.existsSync(file) && fs.readFileSync(file, 'utf8') === content)
+    return false;
   fs.writeFileSync(file, content);
   return true;
 }
 
-function exists(p) { return fs.existsSync(p); }
-function read(p) { return fs.readFileSync(p, 'utf8'); }
-function write(p, s) { fs.writeFileSync(p, s); }
+function exists(p) {
+  return fs.existsSync(p);
+}
+function read(p) {
+  return fs.readFileSync(p, 'utf8');
+}
+function write(p, s) {
+  fs.writeFileSync(p, s);
+}
 
 function walk(dir, out = []) {
   if (!exists(dir)) return out;
@@ -102,7 +109,8 @@ if (writeFileIfDiff('web/src/types/domain.ts', DOMAIN)) {
 const roots = ['web/src', 'web/app'].filter(exists);
 const files = roots.flatMap((r) => walk(r));
 for (const f of files) {
-  let s = read(f), b = s;
+  let s = read(f),
+    b = s;
 
   // Replace default-only TRPC import to named
   s = s.replace(
@@ -137,6 +145,11 @@ function reportStatusFilter(file) {
   }
 }
 ['web/src/app/applications/page.tsx', 'web/src/app/goals/page.tsx']
-  .filter(exists).forEach(reportStatusFilter);
+  .filter(exists)
+  .forEach(reportStatusFilter);
 
-console.log(changed ? `Done. Files changed: ${changed}` : 'No changes needed (idempotent).');
+console.log(
+  changed
+    ? `Done. Files changed: ${changed}`
+    : 'No changes needed (idempotent).'
+);

@@ -7,12 +7,15 @@ const TARGET_DIR = path.join(ROOT, 'apps/api/src');
 const exts = new Set(['.ts', '.tsx', '.js', '.jsx']);
 const files = [];
 
-(function walk(dir){
+(function walk(dir) {
   for (const name of fs.readdirSync(dir)) {
     const p = path.join(dir, name);
     const st = fs.statSync(p);
     if (st.isDirectory()) walk(p);
-    else if (exts.has(path.extname(name)) && (name.endsWith('.spec.ts') || name.endsWith('.test.ts'))) {
+    else if (
+      exts.has(path.extname(name)) &&
+      (name.endsWith('.spec.ts') || name.endsWith('.test.ts'))
+    ) {
       files.push(p);
     }
   }
@@ -44,9 +47,16 @@ for (const f of files) {
     const impRe = /import\s*\{\s*([^}]+)\s*\}\s*from\s*['"]vitest['"];?/;
     if (impRe.test(s)) {
       s = s.replace(impRe, (_m, g1) => {
-        const names = new Set(g1.split(',').map(x => x.trim()).filter(Boolean));
+        const names = new Set(
+          g1
+            .split(',')
+            .map((x) => x.trim())
+            .filter(Boolean)
+        );
         names.add('vi');
-        return `import { ${Array.from(names).sort().join(', ')} } from 'vitest'`;
+        return `import { ${Array.from(names)
+          .sort()
+          .join(', ')} } from 'vitest'`;
       });
     } else {
       // add a vitest import at the top if none exists

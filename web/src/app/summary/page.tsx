@@ -7,10 +7,15 @@ import { trpc } from '@/trpc';
 export default function SummaryPage() {
   // TODO: replace with real userId from your auth/session
   const userId = getUserId();
-  const { data: apps, isLoading, error } = trpc.tracker.getApplications.useQuery({ userId });
+  const {
+    data: apps,
+    isLoading,
+    error,
+  } = trpc.tracker.getApplications.useQuery({ userId });
 
   if (isLoading) return <div className="p-6">Loading…</div>;
-  if (error) return <div className="p-6 text-red-600">Error: {error.message}</div>;
+  if (error)
+    return <div className="p-6 text-red-600">Error: {error.message}</div>;
   if (!apps?.length) return <div className="p-6">No applications yet.</div>;
 
   const byStatus = apps.reduce<Record<string, number>>((acc, a) => {
@@ -19,8 +24,11 @@ export default function SummaryPage() {
     return acc;
   }, {});
 
-  const last30 = new Date(); last30.setDate(last30.getDate() - 30);
-  const recent = apps.filter(a => dateValue(a.createdAt) >= last30.getTime()).length;
+  const last30 = new Date();
+  last30.setDate(last30.getDate() - 30);
+  const recent = apps.filter(
+    (a) => dateValue(a.createdAt) >= last30.getTime()
+  ).length;
 
   return (
     <div className="p-6 space-y-6">

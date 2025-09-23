@@ -14,7 +14,23 @@ import { calendarRouter } from './routers/calendar.router';
 import { goalsRouter } from './routers/goals.router';
 import { profileRouter } from './routers/profile.router';
 import { settingsRouter } from './routers/settings.router';
-export const appRouter = router({ 
-  settings: settingsRouter, profile: profileRouter, goals: goalsRouter, calendar: calendarRouter, notifications: notificationsRouter, skills: skillsRouter, planner: plannerRouter, achievements: achievementsRouter, metrics: metricsRouter, roadmap: roadmapRouter, resume: resumeRouter, networking: networkingRouter, applications: applicationsRouter, tracker: trackerRouter });
+export const appRouter = router({
+  settings: settingsRouter,
+  profile: profileRouter,
+  goals: goalsRouter,
+  calendar: calendarRouter,
+  notifications: notificationsRouter,
+  skills: skillsRouter,
+  planner: plannerRouter,
+  achievements: achievementsRouter,
+  metrics: metricsRouter,
+  roadmap: roadmapRouter,
+  resume: resumeRouter,
+  networking: networkingRouter,
+  applications: applicationsRouter,
+  tracker: trackerRouter,
+});
 export type AppRouter = typeof appRouter;
 export { createContext } from './context';
+export { trackerRouter } from './routers/tracker.router';
+

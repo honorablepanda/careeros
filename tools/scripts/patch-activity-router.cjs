@@ -4,9 +4,24 @@ const cp = require('child_process');
 
 const ROOT = process.cwd();
 const DO_COMMIT = process.argv.includes('--commit');
-const FILE = path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'routers', 'tracker.router.ts');
+const FILE = path.join(
+  ROOT,
+  'apps',
+  'api',
+  'src',
+  'trpc',
+  'routers',
+  'tracker.router.ts'
+);
 
-const has = (p) => { try { fs.accessSync(p); return true; } catch { return false; } };
+const has = (p) => {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
 const read = (p) => fs.readFileSync(p, 'utf8');
 const write = (p, s) => fs.writeFileSync(p, s);
 
@@ -24,8 +39,7 @@ if (!/from 'zod'/.test(s)) {
 
 // 2) Replace any existing getApplicationActivity with a canonical impl
 const procKey = 'getApplicationActivity';
-const procImpl =
-`  ${procKey}: publicProcedure
+const procImpl = `  ${procKey}: publicProcedure
     .input(z.object({ id: z.string() }))
     .query(async ({ ctx, input }) => {
       const prismaAny = ctx.prisma as any;
@@ -35,7 +49,10 @@ const procImpl =
     }),`;
 
 // Try “surgical replace” of existing block
-const procRegex = new RegExp(`${procKey}\\s*:\\s*publicProcedure[\\s\\S]*?\\),\\s*`, 'm');
+const procRegex = new RegExp(
+  `${procKey}\\s*:\\s*publicProcedure[\\s\\S]*?\\),\\s*`,
+  'm'
+);
 if (procRegex.test(s)) {
   s = s.replace(procRegex, procImpl + '\n');
 } else {
@@ -88,7 +105,15 @@ console.log('✓ Patched tracker.router.ts (activity ensured)');
 if (DO_COMMIT) {
   try {
     cp.execFileSync('git', ['add', FILE], { stdio: 'inherit' });
-    cp.execFileSync('git', ['commit', '-m', 'fix(tracker): ensure application activity calls prisma (router patch)'], { stdio: 'inherit' });
+    cp.execFileSync(
+      'git',
+      [
+        'commit',
+        '-m',
+        'fix(tracker): ensure application activity calls prisma (router patch)',
+      ],
+      { stdio: 'inherit' }
+    );
     console.log('✓ committed router patch');
   } catch (e) {
     console.log('⚠️  commit skipped:', e?.message || e);

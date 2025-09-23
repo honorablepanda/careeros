@@ -22,7 +22,11 @@ function walk(dir, exts = ['.ts', '.tsx']) {
 }
 
 function tryRead(p) {
-  try { return fs.readFileSync(p, 'utf8'); } catch { return null; }
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return null;
+  }
 }
 function writeFileSafe(p, s) {
   if (DRY) {
@@ -36,9 +40,12 @@ function writeFileSafe(p, s) {
 
 // Find candidate root TRPC files
 const repoRoot = process.cwd();
-const candidates = walk(repoRoot).filter(p => /\/trpc\/.*\.(ts|tsx)$/.test(p.replace(/\\/g, '/')));
+const candidates = walk(repoRoot).filter((p) =>
+  /\/trpc\/.*\.(ts|tsx)$/.test(p.replace(/\\/g, '/'))
+);
 const roots = [];
-const createAppRouterRe = /export\s+const\s+appRouter\s*=\s*createTRPCRouter\s*\(\s*\{\s*[\s\S]*?\}\s*\)/m;
+const createAppRouterRe =
+  /export\s+const\s+appRouter\s*=\s*createTRPCRouter\s*\(\s*\{\s*[\s\S]*?\}\s*\)/m;
 
 for (const file of candidates) {
   const src = tryRead(file);
@@ -50,7 +57,9 @@ for (const file of candidates) {
 roots.sort((a, b) => a.length - b.length);
 
 if (roots.length === 0) {
-  console.error('Could not find a file that exports "appRouter = createTRPCRouter({...})".');
+  console.error(
+    'Could not find a file that exports "appRouter = createTRPCRouter({...})".'
+  );
   process.exit(1);
 }
 
@@ -66,7 +75,9 @@ function findTrackerRouterPath() {
   if (fs.existsSync(localTsx)) return localTsx;
 
   // fallback: search the repo for tracker.router.ts
-  const all = walk(repoRoot).filter(p => /tracker\.router\.(ts|tsx)$/.test(p));
+  const all = walk(repoRoot).filter((p) =>
+    /tracker\.router\.(ts|tsx)$/.test(p)
+  );
   if (all.length) return all[0];
   return null;
 }
@@ -76,15 +87,30 @@ if (!trackerAbs) {
   console.error('Could not locate tracker.router.ts in the repo. Aborting.');
   process.exit(2);
 }
-const trackerRel = './' + path.relative(dir, trackerAbs).replace(/\\/g, '/').replace(/\.tsx?$/, '');
+const trackerRel =
+  './' +
+  path
+    .relative(dir, trackerAbs)
+    .replace(/\\/g, '/')
+    .replace(/\.tsx?$/, '');
 
-const hasImport = new RegExp(`import\\s*{\\s*trackerRouter\\s*}\\s*from\\s*['"]${trackerRel}['"]`).test(src)
-  || /import\s*{\s*trackerRouter\s*}\s*from\s*['"].*tracker\.router['"]/.test(src);
+const hasImport =
+  new RegExp(
+    `import\\s*{\\s*trackerRouter\\s*}\\s*from\\s*['"]${trackerRel}['"]`
+  ).test(src) ||
+  /import\s*{\s*trackerRouter\s*}\s*from\s*['"].*tracker\.router['"]/.test(src);
 
 if (!hasImport) {
   // insert after last import
-  const lastImportIdx = [...src.matchAll(/^\s*import[\s\S]*?;$/gm)].pop()?.index ?? 0;
-  const insertPos = lastImportIdx >= 0 ? lastImportIdx + src.match(/^\s*import[\s\S]*?;$/gm)?.[src.match(/^\s*import[\s\S]*?;$/gm).length-1].length : 0;
+  const lastImportIdx =
+    [...src.matchAll(/^\s*import[\s\S]*?;$/gm)].pop()?.index ?? 0;
+  const insertPos =
+    lastImportIdx >= 0
+      ? lastImportIdx +
+        src.match(/^\s*import[\s\S]*?;$/gm)?.[
+          src.match(/^\s*import[\s\S]*?;$/gm).length - 1
+        ].length
+      : 0;
   const importLine = `\nimport { trackerRouter } from '${trackerRel}';\n`;
   src = src.slice(0, insertPos) + importLine + src.slice(insertPos);
   console.log(`+ added import { trackerRouter } from '${trackerRel}'`);
@@ -93,13 +119,16 @@ if (!hasImport) {
 }
 
 // ensure tracker: trackerRouter in createTRPCRouter({...})
-const routerObjRe = /(export\s+const\s+appRouter\s*=\s*createTRPCRouter\s*\(\s*\{\s*)([\s\S]*?)(\}\s*\))/m;
+const routerObjRe =
+  /(export\s+const\s+appRouter\s*=\s*createTRPCRouter\s*\(\s*\{\s*)([\s\S]*?)(\}\s*\))/m;
 const m = src.match(routerObjRe);
 if (!m) {
   console.error('Could not parse appRouter createTRPCRouter block. Aborting.');
   process.exit(3);
 }
-const before = m[1], objBody = m[2], after = m[3];
+const before = m[1],
+  objBody = m[2],
+  after = m[3];
 
 // check if key already exists
 let newObjBody = objBody;

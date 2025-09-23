@@ -9,8 +9,20 @@ vi.mock('@/trpc', () => ({
           isLoading: false,
           error: null,
           data: [
-            { id: '1', company: 'Acme', role: 'FE Dev', status: 'APPLIED', createdAt: new Date().toISOString() },
-            { id: '2', company: 'Globex', role: 'BE Dev', status: 'INTERVIEWING', createdAt: new Date().toISOString() },
+            {
+              id: '1',
+              company: 'Acme',
+              role: 'FE Dev',
+              status: 'APPLIED',
+              createdAt: new Date().toISOString(),
+            },
+            {
+              id: '2',
+              company: 'Globex',
+              role: 'BE Dev',
+              status: 'INTERVIEWING',
+              createdAt: new Date().toISOString(),
+            },
           ],
         }),
       },
@@ -24,7 +36,9 @@ describe('Summary page', () => {
   it('renders KPIs and Latest table', () => {
     render(<Page />);
     // Page heading
-    expect(screen.getByRole('heading', { name: /summary/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('heading', { name: /summary/i })
+    ).toBeInTheDocument();
 
     // KPI labels appear somewhere on the page
     expect(screen.getAllByText('APPLIED').length).toBeGreaterThan(0);

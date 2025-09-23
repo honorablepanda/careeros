@@ -29,7 +29,7 @@ export const applicationsRouter = router({
           ...(userId ? { userId } : {}),
           ...(status ? { status } : {}),
         },
-        orderBy: ({ appliedAt: 'desc' } as any),
+        orderBy: { appliedAt: 'desc' } as any,
         ...(limit ? { take: limit } : {}),
       });
     }),

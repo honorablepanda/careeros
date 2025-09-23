@@ -60,7 +60,10 @@ function run(cmd, args, opts = {}) {
 function shorten(s, max = 200) {
   const lines = s.split(/\r?\n/);
   if (lines.length <= max) return s;
-  return lines.slice(0, max).join('\n') + `\n... (truncated ${lines.length - max} lines) ...`;
+  return (
+    lines.slice(0, max).join('\n') +
+    `\n... (truncated ${lines.length - max} lines) ...`
+  );
 }
 
 /**
@@ -215,7 +218,11 @@ for (const v of VARIANTS) {
 
   log(`API status: ${apiOk ? 'PASS' : 'FAIL'} (exit ${api.status})`);
   if (!apiOk) {
-    log(`--- API stderr (first 200 lines) ---\n${shorten(api.stderr)}\n--- end ---`);
+    log(
+      `--- API stderr (first 200 lines) ---\n${shorten(
+        api.stderr
+      )}\n--- end ---`
+    );
   }
 
   // Step 2: web build only if API passed
@@ -223,11 +230,17 @@ for (const v of VARIANTS) {
   let web = null;
   if (apiOk) {
     log(`→ Running web build (pnpm -w exec nx run web:build) ...`);
-    web = run('pnpm', ['-w', 'exec', 'nx', 'run', 'web:build'], { timeout: 15 * 60 * 1000 });
+    web = run('pnpm', ['-w', 'exec', 'nx', 'run', 'web:build'], {
+      timeout: 15 * 60 * 1000,
+    });
     webOk = web.status === 0;
     log(`WEB status: ${webOk ? 'PASS' : 'FAIL'} (exit ${web && web.status})`);
     if (!webOk && web) {
-      log(`--- WEB stderr (first 200 lines) ---\n${shorten(web.stderr)}\n--- end ---`);
+      log(
+        `--- WEB stderr (first 200 lines) ---\n${shorten(
+          web.stderr
+        )}\n--- end ---`
+      );
     }
   } else {
     log(`Skipping web build for ${v.name} because API tests failed.`);
@@ -249,8 +262,8 @@ for (const v of VARIANTS) {
 
 // Decide best outcome
 const winner =
-  results.find(r => r.api === 'pass' && r.web === 'pass') ||
-  results.find(r => r.api === 'pass' && r.web === 'skip');
+  results.find((r) => r.api === 'pass' && r.web === 'pass') ||
+  results.find((r) => r.api === 'pass' && r.web === 'skip');
 
 if (!winner) {
   // Restore original

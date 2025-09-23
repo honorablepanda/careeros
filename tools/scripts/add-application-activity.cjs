@@ -1,31 +1,36 @@
 const fs = require('fs');
 const path = require('path');
 
-const schemaPath = path.join('prisma','schema.prisma');
-const backupPath = path.join('prisma','schema.prisma.bak');
+const schemaPath = path.join('prisma', 'schema.prisma');
+const backupPath = path.join('prisma', 'schema.prisma.bak');
 
-let s = fs.readFileSync(schemaPath,'utf8');
+let s = fs.readFileSync(schemaPath, 'utf8');
 
 // backup once per run (overwrite ok)
 fs.writeFileSync(backupPath, s, 'utf8');
 
-const hasEnum  = /enum\s+ApplicationActivityType\s*\{[\s\S]*?\}/m.test(s);
+const hasEnum = /enum\s+ApplicationActivityType\s*\{[\s\S]*?\}/m.test(s);
 const hasModel = /model\s+ApplicationActivity\s*\{[\s\S]*?\}/m.test(s);
 
 // Insert enum before first model if missing
 if (!hasEnum) {
-  s = s.replace(/(\n\s*model\s+)/, `
+  s = s.replace(
+    /(\n\s*model\s+)/,
+    `
 enum ApplicationActivityType {
   CREATE
   STATUS_CHANGE
 }
 
-$1`);
+$1`
+  );
 }
 
 // Insert model at end if missing
 if (!hasModel) {
-  s = s.trimEnd() + `
+  s =
+    s.trimEnd() +
+    `
 
 model ApplicationActivity {
   id            String                   @id @default(cuid())
@@ -41,4 +46,6 @@ model ApplicationActivity {
 }
 
 fs.writeFileSync(schemaPath, s, 'utf8');
-console.log('✓ Prisma schema patched (ApplicationActivity + enum). Backup at prisma/schema.prisma.bak');
+console.log(
+  '✓ Prisma schema patched (ApplicationActivity + enum). Backup at prisma/schema.prisma.bak'
+);

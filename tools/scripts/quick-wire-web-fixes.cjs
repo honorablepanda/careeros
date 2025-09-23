@@ -20,14 +20,28 @@ const fs = require('fs');
 const path = require('path');
 
 const args = process.argv.slice(2);
-const APPLY = args.includes('--apply') || (args.includes('--fix') && !args.includes('--dry') && !args.includes('--check'));
+const APPLY =
+  args.includes('--apply') ||
+  (args.includes('--fix') &&
+    !args.includes('--dry') &&
+    !args.includes('--check'));
 const DRY = !APPLY; // default to dry mode
 
-function log(...a) { console.log(...a); }
-function info(msg) { console.log('\x1b[36m%s\x1b[0m', msg); }
-function ok(msg) { console.log('\x1b[32m%s\x1b[0m', msg); }
-function warn(msg) { console.log('\x1b[33m%s\x1b[0m', msg); }
-function err(msg) { console.log('\x1b[31m%s\x1b[0m', msg); }
+function log(...a) {
+  console.log(...a);
+}
+function info(msg) {
+  console.log('\x1b[36m%s\x1b[0m', msg);
+}
+function ok(msg) {
+  console.log('\x1b[32m%s\x1b[0m', msg);
+}
+function warn(msg) {
+  console.log('\x1b[33m%s\x1b[0m', msg);
+}
+function err(msg) {
+  console.log('\x1b[31m%s\x1b[0m', msg);
+}
 
 const CWD = process.cwd();
 
@@ -92,21 +106,29 @@ function transformInterviewsPage(src) {
  * Transformation 2: ensure test-local mock in settings page spec
  */
 function ensureSettingsMockSpec(src) {
-  const already = src.includes("vi.mock('@/trpc/react'") || src.includes('vi.mock("@/trpc/react"');
-  if (already) return { changed: false, out: src, details: ['Mock already present'] };
+  const already =
+    src.includes("vi.mock('@/trpc/react'") ||
+    src.includes('vi.mock("@/trpc/react"');
+  if (already)
+    return { changed: false, out: src, details: ['Mock already present'] };
 
-  const mockBlock = `// Auto-added by quick-wire-web-fixes (keeps test self-contained)\n` +
-`vi.mock('@/trpc/react', () => ({\n` +
-`  trpc: {\n` +
-`    settings: {\n` +
-`      get: { useQuery: () => ({ data: { theme: 'system', timezone: 'UTC', notifications: true }, isLoading: false, error: null }) },\n` +
-`      update: { useMutation: () => ({ mutateAsync: vi.fn().mockResolvedValue({ ok: true }), isPending: false }) },\n` +
-`    },\n` +
-`  },\n` +
-`}));\n\n`;
+  const mockBlock =
+    `// Auto-added by quick-wire-web-fixes (keeps test self-contained)\n` +
+    `vi.mock('@/trpc/react', () => ({\n` +
+    `  trpc: {\n` +
+    `    settings: {\n` +
+    `      get: { useQuery: () => ({ data: { theme: 'system', timezone: 'UTC', notifications: true }, isLoading: false, error: null }) },\n` +
+    `      update: { useMutation: () => ({ mutateAsync: vi.fn().mockResolvedValue({ ok: true }), isPending: false }) },\n` +
+    `    },\n` +
+    `  },\n` +
+    `}));\n\n`;
 
   // Prepend ensures it runs before any static imports of the component under test
-  return { changed: true, out: mockBlock + src, details: ['Inserted vi.mock("@/trpc/react") block'] };
+  return {
+    changed: true,
+    out: mockBlock + src,
+    details: ['Inserted vi.mock("@/trpc/react") block'],
+  };
 }
 
 /** Run the plan */
@@ -123,7 +145,9 @@ function ensureSettingsMockSpec(src) {
   const interviews = firstExisting(interviewCandidates);
 
   if (!interviews) {
-    warn('Interviews page not found (searched common locations). Skipping that fix.');
+    warn(
+      'Interviews page not found (searched common locations). Skipping that fix.'
+    );
   } else {
     const src = fs.readFileSync(interviews.abs, 'utf8');
     const { changed, details, out } = transformInterviewsPage(src);
@@ -132,7 +156,11 @@ function ensureSettingsMockSpec(src) {
         ok(`[dry] Would edit ${interviews.rel}: ${details.join('; ')}`);
       } else {
         writeWithBackup(interviews.abs, out);
-        ok(`Wrote ${interviews.rel} (${details.join('; ')}) [backup: ${path.basename(interviews.rel)}.bak]`);
+        ok(
+          `Wrote ${interviews.rel} (${details.join(
+            '; '
+          )}) [backup: ${path.basename(interviews.rel)}.bak]`
+        );
       }
     } else {
       info(`No changes needed in ${interviews.rel} (title column not found).`);
@@ -149,7 +177,9 @@ function ensureSettingsMockSpec(src) {
   const settingsSpec = firstExisting(settingsSpecCandidates);
 
   if (!settingsSpec) {
-    warn('Settings spec not found (searched common locations). Skipping that fix.');
+    warn(
+      'Settings spec not found (searched common locations). Skipping that fix.'
+    );
   } else {
     const src = fs.readFileSync(settingsSpec.abs, 'utf8');
     const { changed, details, out } = ensureSettingsMockSpec(src);
@@ -158,7 +188,11 @@ function ensureSettingsMockSpec(src) {
         ok(`[dry] Would edit ${settingsSpec.rel}: ${details.join('; ')}`);
       } else {
         writeWithBackup(settingsSpec.abs, out);
-        ok(`Wrote ${settingsSpec.rel} (${details.join('; ')}) [backup: ${path.basename(settingsSpec.rel)}.bak]`);
+        ok(
+          `Wrote ${settingsSpec.rel} (${details.join(
+            '; '
+          )}) [backup: ${path.basename(settingsSpec.rel)}.bak]`
+        );
       }
     } else {
       info(`No changes needed in ${settingsSpec.rel} (${details[0]}).`);

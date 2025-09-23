@@ -14,9 +14,19 @@ const ROOT = process.cwd();
 const DO_COMMIT = process.argv.includes('--commit');
 
 const P = (...p) => path.join(ROOT, ...p);
-const has = (p) => { try { fs.accessSync(p); return true; } catch { return false; } };
+const has = (p) => {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+};
 const read = (p) => fs.readFileSync(p, 'utf8');
-const write = (p, s) => { fs.mkdirSync(path.dirname(p), { recursive: true }); fs.writeFileSync(p, s); };
+const write = (p, s) => {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+  fs.writeFileSync(p, s);
+};
 
 const TRACKER_ROUTER = P('apps/api/src/trpc/routers/tracker.router.ts');
 const API_TEST = P('apps/api/src/router/__tests__/tracker.activity.spec.ts');
@@ -24,8 +34,9 @@ const WEB_PAGE = P('web/src/app/tracker/activity/page.tsx');
 const WEB_TEST = P('web/src/app/tracker/activity/page.spec.tsx');
 
 // Patch router
-(function patchRouter(){
-  if (!has(TRACKER_ROUTER)) return console.log('• tracker.router.ts not found, skipping router patch');
+(function patchRouter() {
+  if (!has(TRACKER_ROUTER))
+    return console.log('• tracker.router.ts not found, skipping router patch');
 
   let s = read(TRACKER_ROUTER);
 
@@ -47,11 +58,14 @@ const WEB_TEST = P('web/src/app/tracker/activity/page.spec.tsx');
     }),
 `;
     // try to place before closing createTRPCRouter({...})
-    s = s.replace(/createTRPCRouter\(\{\s*/m, match => match + proc);
+    s = s.replace(/createTRPCRouter\(\{\s*/m, (match) => match + proc);
   }
 
   // Activity write on createApplication (guarded)
-  if (/createApplication\s*:/.test(s) && !/applicationActivity\.create/.test(s)) {
+  if (
+    /createApplication\s*:/.test(s) &&
+    !/applicationActivity\.create/.test(s)
+  ) {
     s = s.replace(
       /return await ctx\.prisma\.application\.create\(\{([\s\S]*?)\}\);/,
       (m) => `
@@ -96,8 +110,9 @@ const WEB_TEST = P('web/src/app/tracker/activity/page.spec.tsx');
 })();
 
 // API tests
-(function writeApiTest(){
-  if (has(API_TEST)) return console.log('⏭  test exists ->', path.relative(ROOT, API_TEST));
+(function writeApiTest() {
+  if (has(API_TEST))
+    return console.log('⏭  test exists ->', path.relative(ROOT, API_TEST));
   const t = `import { describe, it, expect, vi } from 'vitest';
 import { trackerRouter } from '../../trpc/routers/tracker.router';
 
@@ -162,7 +177,7 @@ describe('tracker activity', () => {
 })();
 
 // Optional web page (resilient)
-(function writeWeb(){
+(function writeWeb() {
   if (!has(WEB_PAGE)) {
     const content = `'use client';
 import * as React from 'react';
@@ -213,7 +228,10 @@ export default function TrackerActivityPage() {
 }
 `;
     write(WEB_PAGE, content);
-    console.log('✓ wrote web tracker/activity page ->', path.relative(ROOT, WEB_PAGE));
+    console.log(
+      '✓ wrote web tracker/activity page ->',
+      path.relative(ROOT, WEB_PAGE)
+    );
   } else {
     console.log('⏭  web tracker/activity page exists');
   }
@@ -241,11 +259,20 @@ describe('Tracker Activity page', () => {
 // Commit (optional)
 if (DO_COMMIT) {
   try {
-    cp.execFileSync('git', ['add',
-      TRACKER_ROUTER, API_TEST,
-      WEB_PAGE, WEB_TEST,
-    ], { stdio: 'inherit' });
-    cp.execFileSync('git', ['commit', '-m', 'feat(tracker): add application activity (router+tests+optional UI)'], { stdio: 'inherit' });
+    cp.execFileSync(
+      'git',
+      ['add', TRACKER_ROUTER, API_TEST, WEB_PAGE, WEB_TEST],
+      { stdio: 'inherit' }
+    );
+    cp.execFileSync(
+      'git',
+      [
+        'commit',
+        '-m',
+        'feat(tracker): add application activity (router+tests+optional UI)',
+      ],
+      { stdio: 'inherit' }
+    );
     console.log('✓ committed');
   } catch (e) {
     console.log('⚠️  commit failed:', e?.message || e);

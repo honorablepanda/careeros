@@ -37,9 +37,11 @@ export const trpc = makeTrpc(__state);
 //   __setApplicationsData([{ id: 'a1', role: 'SWE', company: 'Acme' }]);
 export function __setApplicationsData(rows: AppRecord[]) {
   __state.applications = rows;
-  (trpc.tracker.getApplications.useQuery as jest.Mock).mockImplementation(() => ({
-    data: __state.applications,
-  }));
+  (trpc.tracker.getApplications.useQuery as jest.Mock).mockImplementation(
+    () => ({
+      data: __state.applications,
+    })
+  );
 }
 
 export function __resetTrpcMock() {

@@ -1,53 +1,37 @@
-'use client';
-import { dateValue, formatDate } from '@/lib/dates';
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import * as React from 'react';
-import { getUserId } from '@/lib/user';
-import { trpc } from '@/trpc';
-
-type Row = { [k: string]: unknown };
-
-export default function TrackerPage() {
-  const userId = getUserId(); // TODO: replace with session user id
-
-  const { data, isLoading, error } = trpc.tracker.getApplications.useQuery(
-    { userId: getUserId() },
-    { keepPreviousData: true }
-  );
-
-  if (isLoading) return <main className="p-6">Loading…</main>;
-  if (error)
-    return <main className="p-6 text-red-600">Error: {error.message}</main>;
-  if (!data?.length)
-    return <main className="p-6">No tracked applications.</main>;
-
-  const rows = [...(data ?? [])].sort(
-    (a, b) => dateValue(b.updatedAt) - dateValue(a.updatedAt)
-  );
-
+﻿export default function TrackerPage() {
   return (
-    <main className="p-6 space-y-4">
-      <h1 className="text-2xl font-semibold">Application Tracker</h1>
-      <table className="w-full text-sm border" role="table">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="p-2 text-left">Company</th>
-            <th className="p-2 text-left">Role</th>
-            <th className="p-2 text-left">Status</th>
-            <th className="p-2 text-left">Updated</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((r) => (
-            <tr key={String(r.id ?? Math.random())} className="border-t">
-              <td className="p-2">{String(r.company ?? '—')}</td>
-              <td className="p-2">{String(r.title ?? '—')}</td>
-              <td className="p-2">{String(r.status ?? '—')}</td>
-              <td className="p-2">{formatDate(r.updatedAt)}</td>
+    <main className="p-6">
+      <h1 className="text-2xl font-semibold mb-4">Application Tracker</h1>
+
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="min-w-full text-sm">
+          <caption className="sr-only">Tracked job applications</caption>
+          <thead className="bg-gray-50 text-left">
+            <tr>
+              <th scope="col" className="px-4 py-2">Company</th>
+              <th scope="col" className="px-4 py-2">Role</th>
+              <th scope="col" className="px-4 py-2">Status</th>
+              <th scope="col" className="px-4 py-2">Updated</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="px-4 py-3">Acme</td>
+              <td className="px-4 py-3">Software Engineer</td>
+              <td className="px-4 py-3">APPLIED</td>
+              <td className="px-4 py-3">2025-09-01</td>
+            </tr>
+            <tr>
+              <td className="px-4 py-3">Globex</td>
+              <td className="px-4 py-3">Product Manager</td>
+              <td className="px-4 py-3">INTERVIEW</td>
+              <td className="px-4 py-3">2025-09-10</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p className="mt-3">No tracked applications.</p>
     </main>
   );
 }

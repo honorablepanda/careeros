@@ -12,7 +12,7 @@
     "build": "pnpm -w exec nx run-many -t build --all --exclude=root",
     "test": "pnpm -w test:api && pnpm -w test:web",
     "test:api": "vitest run --config apps/api/vitest.config.ts",
-    "test:web": "cross-env NODE_OPTIONS=--max-old-space-size=6144 vitest run --config web/vitest.config.ts --pool forks",
+    "test:web": "vitest run --root web --config vitest.config.ts --pool forks",
     "test:all": "pnpm -w exec nx run-many -t test --all --skip-nx-cache --exclude=root",
     "release:prep": "pnpm -w tsc -b && pnpm -w exec nx run-many -t build --all --exclude=root && pnpm -w exec nx run-many -t test --all --skip-nx-cache --exclude=root && node tools/scripts/run-final-scan.cjs",
     "wire:trpc-web": "node tools/scripts/wire-trpc-web.cjs",
@@ -53,7 +53,8 @@
     "fix:pages:scan": "node tools/scripts/fix-pages.cjs --scan tools/reports/pages-scan-latest.json",
     "test:vitest": "node --max-old-space-size=4096 node_modules/.bin/vitest run",
     "check:activity": "node tools/scripts/runtime-activity-check.cjs",
-    "ci:check:activity": "node tools/scripts/ci-check-activity.cjs"
+    "ci:check:activity": "node tools/scripts/ci-check-activity.cjs",
+    "test:web:ui": "vitest --root web --config vitest.config.ts"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

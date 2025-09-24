@@ -56,6 +56,10 @@ jobs:
       - name: Type check
         run: pnpm -w tsc -b
 
+      # NEW: mirrors your pre-push safeguard in CI
+      - name: Activity contract check
+        run: pnpm -w run check:activity
+
       - name: Run tests (Vitest)
         run: pnpm -w test
 

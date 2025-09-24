@@ -88,3 +88,5 @@ apps/web._archived_*/
 web/NUL
 
 NUL
+
+web/src/app/tracker/page.tsx.bak-*

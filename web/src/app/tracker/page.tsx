@@ -1,9 +1,10 @@
-﻿// TODO(Phase 3): This page now renders real data via TRPC.
+﻿// web/src/app/tracker/page.tsx
+// TODO(Phase 3): This page now renders real data via TRPC.
 // Keep <h1> and headers (Company, Role, Status, Updated) as the permanent contract.
 
 'use client';
 
-import { trpc } from '@/lib/trpc'; // Adjust this path if your TRPC client lives elsewhere
+import { trpc } from '@/lib/trpc';
 
 type Row = {
   id?: string | number;
@@ -20,7 +21,6 @@ export default function TrackerPage() {
     isError,
     error,
   } = trpc.applications.list.useQuery<Row[] | undefined>(undefined, {
-    // Keep tests snappy and UI responsive
     staleTime: 30_000,
   });
 

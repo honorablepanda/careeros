@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "prepare": "husky",
-    "dev:web": "pnpm -w exec nx run web:serve",
+    "dev:web": "pnpm run fix:hydration && pnpm -w exec nx run web:serve",
     "dev": "pnpm run dev:web",
     "smoke:trpc": "node tools/scripts/trpc-smoke.cjs",
     "ping:trpc": "node tools/scripts/ping-trpc.cjs",
@@ -54,7 +54,8 @@
     "test:vitest": "node --max-old-space-size=4096 node_modules/.bin/vitest run",
     "check:activity": "node tools/scripts/runtime-activity-check.cjs",
     "ci:check:activity": "node tools/scripts/ci-check-activity.cjs",
-    "test:web:ui": "vitest --root web --config vitest.config.ts"
+    "test:web:ui": "vitest --root web --config vitest.config.ts",
+    "fix:hydration": "node tools/scripts/ensure-body-suppressHydration.cjs"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

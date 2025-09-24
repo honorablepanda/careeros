@@ -1,39 +1,48 @@
-'use client';
 // web/src/app/magic/page.tsx
-import { useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+'use client';
 
-export default function MagicLinkPage() {
+import * as React from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { trpc } from '@/trpc';
+
+export default function MagicPage() {
+  const params = useSearchParams();
   const router = useRouter();
-  const search = useSearchParams();
-  const token = search.get('token') ?? '';
+  const token = params.get('token') ?? '';
 
-  // If you want to persist the token for a later server/API call, you can stash it.
-  useEffect(() => {
-    if (!token) return;
-    try {
-      // Store temporarily; replace with a secure flow later (cookie via API route, etc.)
-      sessionStorage.setItem('magic_token', token);
-    } catch {
-      /* ignore storage errors */
-    }
-    // For now, just continue to the dashboard.
-    router.replace('/dashboard');
-  }, [token, router]);
+  const { mutate, isLoading, isSuccess, error, reset } =
+    trpc.auth.verifyToken.useMutation({
+      onSuccess: () => router.replace('/dashboard'), // adjust path if you prefer
+    });
 
-  if (!token) {
-    return (
-      <main className="p-6">
-        <h1 className="text-2xl font-semibold mb-2">Magic link</h1>
-        <p className="text-slate-600">No token found in the URL.</p>
-      </main>
-    );
-  }
+  React.useEffect(() => {
+    if (token) mutate({ token });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [token]);
 
   return (
-    <main className="p-6">
-      <h1 className="text-2xl font-semibold mb-2">Magic link</h1>
-      <p className="text-slate-600">Verifying your link…</p>
+    <main className="p-6 max-w-lg mx-auto space-y-4">
+      <h1 className="text-2xl font-semibold">Verifying magic link…</h1>
+
+      {!token && (
+        <p className="text-red-600">Missing token. Use the magic link from your email.</p>
+      )}
+      {isLoading && <p>One moment while we verify…</p>}
+      {error && (
+        <div className="space-y-2">
+          <p className="text-red-600">Verification failed: {error.message}</p>
+          <button
+            className="rounded-md bg-black text-white px-4 py-2"
+            onClick={() => {
+              reset();
+              router.replace('/reset');
+            }}
+          >
+            Request a new link
+          </button>
+        </div>
+      )}
+      {isSuccess && <p>Success! Redirecting…</p>}
     </main>
   );
 }

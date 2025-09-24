@@ -1,5 +1,12 @@
+// web/src/app/layout.tsx
+import './globals.css';
+import type { Metadata } from 'next';
 import { Providers } from './providers';
-export const metadata = { title: 'CareerOS', description: 'Placeholder app' };
+
+export const metadata: Metadata = {
+  title: 'CareerOS',
+  description: 'Your job hunt, organized.',
+};
 
 export default function RootLayout({
   children,
@@ -8,7 +15,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>
+      <body className="min-h-screen bg-white text-gray-900">
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -13,7 +13,9 @@ const client = createTRPCProxyClient({
 
 (async () => {
   console.log('→ QUERY tracker.getApplications');
-  const r1 = await client.tracker.getApplications.query({ userId: 'demo-user' });
+  const r1 = await client.tracker.getApplications.query({
+    userId: 'demo-user',
+  });
   console.log(JSON.stringify(r1, null, 2));
 
   console.log('→ MUTATION tracker.createApplication');
@@ -28,7 +30,9 @@ const client = createTRPCProxyClient({
   console.log(JSON.stringify(m, null, 2));
 
   console.log('→ QUERY tracker.getApplications (after insert)');
-  const r2 = await client.tracker.getApplications.query({ userId: 'demo-user' });
+  const r2 = await client.tracker.getApplications.query({
+    userId: 'demo-user',
+  });
   console.log(JSON.stringify(r2, null, 2));
 })().catch((e) => {
   console.error('Smoke test failed:', e?.response?.json ?? e);

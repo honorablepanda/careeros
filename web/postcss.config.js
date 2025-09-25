@@ -1,6 +1,7 @@
+﻿/** Tailwind v4 PostCSS adapter (app-level) */
 module.exports = {
   plugins: {
-    tailwindcss: {},
+    "@tailwindcss/postcss": {},
     autoprefixer: {},
   },
-}
+};

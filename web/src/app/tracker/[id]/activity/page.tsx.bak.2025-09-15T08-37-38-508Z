@@ -1,0 +1,13 @@
+type Params = { id?: string };
+export default function ActivityDynamicPage(
+  { params }: { params?: Params }
+) {
+  const id = params?.id;
+  return (
+    <main style={{padding: 24}}>
+      <h1>Tracker Activity</h1>
+      <p><strong>Dynamic id:</strong> {id ?? '—'}</p>
+      <p>Activity API not available — No activity</p>
+    </main>
+  );
+}

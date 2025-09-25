@@ -8,9 +8,7 @@
   "targets": {
     "test": {
       "options": {
-        "args": [
-          "--runInBand"
-        ]
+        "args": ["--runInBand"]
       }
     },
     "serve": {

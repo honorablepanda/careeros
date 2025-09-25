@@ -28,9 +28,7 @@
       "web/tsconfig.spec.json",
       "web-e2e/tsconfig.json"
     ],
-    "swcrcFiles": [
-      "web/.swcrc"
-    ],
+    "swcrcFiles": ["web/.swcrc"],
     "issueCounts": {
       "jest": 0,
       "tsconfig": 0,
@@ -103,97 +101,73 @@
     {
       "file": "api-e2e/tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "api-e2e/tsconfig.spec.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "apps/web/tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/prisma/tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/prisma/tsconfig.lib.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/prisma/tsconfig.spec.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/trpc/tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/trpc/tsconfig.lib.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/trpc/tsconfig.spec.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/types/tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/types/tsconfig.lib.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "shared/types/tsconfig.spec.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
@@ -205,33 +179,25 @@
     {
       "file": "tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "web/tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "web/tsconfig.spec.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     },
     {
       "file": "web-e2e/tsconfig.json",
       "issues": [],
-      "notes": [
-        "No compilerOptions.target set."
-      ],
+      "notes": ["No compilerOptions.target set."],
       "target": null
     }
   ],

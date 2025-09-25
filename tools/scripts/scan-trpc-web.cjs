@@ -16,11 +16,23 @@ const SPECS_DIR = path.join(WEB_DIR, 'specs');
 const JEST_CONFIG = path.join(WEB_DIR, 'jest.config.ts');
 const SCANS_DIR = path.join(ROOT, 'scans');
 
-function exists(p){ try { return fs.existsSync(p); } catch { return false; } }
-function read(p){ try { return fs.readFileSync(p, 'utf8'); } catch { return ''; } }
-function list(dir){
+function exists(p) {
   try {
-    return fs.readdirSync(dir).map(f => path.join(dir, f));
+    return fs.existsSync(p);
+  } catch {
+    return false;
+  }
+}
+function read(p) {
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return '';
+  }
+}
+function list(dir) {
+  try {
+    return fs.readdirSync(dir).map((f) => path.join(dir, f));
   } catch {
     return [];
   }
@@ -78,12 +90,14 @@ function mapperHasTrpc(jestText) {
     specsAnalyzed: 0,
     importedModules: [],
     mockedModules: [],
-    resolution: { issues: [] }
+    resolution: { issues: [] },
   };
 
   // Read jest config text (don’t execute it)
   const jestText = exists(JEST_CONFIG) ? read(JEST_CONFIG) : '';
-  out.jest.moduleNameMapper = jestText.includes('moduleNameMapper') ? jestText : '';
+  out.jest.moduleNameMapper = jestText.includes('moduleNameMapper')
+    ? jestText
+    : '';
   out.jest.mapperHasTrpc = mapperHasTrpc(jestText);
 
   // Scan specs
@@ -104,17 +118,22 @@ function mapperHasTrpc(jestText) {
   out.mockedModules = Array.from(mocked).sort();
 
   // Find any @careeros/trpc imports that were not explicitly jest.mock(...)'d
-  const trpcImports = out.importedModules.filter(m => /^@careeros\/trpc(\/.*)?$/.test(m));
-  const trpcMocked  = out.mockedModules.filter(m => /^@careeros\/trpc(\/.*)?$/.test(m));
+  const trpcImports = out.importedModules.filter((m) =>
+    /^@careeros\/trpc(\/.*)?$/.test(m)
+  );
+  const trpcMocked = out.mockedModules.filter((m) =>
+    /^@careeros\/trpc(\/.*)?$/.test(m)
+  );
 
-  const unmockedTrpcPaths = trpcImports.filter(m => !trpcMocked.includes(m));
+  const unmockedTrpcPaths = trpcImports.filter((m) => !trpcMocked.includes(m));
 
   // Only flag if there's NO moduleNameMapper handling @careeros/trpc
   if (unmockedTrpcPaths.length && !out.jest.mapperHasTrpc) {
     out.resolution.issues.push({
       type: 'missing-mocks',
-      message: 'Spec is not mocking trpc for the exact import path(s) used by the page.',
-      missingFor: unmockedTrpcPaths
+      message:
+        'Spec is not mocking trpc for the exact import path(s) used by the page.',
+      missingFor: unmockedTrpcPaths,
     });
   }
 
@@ -123,11 +142,18 @@ function mapperHasTrpc(jestText) {
   // Console summary
   console.log('=== tRPC Web Scan ===');
   console.log('Specs analyzed:', out.specsAnalyzed);
-  console.log('Jest mapper includes @careeros/trpc:', out.jest.mapperHasTrpc ? 'yes' : 'no');
+  console.log(
+    'Jest mapper includes @careeros/trpc:',
+    out.jest.mapperHasTrpc ? 'yes' : 'no'
+  );
   if (out.resolution.issues.length) {
     console.log('Issues:');
     for (const i of out.resolution.issues) {
-      console.log('-', i.message, i.missingFor ? `[${i.missingFor.join(', ')}]` : '');
+      console.log(
+        '-',
+        i.message,
+        i.missingFor ? `[${i.missingFor.join(', ')}]` : ''
+      );
     }
     process.exitCode = 2;
   } else {

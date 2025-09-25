@@ -1,0 +1,96 @@
+// apps/api/src/trpc/routers/tracker.router.ts
+import { z } from 'zod';
+import { router, publicProcedure } from '../trpc';
+import { $Enums } from '@prisma/client';
+
+export const trackerRouter = router({
+  getApplications: publicProcedure
+    .input(
+      z.object({
+        userId: z.string().optional(),
+        status: z.nativeEnum($Enums.ApplicationStatus).optional().or(z.string()),
+        limit: z.number().int().positive().max(500).optional(),
+      })
+    )
+    .query(async ({ ctx, input }) => {
+      const { userId, status, limit } = input ?? {};
+      return ctx.prisma.application.findMany({
+        where: {
+          ...(userId ? { userId } : {}),
+          ...(status ? { status: status as any } : {}),
+        },
+        orderBy: ({ appliedAt: 'desc' } as any),
+        ...(limit ? { take: limit } : {}),
+      });
+    }),
+
+  createApplication: publicProcedure
+    .input(z.object({}).passthrough())
+    .mutation(async ({ ctx, input }) => {
+      const prismaAny = ctx.prisma as any;
+
+      const created = await prismaAny?.application?.create?.({
+        data: input,
+      });
+
+      if (prismaAny?.applicationActivity?.create && created?.id) {
+        await prismaAny.applicationActivity.create({
+          data: {
+            applicationId: created.id,
+            type: 'CREATE',
+            payload: { data: input },
+          },
+        });
+      }
+
+      return created;
+    }),
+
+  updateApplication: publicProcedure
+    .input(
+      z.object({
+        id: z.string(),
+        data: z.object({}).passthrough(),
+      })
+    )
+    .mutation(async ({ ctx, input }) => {
+      const prismaAny = ctx.prisma as any;
+
+      const updated = await prismaAny?.application?.update?.({
+        where: { id: input.id },
+        data: input.data,
+      });
+
+      const nextStatus = (input?.data as any)?.status;
+      if (prismaAny?.applicationActivity?.create && nextStatus) {
+        await prismaAny.applicationActivity.create({
+          data: {
+            applicationId: input.id,
+            type: 'STATUS_CHANGE',
+            payload: { to: nextStatus },
+          },
+        });
+      }
+
+      return updated;
+    }),
+
+  deleteApplication: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.prisma.application.delete({
+        where: { id: input.id },
+      });
+    }),
+
+  getApplicationActivity: publicProcedure
+    .input(z.object({ id: z.string() }))
+    .query(async ({ ctx, input }) => {
+      const prismaAny = ctx.prisma as any;
+      if (!prismaAny?.applicationActivity?.findMany) return [];
+      return await prismaAny.applicationActivity.findMany({
+        where: { applicationId: input.id },
+        orderBy: { createdAt: 'desc' },
+      });
+    }),
+});

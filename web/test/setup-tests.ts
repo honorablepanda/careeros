@@ -1,0 +1,25 @@
+
+import { afterEach, expect, vi } from 'vitest';
+import '@testing-library/jest-dom/vitest';
+import { cleanup } from '@testing-library/react';
+import React from 'react';
+
+// Make React available for any classic-runtime compiled JSX.
+(globalThis as any).React = React;
+
+// Sanity: stable URL for code using location/origin.
+try {
+  const loc: any = globalThis.location;
+  if (loc && loc.href === 'about:blank') {
+    Object.defineProperty(window, 'location', {
+      value: new URL('http://localhost'),
+      writable: true,
+      configurable: true,
+    });
+  }
+} catch { /* ignore */ }
+
+afterEach(() => {
+  cleanup();
+  vi.clearAllMocks();
+});

@@ -23,6 +23,6 @@ const trpc = { tracker };
 module.exports = {
   __esModule: true,
   default: trpc, // default import → trpc
-  trpc,          // named import   → { trpc }
-  tracker,       // convenience    → { tracker }
+  trpc, // named import   → { trpc }
+  tracker, // convenience    → { tracker }
 };

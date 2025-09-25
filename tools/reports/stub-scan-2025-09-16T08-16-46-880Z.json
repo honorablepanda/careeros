@@ -1,0 +1,881 @@
+{
+  "when": "2025-09-16T08:16:46.936Z",
+  "root": "C:/Users/kashi/Desktop/COS/careeros",
+  "scanned": 364,
+  "findingsCount": 123,
+  "byType": {
+    "CAST_ANY": 122,
+    "TS_BANDAID": 1
+  },
+  "byGroup": {
+    "api": 29,
+    "api-router": 41,
+    "other": 36,
+    "web": 17
+  },
+  "findings": [
+    {
+      "file": "apps/api/src/router/__tests__/applications.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 10,
+      "text": "const caller = r.createCaller({ prisma: { application: { create } } } as any);"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/applications.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 16,
+      "text": "} as any; // zod will enforce at runtime; TS not strict here"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/applications.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 28,
+      "text": "const caller = r.createCaller({ prisma: { application: { findMany } } } as any);"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/demo.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "const caller = r.createCaller({} as any);"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/system.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "const caller = r.createCaller({} as any);"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/tracker.activity.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 13,
+      "text": "return { prisma: { application, applicationActivity } } as any;"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/tracker.activity.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 31,
+      "text": "await caller.createApplication({ userId: 'u1', company: 'Acme', role: 'FE' } as any);"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/tracker.activity.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 45,
+      "text": "await caller.updateApplication({ id: 'a1', data: { status: 'INTERVIEW' } } as any);"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/tracker.crud.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 13,
+      "text": "return { prisma } as any;"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/tracker.crud.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 23,
+      "text": "expect(arg.orderBy).toEqual({ appliedAt: 'desc' } as any);"
+    },
+    {
+      "file": "apps/api/src/router/__tests__/tracker.crud.spec.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 31,
+      "text": "await caller.createApplication({ company: 'Acme', role: 'FE' } as any);"
+    },
+    {
+      "file": "apps/api/src/router/achievements.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const achievementsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/activity.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const activityRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/auth.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const authRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/calendar.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const calendarRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/dashboard.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const dashboardRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/goals.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const goalsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/insights.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const insightsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/interviews.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const interviewsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/metrics.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const metricsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/networking.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const networkingRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/notifications.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const notificationsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/onboarding.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const onboardingRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/planner.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const plannerRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/profile.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const profileRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/resume.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const resumeRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/roadmap.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const roadmapRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/settings.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const settingsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/router/skills.ts",
+      "group": "api",
+      "type": "CAST_ANY",
+      "line": 7,
+      "text": "export const skillsRouter = {} as any;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/achievements.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/achievements.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/achievements.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/applications.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 20,
+      "text": "return ctx.prisma.application.create({ data: input as any });"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/applications.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 32,
+      "text": "orderBy: ({ appliedAt: 'desc' } as any),"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/calendar.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/calendar.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/calendar.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/goals.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/goals.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/goals.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/metrics.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/metrics.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/metrics.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/networking.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/networking.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/networking.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/notifications.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/notifications.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/notifications.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/planner.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/planner.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/planner.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/profile.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/profile.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/profile.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/resume.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/resume.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/resume.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/roadmap.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/roadmap.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/roadmap.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/settings.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/settings.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/settings.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/skills.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 9,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/skills.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 25,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/skills.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 36,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/tracker.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 20,
+      "text": "...(status ? { status: status as any } : {}),"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/tracker.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 22,
+      "text": "orderBy: ({ appliedAt: 'desc' } as any),"
+    },
+    {
+      "file": "apps/api/src/trpc/routers/tracker.router.ts",
+      "group": "api-router",
+      "type": "CAST_ANY",
+      "line": 30,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/out/activity-variants/run-2025-09-14T08-53-02-614Z.summary.json",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 19,
+      "text": "\"preview\": \".mutation(async ({ ctx, input }) => {\\n      const prismaAny = ctx.prisma as any;\\n      const created = await prismaAny?.application?.create?.({ data: input });\\n      if (prismaAny?.applicationActivity?.create && created?.id) {\\n        await prismaAny.applicationActivity.create({\\n          data: { applicationId: created.id, type: 'CREATE', payload: { data: input } },\\n        });\\n      }\\n      return created;\\n    }),\""
+    },
+    {
+      "file": "tools/out/activity-variants/run-2025-09-14T08-53-02-614Z.summary.json",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 24,
+      "text": "\"preview\": \".mutation(async ({ ctx, input }) => {\\n      const prismaAny = ctx.prisma as any;\\n      const updated = await prismaAny?.application?.update?.({\\n        where: { id: input.id },\\n        data: input.data,\\n      });\\n      const nextStatus = (input?.data as any)?.status;\\n      if (prismaAny?.applicationActivity?.create && nextStatus) {\\n        await prismaAny.applicationActivity.create({\\n          data: { applicationId: input.id, type: 'STATUS_CHANGE', payload: { to: nextStatus } },\\n        });\\n      }\\n      return updated;\\n    }),\""
+    },
+    {
+      "file": "tools/out/activity-variants/run-2025-09-14T08-53-02-614Z.summary.json",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 26,
+      "text": "\"rawPreview\": \"import { z } from 'zod';\\nimport { router, publicProcedure } from '../trpc';\\nimport { $Enums } from '@prisma/client';\\n\\nexport const trackerRouter = router({\\n  getApplications: publicProcedure\\n    .input(\\n      z.object({\\n        userId: z.string().optional(),\\n        status: z.nativeEnum($Enums.ApplicationStatus).optional().or(z.string()),\\n        limit: z.number().int().positive().max(500).optional(),\\n      })\\n    )\\n    .query(async ({ ctx, input }) => {\\n      const { userId, status, limit } = input ?? {};\\n      return ctx.prisma.application.findMany({\\n        where: {\\n          ...(userId ? { userId } : {}),\\n          ...(status ? { status: status as any } : {}),\\n        },\\n        orderBy: ({ appliedAt: 'desc' } as any),\\n        ...(limit ? { take: limit } : {}),\\n      });\\n    }),\\n\\n  createApplication: publicProcedure\\n    .input(z.object({}).passthrough())\\n    .mutation(async ({ ctx, input }) => {\\n      const prismaAny = ctx.prisma as any;\\n      const created = await prismaAny?.application?.create?.({ data: input });\\n      if (prismaAny?.applicationActivity?.create && created?.id) {\\n        await prismaAny.applicationActivity.create({\\n          data: { applicationId: created.id, \""
+    },
+    {
+      "file": "tools/scripts/deep-scan-activity.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 236,
+      "text": ": COLORS.yellow('⚠ No model ApplicationActivity (router guards with as any; tests are fine)'));"
+    },
+    {
+      "file": "tools/scripts/find-stubs.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 10,
+      "text": "*  - CAST_ANY:     `as any`"
+    },
+    {
+      "file": "tools/scripts/find-stubs.cjs",
+      "group": "other",
+      "type": "TS_BANDAID",
+      "line": 9,
+      "text": "*  - TS_BANDAID:   @ts-ignore | @ts-expect-error"
+    },
+    {
+      "file": "tools/scripts/fix-phase3-all.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 78,
+      "text": "export const ${mod}Router = {} as any;"
+    },
+    {
+      "file": "tools/scripts/fix-phase3-all.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 102,
+      "text": "} as any;"
+    },
+    {
+      "file": "tools/scripts/fix-phase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 99,
+      "text": "} as any;"
+    },
+    {
+      "file": "tools/scripts/fix-phase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 147,
+      "text": "export const appRouter = { tracker: trackerRouter } as any;"
+    },
+    {
+      "file": "tools/scripts/fix-prepush-blockers.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 67,
+      "text": "createClient: () => ({} as any),"
+    },
+    {
+      "file": "tools/scripts/fix-tracker-activity.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 161,
+      "text": "const nextStatus = (input?.data as any)?.status;"
+    },
+    {
+      "file": "tools/scripts/fix-tracker-activity.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 180,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/scripts/gen-module.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 72,
+      "text": "const caller = r.createCaller({} as any);"
+    },
+    {
+      "file": "tools/scripts/generate-api-routers.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 68,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "tools/scripts/generate-api-routers.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 84,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "tools/scripts/generate-api-routers.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 95,
+      "text": "const prisma: any = (ctx as any)?.prisma;"
+    },
+    {
+      "file": "tools/scripts/generate-small-ui.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 197,
+      "text": "const hook = (trpc as any)?.${router}?.${method}?.useQuery;"
+    },
+    {
+      "file": "tools/scripts/maintain-all.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 123,
+      "text": ": \"orderBy: ({ appliedAt: 'desc' } as any)\";"
+    },
+    {
+      "file": "tools/scripts/mark-existing-stubs.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 49,
+      "text": "/Minimal placeholder router|export const\\s+\\w+Router\\s*=\\s*\\{\\}\\s*as any;/.test(s)"
+    },
+    {
+      "file": "tools/scripts/patch-activity-router.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 31,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/scripts/patch-activity-router.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 54,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/scripts/patch-activity-router.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 72,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/scripts/phase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 104,
+      "text": "...(status ? { status: status as any } : {}),"
+    },
+    {
+      "file": "tools/scripts/phase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 107,
+      "text": "orderBy: ({ appliedAt: 'desc' } as any),"
+    },
+    {
+      "file": "tools/scripts/phase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 115,
+      "text": "return ctx.prisma.application.create({ data: input as any });"
+    },
+    {
+      "file": "tools/scripts/scaffold-application-activity.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 43,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/scripts/scaffold-application-activity.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 62,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/scripts/scaffold-application-activity.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 82,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "tools/scripts/scan-stubs.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 41,
+      "text": "if (/Minimal placeholder router|export const\\s+\\w+Router\\s*=\\s*\\{\\}\\s*as any;/.test(src))"
+    },
+    {
+      "file": "tools/scripts/scriptsphase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 104,
+      "text": "...(status ? { status: status as any } : {}),"
+    },
+    {
+      "file": "tools/scripts/scriptsphase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 107,
+      "text": "orderBy: ({ appliedAt: 'desc' } as any),"
+    },
+    {
+      "file": "tools/scripts/scriptsphase3-tracker.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 115,
+      "text": "return ctx.prisma.application.create({ data: input as any });"
+    },
+    {
+      "file": "tools/scripts/try-activity-variants.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 75,
+      "text": "...(status ? { status: status as any } : {}),"
+    },
+    {
+      "file": "tools/scripts/try-activity-variants.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 77,
+      "text": "orderBy: ({ appliedAt: 'desc' } as any),"
+    },
+    {
+      "file": "tools/scripts/try-activity-variants.cjs",
+      "group": "other",
+      "type": "CAST_ANY",
+      "line": 85,
+      "text": "const prismaAny = ctx.prisma as any;"
+    },
+    {
+      "file": "web/src/app/achievements/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "const hook = (trpc as any)?.achievements?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/applications/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "{ userId, status: status as any },"
+    },
+    {
+      "file": "web/src/app/calendar/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 16,
+      "text": "const hook = (trpc as any)?.calendar?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/goals/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 10,
+      "text": "const hook = (trpc as any)?.goals?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/interviews/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 17,
+      "text": "const hook = (trpc as any)?.interviews?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/metrics/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "const hook = (trpc as any)?.metrics?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/networking/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "const hook = (trpc as any)?.networking?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/notifications/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 17,
+      "text": "const hook = (trpc as any)?.notifications?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/planner/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "const hook = (trpc as any)?.planner?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/profile/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 10,
+      "text": "const hook = (trpc as any)?.profile?.get?.useQuery;"
+    },
+    {
+      "file": "web/src/app/resume/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "const hook = (trpc as any)?.resume?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/roadmap/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "const hook = (trpc as any)?.roadmap?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/settings/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 15,
+      "text": "const hook = (trpc as any)?.settings?.get?.useQuery;"
+    },
+    {
+      "file": "web/src/app/skills/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 11,
+      "text": "const hook = (trpc as any)?.skills?.list?.useQuery;"
+    },
+    {
+      "file": "web/src/app/tracker/activity/page.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 6,
+      "text": "const hook = (trpc as any)?.tracker?.getApplicationActivity?.useQuery;"
+    },
+    {
+      "file": "web/src/app/tracker/AddApplicationForm.tsx",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 39,
+      "text": "<select value={source} onChange={e=>setSource(e.target.value as any)}>"
+    },
+    {
+      "file": "web/src/trpc/react.ts",
+      "group": "web",
+      "type": "CAST_ANY",
+      "line": 3,
+      "text": "export const trpc = {} as any;"
+    }
+  ],
+  "stubSpecs": [],
+  "since": null
+}

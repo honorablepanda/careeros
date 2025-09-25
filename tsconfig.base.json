@@ -10,30 +10,16 @@
     "importHelpers": true,
     "target": "es2015",
     "module": "esnext",
-    "lib": [
-      "es2020",
-      "dom"
-    ],
+    "lib": ["es2020", "dom"],
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@careeros/prisma": [
-        "shared/prisma/src/index.ts"
-      ],
-      "@careeros/trpc": [
-        "shared/trpc/src/index.ts"
-      ],
-      "@careeros/types": [
-        "libs/types/src/index.ts"
-      ],
-      "@careeros/api": [
-        "apps/api/src/trpc/root.ts"
-      ]
+      "@careeros/prisma": ["shared/prisma/src/index.ts"],
+      "@careeros/trpc": ["shared/trpc/src/index.ts"],
+      "@careeros/types": ["libs/types/src/index.ts"],
+      "@careeros/api": ["apps/api/src/trpc/root.ts"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "tmp"
-  ]
+  "exclude": ["node_modules", "tmp"]
 }

@@ -1,44 +1,90 @@
-// prisma/schema.prisma
+// ================================
+// Prisma schema for CareerOS
+// - Adds ApplicationActivity model
+// - Uses INTERVIEWING (maps from legacy INTERVIEW)
+// - Renames Application.activities relation field
+// ================================
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql" // change if you use sqlite/mysql
+  provider = "postgresql" // change if you use mysql/sqlite/etc.
   url      = env("DATABASE_URL")
 }
 
+// ---------- Enums ----------
+
+// If your DB previously stored the value "INTERVIEW",
+// this maps it to the new code-level name "INTERVIEWING"
+// so you don't lose data. You can keep the @map forever,
+// or later run a manual DB update and drop @map.
 enum ApplicationStatus {
   APPLIED
-  INTERVIEW
+  INTERVIEWING @map("INTERVIEW")
   OFFER
   REJECTED
-  WITHDRAWN
   HIRED
+  WITHDRAWN
 }
 
-enum ApplicationSource {
-  JOB_BOARD
-  REFERRAL
-  COMPANY_WEBSITE
-  RECRUITER
-  OTHER
+// Activity kinds we log for an application.
+// Extend as needed (e.g., NOTE, FOLLOW_UP, etc.).
+enum ApplicationActivityType {
+  CREATE
+  STATUS_CHANGE
 }
 
+// ---------- Core Models ----------
+
+// Minimal user model used by Application.user relation.
+// If your project already has a richer User model,
+// keep that one; only ensure the relation to Application
+// matches (id <-> userId).
+model User {
+  id           String        @id @default(cuid())
+  email        String        @unique
+  name         String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  applications Application[]
+}
+
+// The primary job-application record.
+// NOTE:
+// - `status` now uses INTERVIEWING (code-level) while
+//   still reading/writing the legacy DB value "INTERVIEW" via @map.
+// - Relation to activity entries is now `activities`.
 model Application {
-  id        String             @id @default(cuid())
-  userId    String                                 // keep loose; no FK until your User model is defined
-  company   String
-  role      String
-  location  String?
-  status    ApplicationStatus  @default(APPLIED)
-  source    ApplicationSource  @default(OTHER)
-  notes     String?
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  createdAt DateTime           @default(now())
-  updatedAt DateTime           @updatedAt
+  company String
+  title   String
+  status  ApplicationStatus @default(APPLIED)
 
-  @@index([userId, status])
-  @@index([company, role])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // renamed from `ApplicationActivity ApplicationActivity[]`
+  activities ApplicationActivity[]
+
+  @@index([userId])
+  @@index([status, updatedAt(sort: Desc)])
+}
+
+// New activity log entries for each application.
+// Shape matches your router/tests: CREATE and STATUS_CHANGE,
+// optional JSON `payload`, and reverse-chronological querying.
+model ApplicationActivity {
+  id            String                  @id @default(cuid())
+  applicationId String
+  application   Application             @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+  type          ApplicationActivityType
+  payload       Json?
+  createdAt     DateTime                @default(now())
+
+  @@index([applicationId, createdAt(sort: Desc)])
 }

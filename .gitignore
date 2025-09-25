@@ -70,3 +70,23 @@ tools/scripts/automate-stabilize-pr.sh
 web/jest.config.ts.bak*
 tools/scripts/generate-release-notes.cjs
 web/jest.config.ts*.bak*
+
+# local backups
+*.bak
+# local CI outputs
+/activity-ci-report.json
+/activity-readiness.json
+/activity-report.json
+# Next/Nx caches (if ever run at repo root)
+/.next
+/.nx/
+# tool backups
+*.bak.*
+apps/web._archived_*/
+
+# Windows reserved filename
+web/NUL
+
+NUL
+
+web/src/app/tracker/page.tsx.bak-*

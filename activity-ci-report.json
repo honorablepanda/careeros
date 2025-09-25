@@ -1,0 +1,38 @@
+{
+  "params": {
+    "host": "http://localhost",
+    "port": 3000,
+    "strict": false
+  },
+  "steps": [],
+  "results": {
+    "seed": {
+      "beforeCount": 6,
+      "created": 1,
+      "afterCount": 7,
+      "byType": {
+        "CREATE": 1,
+        "STATUS_CHANGE": 6
+      }
+    },
+    "db": {
+      "activityCount": 7
+    },
+    "web": {
+      "query": {
+        "url": "http://localhost:3000/tracker/activity?id=cmfjkdg7u00042knkq4v8y4hm",
+        "ok": true,
+        "status": 200,
+        "snippet": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static"
+      },
+      "dynamic": {
+        "url": "http://localhost:3000/tracker/cmfjkdg7u00042knkq4v8y4hm/activity",
+        "ok": true,
+        "status": 200,
+        "snippet": "<!DOCTYPE html><html lang=\"en\"><head><meta charSet=\"utf-8\"/><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"/><link rel=\"preload\" as=\"script\" fetchPriority=\"low\" href=\"/_next/static"
+      }
+    }
+  },
+  "ok": true,
+  "appId": "cmfjkdg7u00042knkq4v8y4hm"
+}

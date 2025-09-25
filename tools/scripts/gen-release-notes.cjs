@@ -14,12 +14,21 @@ if (!TAG) {
 // Find previous tag (if any)
 let prevTag = '';
 try {
-  prevTag = execSync('git describe --tags --abbrev=0 --exclude=' + TAG, { stdio: ['ignore','pipe','ignore'] }).toString().trim();
-} catch (_) { /* first tag */ }
+  prevTag = execSync('git describe --tags --abbrev=0 --exclude=' + TAG, {
+    stdio: ['ignore', 'pipe', 'ignore'],
+  })
+    .toString()
+    .trim();
+} catch (_) {
+  /* first tag */
+}
 
 function log(range) {
   try {
-    return execSync(`git log --no-merges --pretty=format:"- %s (%h) [%an]" ${range}`, { stdio: ['ignore','pipe','ignore'] }).toString();
+    return execSync(
+      `git log --no-merges --pretty=format:"- %s (%h) [%an]" ${range}`,
+      { stdio: ['ignore', 'pipe', 'ignore'] }
+    ).toString();
   } catch {
     return '';
   }
@@ -28,4 +37,8 @@ function log(range) {
 const range = prevTag ? `${prevTag}..${TAG}` : TAG;
 const commits = log(range);
 
-console.log(`# ${TAG}\n\n${prevTag ? `Changes since ${prevTag}:` : 'Initial release:'}\n\n${commits || '- (no notable changes)'}\n`);
+console.log(
+  `# ${TAG}\n\n${
+    prevTag ? `Changes since ${prevTag}:` : 'Initial release:'
+  }\n\n${commits || '- (no notable changes)'}\n`
+);

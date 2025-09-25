@@ -80,8 +80,8 @@ A('shared/types/src/index.ts', `export * from './lib/tracker';`);
 /* 2) Prisma schema ensure */
 const PRISMA_SCHEMA_PATHS = [
   'shared/prisma/schema.prisma', // preferred in your repo
-  'prisma/schema.prisma'
-].filter(p => fs.existsSync(path.join(ROOT, p)));
+  'prisma/schema.prisma',
+].filter((p) => fs.existsSync(path.join(ROOT, p)));
 
 if (PRISMA_SCHEMA_PATHS.length) {
   const p = PRISMA_SCHEMA_PATHS[0];
@@ -130,7 +130,9 @@ model Application {
     console.log('= Prisma schema ok:', p);
   }
 } else {
-  console.log('! Prisma schema not found (looked in shared/prisma/schema.prisma or prisma/schema.prisma). Skipping Prisma edits.');
+  console.log(
+    '! Prisma schema not found (looked in shared/prisma/schema.prisma or prisma/schema.prisma). Skipping Prisma edits.'
+  );
 }
 
 /* 3) API: tRPC router + root wiring (NestJS + tRPC pattern) */
@@ -211,8 +213,11 @@ export const router = t.router;
 export const publicProcedure = t.procedure;
 `;
 
-const API_DIR = fs.existsSync(path.join(ROOT, 'api')) ? 'api' :
-                (fs.existsSync(path.join(ROOT, 'apps/api')) ? 'apps/api' : null);
+const API_DIR = fs.existsSync(path.join(ROOT, 'api'))
+  ? 'api'
+  : fs.existsSync(path.join(ROOT, 'apps/api'))
+  ? 'apps/api'
+  : null;
 
 if (API_DIR) {
   // ensure trpc kernel exists
@@ -222,18 +227,24 @@ if (API_DIR) {
 
   // root router: create or patch
   const ROOT_ROUTER_P = path.join(API_DIR, 'src/trpc/root.ts');
-  let rootContent = fs.existsSync(ROOT_ROUTER_P) ? fs.readFileSync(ROOT_ROUTER_P, 'utf8') : `import { router } from './trpc';
+  let rootContent = fs.existsSync(ROOT_ROUTER_P)
+    ? fs.readFileSync(ROOT_ROUTER_P, 'utf8')
+    : `import { router } from './trpc';
 export const appRouter = router({});
 export type AppRouter = typeof appRouter;
 `;
 
   if (!/trackerRouter/.test(rootContent)) {
     if (!/from\s+['"]\.\/routers\/tracker\.router['"]/.test(rootContent)) {
-      rootContent = `import { trackerRouter } from './routers/tracker.router';\n` + rootContent;
+      rootContent =
+        `import { trackerRouter } from './routers/tracker.router';\n` +
+        rootContent;
     }
     rootContent = rootContent.replace(/router\(\{([\s\S]*?)\}\)/m, (m, g1) => {
       const items = g1.trim();
-      const withTracker = items ? items + `,\n  tracker: trackerRouter` : `tracker: trackerRouter`;
+      const withTracker = items
+        ? items + `,\n  tracker: trackerRouter`
+        : `tracker: trackerRouter`;
       return `router({\n  ${withTracker}\n})`;
     });
     if (!/export type AppRouter = typeof appRouter;/.test(rootContent)) {
@@ -257,7 +268,6 @@ describe('tracker router', () => {
 });
 `;
   W(path.join(API_DIR, 'src/trpc/__tests__/tracker.router.spec.ts'), API_SPEC);
-
 } else {
   console.log('! API app not found (api/ or apps/api/). Skipping API router.');
 }
@@ -354,11 +364,19 @@ try {
     console.log('! Skipping prisma steps (schema not found).');
   }
 } catch (e) {
-  console.warn('! Prisma steps partially failed (non-fatal for scaffolding).', e.message || e);
+  console.warn(
+    '! Prisma steps partially failed (non-fatal for scaffolding).',
+    e.message || e
+  );
 }
 
 console.log('\n[done] Tracker module scaffold complete ✅');
-console.log('- Types: shared/types/src/lib/tracker.ts (re-exported in index.ts)');
-console.log('- API  :', API_DIR ? `${API_DIR}/src/trpc/routers/tracker.router.ts` : '(skipped)');
+console.log(
+  '- Types: shared/types/src/lib/tracker.ts (re-exported in index.ts)'
+);
+console.log(
+  '- API  :',
+  API_DIR ? `${API_DIR}/src/trpc/routers/tracker.router.ts` : '(skipped)'
+);
 console.log('- Web  : web/src/app/tracker/page.tsx');
 console.log('- Tests: API + Web stubs added');

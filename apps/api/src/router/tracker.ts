@@ -27,7 +27,7 @@ export const trackerRouter = router({
       prisma.application.findMany({
         where: { userId: input.userId },
         orderBy: { createdAt: 'desc' },
-      }),
+      })
     ),
 
   createApplication: publicProcedure
@@ -40,7 +40,7 @@ export const trackerRouter = router({
         status: Status.default('APPLIED'),
         source: Source.default('OTHER'),
         notes: z.string().optional(),
-      }),
+      })
     )
     .mutation(({ input }) => prisma.application.create({ data: input })),
 
@@ -56,18 +56,18 @@ export const trackerRouter = router({
           source: Source.optional(),
           notes: z.string().optional(),
         }),
-      }),
+      })
     )
     .mutation(({ input }) =>
       prisma.application.update({
         where: { id: input.id },
         data: input.data,
-      }),
+      })
     ),
 
   deleteApplication: publicProcedure
     .input(z.object({ id: z.string() }))
     .mutation(({ input }) =>
-      prisma.application.delete({ where: { id: input.id } }),
+      prisma.application.delete({ where: { id: input.id } })
     ),
 });

@@ -1,22 +1,22 @@
-| Module | Router | Unit Test | E2E Test | Page | Types | Types Exported | Registered in appRouter |
-|--------|--------|-----------|----------|------|-------|----------------|--------------------------|
-| auth | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| onboarding | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| dashboard | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| tracker | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| resume | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| settings | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| profile | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| goals | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| planner | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| calendar | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| roadmap | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| interviews | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| activity | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| notifications | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| summary | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| skills | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| insights | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| metrics | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| achievements | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| networking | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Module        | Router | Unit Test | E2E Test | Page | Types | Types Exported | Registered in appRouter |
+| ------------- | ------ | --------- | -------- | ---- | ----- | -------------- | ----------------------- |
+| auth          | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| onboarding    | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| dashboard     | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| tracker       | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| resume        | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| settings      | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| profile       | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| goals         | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| planner       | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| calendar      | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| roadmap       | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| interviews    | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| activity      | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| notifications | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| summary       | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| skills        | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| insights      | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| metrics       | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| achievements  | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |
+| networking    | ✅     | ✅        | ✅       | ✅   | ✅    | ✅             | ✅                      |

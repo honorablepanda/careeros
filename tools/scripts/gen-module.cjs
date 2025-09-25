@@ -1,31 +1,50 @@
 #!/usr/bin/env node
-const fs = require('fs'); const path = require('path');
+const fs = require('fs');
+const path = require('path');
 
 const name = (process.argv[2] || '').trim();
 if (!name || !/^[a-z][a-z0-9\-]*$/.test(name)) {
   console.error('Usage: node tools/scripts/gen-module.cjs <kebab-name>');
   process.exit(1);
 }
-const camel = name.replace(/-([a-z])/g, (_,c)=>c.toUpperCase());
+const camel = name.replace(/-([a-z])/g, (_, c) => c.toUpperCase());
 const RouterName = `${camel.charAt(0).toUpperCase()}${camel.slice(1)}Router`;
 
-const apiRoot  = path.join('apps','api','src');
-const trpcUtil = path.join(apiRoot,'trpc','trpc.ts');
-const routerDir= path.join(apiRoot,'router');
-const rootFile = path.join(routerDir,'root.ts');
-const modFile  = path.join(routerDir, `${name}.ts`);
-const specDir  = path.join(routerDir,'__tests__');
+const apiRoot = path.join('apps', 'api', 'src');
+const trpcUtil = path.join(apiRoot, 'trpc', 'trpc.ts');
+const routerDir = path.join(apiRoot, 'router');
+const rootFile = path.join(routerDir, 'root.ts');
+const modFile = path.join(routerDir, `${name}.ts`);
+const specDir = path.join(routerDir, '__tests__');
 const specFile = path.join(specDir, `${name}.spec.ts`);
 
-function ensure(p){fs.mkdirSync(path.dirname(p),{recursive:true});}
-function write(p,s){ensure(p);fs.writeFileSync(p,s,'utf8');console.log('✓ wrote',p);}
-function read(p){return fs.readFileSync(p,'utf8');}
-function exists(p){try{fs.accessSync(p);return true;}catch{return false;}}
+function ensure(p) {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+}
+function write(p, s) {
+  ensure(p);
+  fs.writeFileSync(p, s, 'utf8');
+  console.log('✓ wrote', p);
+}
+function read(p) {
+  return fs.readFileSync(p, 'utf8');
+}
+function exists(p) {
+  try {
+    fs.accessSync(p);
+    return true;
+  } catch {
+    return false;
+  }
+}
 
-if(!exists(trpcUtil)){ console.error('! Missing', trpcUtil); process.exit(1); }
+if (!exists(trpcUtil)) {
+  console.error('! Missing', trpcUtil);
+  process.exit(1);
+}
 
 // 1) router file
-if(!exists(modFile)){
+if (!exists(modFile)) {
   const modSrc = `import { router, publicProcedure } from '../trpc/trpc';
 import { z } from 'zod';
 
@@ -43,16 +62,21 @@ export const ${RouterName} = router({
 }
 
 // 2) wire into root router
-if(exists(rootFile)){
+if (exists(rootFile)) {
   let s = read(rootFile);
-  if(!new RegExp(`\\b${RouterName}\\b`).test(s)){
+  if (!new RegExp(`\\b${RouterName}\\b`).test(s)) {
     // import line: try various relative paths
-    const importLine = s.includes("from './router/") || s.includes("from './routers/")
-      ? `import { ${RouterName} } from './router/${name}';\n`
-      : s.includes("from '../router/") ? `import { ${RouterName} } from '../router/${name}';\n`
-      : `import { ${RouterName} } from './${name}';\n`;
+    const importLine =
+      s.includes("from './router/") || s.includes("from './routers/")
+        ? `import { ${RouterName} } from './router/${name}';\n`
+        : s.includes("from '../router/")
+        ? `import { ${RouterName} } from '../router/${name}';\n`
+        : `import { ${RouterName} } from './${name}';\n`;
     s = s.replace(/(^import[\s\S]*?;[\r\n]+)/, '$1' + importLine);
-    s = s.replace(/router\(\s*{\s*/m, m => m + `  ${camel}: ${RouterName},\n`);
+    s = s.replace(
+      /router\(\s*{\s*/m,
+      (m) => m + `  ${camel}: ${RouterName},\n`
+    );
     write(rootFile, s);
   } else {
     console.log('= already wired in root');
@@ -62,7 +86,7 @@ if(exists(rootFile)){
 }
 
 // 3) spec
-if(!exists(specFile)){
+if (!exists(specFile)) {
   const specSrc = `import { router } from '../../trpc/trpc';
 import { ${RouterName} } from '../${name}';
 

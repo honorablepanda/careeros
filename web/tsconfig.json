@@ -16,23 +16,11 @@
     ],
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "@careeros/api": [
-        "../apps/api/src/trpc/root.ts"
-      ],
-      "@careeros/types": [
-        "../libs/types/src/index.ts"
-      ]
+      "@/*": ["src/*"],
+      "@careeros/api": ["../apps/api/src/trpc/root.ts"],
+      "@careeros/types": ["../libs/types/src/index.ts"]
     }
   },
-  "include": [
-    "next-env.d.ts",
-    "src/**/*",
-    ".next/types/**/*.ts"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  "include": ["next-env.d.ts", "src/**/*", ".next/types/**/*.ts"],
+  "exclude": ["node_modules"]
 }

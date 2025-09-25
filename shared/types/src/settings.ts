@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 export const StatusCountSchema = z.object({
-  status: z.string(),          // keep string here to avoid enum coupling
+  status: z.string(), // keep string here to avoid enum coupling
   count: z.number().int().nonnegative(),
 });
 export type StatusCount = z.infer<typeof StatusCountSchema>;

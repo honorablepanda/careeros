@@ -1,38 +1,38 @@
 #!/usr/bin/env node
 /* eslint-disable no-console */
-const fs = require("fs");
-const path = require("path");
-const os = require("os");
+const fs = require('fs');
+const path = require('path');
+const os = require('os');
 
 const ROOT = process.cwd();
 const rel = (p) => path.join(ROOT, p);
-const readIf = (p) => (fs.existsSync(p) ? fs.readFileSync(p, "utf8") : null);
+const readIf = (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : null);
 const readJSON = (p) =>
-  fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, "utf8")) : null;
+  fs.existsSync(p) ? JSON.parse(fs.readFileSync(p, 'utf8')) : null;
 
 const start = new Date();
-const outDir = rel("tools/logs");
+const outDir = rel('tools/logs');
 fs.mkdirSync(outDir, { recursive: true });
 const stamp = new Date()
   .toISOString()
-  .replace(/[:.]/g, "-")
-  .replace("T", "_")
+  .replace(/[:.]/g, '-')
+  .replace('T', '_')
   .slice(0, 19);
 const logPath = path.join(outDir, `doctor_${stamp}.log`);
 
 const lines = [];
-const log = (s = "") => {
+const log = (s = '') => {
   lines.push(s);
 };
 
 const section = (title) => {
-  log("");
-  log("## " + title);
+  log('');
+  log('## ' + title);
 };
 const status = {
-  OK: (m) => log("  ✓ " + m),
-  WARN: (m) => log("  ! " + m),
-  FAIL: (m) => log("  ✖ " + m),
+  OK: (m) => log('  ✓ ' + m),
+  WARN: (m) => log('  ! ' + m),
+  FAIL: (m) => log('  ✖ ' + m),
 };
 
 let failCount = 0;
@@ -51,30 +51,30 @@ const ok = (m) => status.OK(m);
 // ---- helpers
 function getInstalledVersion(pkgName) {
   // Try standard node_modules symlink
-  let p = rel(path.join("node_modules", pkgName, "package.json"));
+  let p = rel(path.join('node_modules', pkgName, 'package.json'));
   if (fs.existsSync(p)) {
     try {
-      return JSON.parse(fs.readFileSync(p, "utf8")).version || null;
+      return JSON.parse(fs.readFileSync(p, 'utf8')).version || null;
     } catch {}
   }
   // Fallback: search pnpm store in node_modules/.pnpm
-  const enc = pkgName.replace("/", "+");
-  const base = rel("node_modules/.pnpm");
+  const enc = pkgName.replace('/', '+');
+  const base = rel('node_modules/.pnpm');
   if (!fs.existsSync(base)) return null;
   const dirs = fs
     .readdirSync(base, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && d.name.startsWith(enc + "@"));
+    .filter((d) => d.isDirectory() && d.name.startsWith(enc + '@'));
   for (const d of dirs) {
     const nested = path.join(
       base,
       d.name,
-      "node_modules",
+      'node_modules',
       pkgName,
-      "package.json"
+      'package.json'
     );
     if (fs.existsSync(nested)) {
       try {
-        return JSON.parse(fs.readFileSync(nested, "utf8")).version || null;
+        return JSON.parse(fs.readFileSync(nested, 'utf8')).version || null;
       } catch {}
     }
   }
@@ -88,28 +88,32 @@ function firstMatchRe(s, re) {
 
 // ---- HEADER
 log(`# Workspace Doctor Report`);
-log(`Time: ${start.toISOString()} (${Intl.DateTimeFormat().resolvedOptions().timeZone || "local TZ"})`);
+log(
+  `Time: ${start.toISOString()} (${
+    Intl.DateTimeFormat().resolvedOptions().timeZone || 'local TZ'
+  })`
+);
 log(`OS: ${os.platform()} ${os.release()} | Node: ${process.version}`);
 log(`Root: ${ROOT}`);
 
 // ---- Prisma model & router check
-section("Prisma schema & tracker router");
-const schemaPath = rel("prisma/schema.prisma");
+section('Prisma schema & tracker router');
+const schemaPath = rel('prisma/schema.prisma');
 const schema = readIf(schemaPath);
 if (!schema) {
   fail(`Missing prisma/schema.prisma`);
 } else {
-  const modelNames = [...schema.matchAll(/^\s*model\s+([A-Za-z0-9_]+)\s*\{/gm)].map(
-    (m) => m[1]
-  );
+  const modelNames = [
+    ...schema.matchAll(/^\s*model\s+([A-Za-z0-9_]+)\s*\{/gm),
+  ].map((m) => m[1]);
   if (modelNames.length === 0) {
     warn(`No Prisma models found in prisma/schema.prisma`);
   } else {
-    ok(`Found models: ${modelNames.join(", ")}`);
+    ok(`Found models: ${modelNames.join(', ')}`);
   }
   // Infer the application model + prisma property
   // Prefer 'Application' or anything containing 'Application'
-  let model = modelNames.find((n) => n === "Application");
+  let model = modelNames.find((n) => n === 'Application');
   if (!model) model = modelNames.find((n) => /Application/i.test(n));
   if (!model) {
     warn(
@@ -119,7 +123,7 @@ if (!schema) {
     const clientProp = model.charAt(0).toLowerCase() + model.slice(1);
     ok(`Application-like model: ${model} → prisma property '${clientProp}'`);
     // Check router file usage
-    const trackerPath = rel("apps/api/src/trpc/routers/tracker.router.ts");
+    const trackerPath = rel('apps/api/src/trpc/routers/tracker.router.ts');
     const tracker = readIf(trackerPath);
     if (!tracker) {
       fail(`Missing ${path.relative(ROOT, trackerPath)}`);
@@ -152,10 +156,10 @@ if (!schema) {
 }
 
 // ---- API tRPC runtime (context/trpc/root)
-section("API tRPC runtime");
-const ctxPath = rel("apps/api/src/trpc/context.ts");
-const trpcPath = rel("apps/api/src/trpc/trpc.ts");
-const rootPath = rel("apps/api/src/trpc/root.ts");
+section('API tRPC runtime');
+const ctxPath = rel('apps/api/src/trpc/context.ts');
+const trpcPath = rel('apps/api/src/trpc/trpc.ts');
+const rootPath = rel('apps/api/src/trpc/root.ts');
 const ctxSrc = readIf(ctxPath);
 const trpcSrc = readIf(trpcPath);
 const rootSrc = readIf(rootPath);
@@ -188,17 +192,17 @@ else {
   );
   if (bodyMatch) {
     const candidates = bodyMatch[1]
-      .split(",")
+      .split(',')
       .map((s) => s.trim())
       .map((s) => (s.match(/^([A-Za-z0-9_]+)\s*:/) || [null, null])[1])
       .filter(Boolean);
-    if (candidates.length) ok(`root router keys: ${candidates.join(", ")}`);
-    const reserved = ["useContext", "useUtils", "Provider"];
+    if (candidates.length) ok(`root router keys: ${candidates.join(', ')}`);
+    const reserved = ['useContext', 'useUtils', 'Provider'];
     const hit = candidates.filter((k) => reserved.includes(k));
     if (hit.length) {
       fail(
         `root.ts router keys collide with hooks: ${hit.join(
-          ", "
+          ', '
         )} (rename these keys)`
       );
     }
@@ -206,28 +210,26 @@ else {
 }
 
 // ---- TS aliases (base + web)
-section("TypeScript aliases");
-const tsbasePath = rel("tsconfig.base.json");
+section('TypeScript aliases');
+const tsbasePath = rel('tsconfig.base.json');
 const tsbase = readJSON(tsbasePath);
 if (!tsbase) {
   fail(`Missing tsconfig.base.json`);
 } else {
   const paths = (tsbase.compilerOptions || {}).paths || {};
-  const wantApi = ["apps/api/src/trpc/root.ts"];
-  const wantTypes = ["libs/types/src/index.ts"];
+  const wantApi = ['apps/api/src/trpc/root.ts'];
+  const wantTypes = ['libs/types/src/index.ts'];
   const sameArr = (a = [], b = []) =>
     Array.isArray(a) &&
     Array.isArray(b) &&
     a.length === b.length &&
     a.every((x, i) => x === b[i]);
-  if (!sameArr(paths["@careeros/api"], wantApi)) {
+  if (!sameArr(paths['@careeros/api'], wantApi)) {
     fail(
-      `tsconfig.base.json: paths["@careeros/api"] != ${JSON.stringify(
-        wantApi
-      )}`
+      `tsconfig.base.json: paths["@careeros/api"] != ${JSON.stringify(wantApi)}`
     );
   } else ok(`@careeros/api alias OK`);
-  if (!sameArr(paths["@careeros/types"], wantTypes)) {
+  if (!sameArr(paths['@careeros/types'], wantTypes)) {
     fail(
       `tsconfig.base.json: paths["@careeros/types"] != ${JSON.stringify(
         wantTypes
@@ -236,25 +238,23 @@ if (!tsbase) {
   } else ok(`@careeros/types alias OK`);
 }
 
-const webTsPath = rel("web/tsconfig.json");
+const webTsPath = rel('web/tsconfig.json');
 const webTs = readJSON(webTsPath);
 if (!webTs) {
   fail(`Missing web/tsconfig.json`);
 } else {
   const wpaths = (webTs.compilerOptions || {}).paths || {};
-  const wantWeb = ["src/*"];
-  const cur = wpaths["@/*"];
-  if (!cur || cur.join("|") !== wantWeb.join("|")) {
-    fail(
-      `web/tsconfig.json: paths["@/*"] != ${JSON.stringify(wantWeb)}`
-    );
+  const wantWeb = ['src/*'];
+  const cur = wpaths['@/*'];
+  if (!cur || cur.join('|') !== wantWeb.join('|')) {
+    fail(`web/tsconfig.json: paths["@/*"] != ${JSON.stringify(wantWeb)}`);
   } else ok(`web alias @/* → src/* OK`);
 }
 
 // ---- Web client wiring
-section("Web client wiring");
-const webClientPath = rel("web/src/trpc.ts");
-const webProviderPath = rel("web/src/app/providers.tsx");
+section('Web client wiring');
+const webClientPath = rel('web/src/trpc.ts');
+const webProviderPath = rel('web/src/app/providers.tsx');
 const webClient = readIf(webClientPath);
 const webProvider = readIf(webProviderPath);
 
@@ -264,12 +264,20 @@ else {
     !/createTRPCReact/.test(webClient) ||
     !/from\s+['"]@trpc\/react-query['"]/.test(webClient)
   ) {
-    fail(`web/src/trpc.ts: missing createTRPCReact import from @trpc/react-query`);
+    fail(
+      `web/src/trpc.ts: missing createTRPCReact import from @trpc/react-query`
+    );
   } else {
     ok(`web/src/trpc.ts imports createTRPCReact`);
   }
-  if (!/type\s+\{\s*AppRouter\s*\}\s+from\s+['"]@careeros\/api['"]/.test(webClient)) {
-    fail(`web/src/trpc.ts: missing 'type { AppRouter } from "@careeros/api"' import`);
+  if (
+    !/type\s+\{\s*AppRouter\s*\}\s+from\s+['"]@careeros\/api['"]/.test(
+      webClient
+    )
+  ) {
+    fail(
+      `web/src/trpc.ts: missing 'type { AppRouter } from "@careeros/api"' import`
+    );
   } else ok(`web/src/trpc.ts imports type AppRouter from @careeros/api`);
   if (!/createTRPCReact<\s*AppRouter\s*>\s*\(\)/.test(webClient)) {
     fail(`web/src/trpc.ts: missing 'createTRPCReact<AppRouter>()'`);
@@ -290,15 +298,15 @@ else {
 }
 
 // ---- Versions
-section("Package versions (installed)");
+section('Package versions (installed)');
 const pkgs = [
-  "@trpc/server",
-  "@trpc/client",
-  "@trpc/react-query",
-  "@tanstack/react-query",
-  "react",
-  "react-dom",
-  "next",
+  '@trpc/server',
+  '@trpc/client',
+  '@trpc/react-query',
+  '@tanstack/react-query',
+  'react',
+  'react-dom',
+  'next',
 ];
 const versions = {};
 for (const name of pkgs) {
@@ -314,14 +322,14 @@ function major(v) {
   const m = v.match(/^(\d+)/);
   return m ? parseInt(m[1], 10) : null;
 }
-const tServer = major(versions["@trpc/server"]);
-const tClient = major(versions["@trpc/client"]);
-const tReact = major(versions["@trpc/react-query"]);
-const rq = major(versions["@tanstack/react-query"]);
-const reactMaj = major(versions["react"]);
-const nextMaj = major(versions["next"]);
+const tServer = major(versions['@trpc/server']);
+const tClient = major(versions['@trpc/client']);
+const tReact = major(versions['@trpc/react-query']);
+const rq = major(versions['@tanstack/react-query']);
+const reactMaj = major(versions['react']);
+const nextMaj = major(versions['next']);
 
-section("Version consistency rules");
+section('Version consistency rules');
 if (tServer && tClient && tReact) {
   if (!(tServer === tClient && tClient === tReact)) {
     fail(
@@ -331,22 +339,20 @@ if (tServer && tClient && tReact) {
 }
 if (tServer === 10 || tClient === 10 || tReact === 10) {
   if (rq && rq !== 4) {
-    fail(
-      `tRPC v10 requires @tanstack/react-query v4 (found v${rq})`
-    );
+    fail(`tRPC v10 requires @tanstack/react-query v4 (found v${rq})`);
   } else if (rq === 4) ok(`tRPC v10 ↔ react-query v4 OK`);
 }
 if (tServer === 11 || tClient === 11 || tReact === 11) {
   if (rq && rq !== 5) {
-    fail(
-      `tRPC v11 requires @tanstack/react-query v5 (found v${rq})`
-    );
+    fail(`tRPC v11 requires @tanstack/react-query v5 (found v${rq})`);
   } else if (rq === 5) ok(`tRPC v11 ↔ react-query v5 OK`);
 }
 if (reactMaj && rq) {
   // react-query v4 supports React 16-18; v5 supports 18-19
   if (rq === 4 && reactMaj >= 19) {
-    warn(`react-query v4 + React ${reactMaj}: peer warning (v4 targets React ≤18)`);
+    warn(
+      `react-query v4 + React ${reactMaj}: peer warning (v4 targets React ≤18)`
+    );
   }
   if (rq === 5 && reactMaj < 18) {
     fail(`react-query v5 requires React ≥18`);
@@ -355,13 +361,13 @@ if (reactMaj && rq) {
 if (nextMaj) ok(`Next major: ${nextMaj}`);
 
 // ---- Summary
-section("Summary");
+section('Summary');
 log(`  Failures: ${failCount}`);
 log(`  Warnings: ${warnCount}`);
-log("");
+log('');
 log(`Log written to: ${logPath}`);
-fs.writeFileSync(logPath, lines.join("\n") + "\n", "utf8");
+fs.writeFileSync(logPath, lines.join('\n') + '\n', 'utf8');
 
 // Print to stdout
-console.log(lines.join("\n"));
+console.log(lines.join('\n'));
 process.exit(failCount > 0 ? 1 : 0);

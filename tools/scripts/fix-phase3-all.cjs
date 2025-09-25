@@ -13,9 +13,26 @@ const path = require('path');
 const ROOT = process.cwd();
 
 const MODULES = [
-  'auth','onboarding','dashboard','tracker','resume','settings','profile','goals',
-  'planner','calendar','roadmap','interviews','activity','notifications','summary',
-  'skills','insights','metrics','achievements','networking',
+  'auth',
+  'onboarding',
+  'dashboard',
+  'tracker',
+  'resume',
+  'settings',
+  'profile',
+  'goals',
+  'planner',
+  'calendar',
+  'roadmap',
+  'interviews',
+  'activity',
+  'notifications',
+  'summary',
+  'skills',
+  'insights',
+  'metrics',
+  'achievements',
+  'networking',
 ];
 
 const P = {
@@ -28,9 +45,23 @@ const P = {
   sharedTypesSrcDir: path.join(ROOT, 'shared', 'types', 'src'),
 };
 
-function exists(p) { try { return fs.existsSync(p); } catch { return false; } }
-function read(p) { try { return fs.readFileSync(p, 'utf8'); } catch { return null; } }
-function mkdirp(p) { fs.mkdirSync(p, { recursive: true }); }
+function exists(p) {
+  try {
+    return fs.existsSync(p);
+  } catch {
+    return false;
+  }
+}
+function read(p) {
+  try {
+    return fs.readFileSync(p, 'utf8');
+  } catch {
+    return null;
+  }
+}
+function mkdirp(p) {
+  fs.mkdirSync(p, { recursive: true });
+}
 function writeIfDiff(p, s) {
   const cur = read(p);
   if (cur !== s) {
@@ -50,19 +81,24 @@ function ensureLineInFile(p, needle, insert) {
   }
   return false;
 }
-function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
+function cap(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
 
 // 0) prisma client singleton (apps/api/src/server/db.ts)
-(function ensurePrismaSingleton(){
+(function ensurePrismaSingleton() {
   const dbPath = path.join(P.apiSrc, 'server', 'db.ts');
   if (!exists(dbPath)) {
-    writeIfDiff(dbPath, `import { PrismaClient } from '@prisma/client';
+    writeIfDiff(
+      dbPath,
+      `import { PrismaClient } from '@prisma/client';
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({ log: process.env.NODE_ENV === 'development' ? ['query','error','warn'] : ['error'] });
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-`);
+`
+    );
     console.log('✓ prisma singleton: apps/api/src/server/db.ts');
   } else {
     console.log('= prisma singleton present');
@@ -72,7 +108,10 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 // 1) Create router stubs for each module
 function ensureModuleRouter(mod) {
   const file = path.join(P.apiRouterDir, `${mod}.ts`);
-  if (exists(file)) { console.log(`= router present: ${mod}`); return; }
+  if (exists(file)) {
+    console.log(`= router present: ${mod}`);
+    return;
+  }
   const body = `// apps/api/src/router/${mod}.ts
 // Minimal placeholder router for "${mod}" (replace with real tRPC wiring later).
 export const ${mod}Router = {} as any;
@@ -93,8 +132,10 @@ function ensureRootRegistration(mods) {
 
   if (!target) {
     // create a minimal root that exports an object with all routers
-    const imports = mods.map(m => `import { ${m}Router } from './${m}';`).join('\n');
-    const props = mods.map(m => `  ${m}: ${m}Router,`).join('\n');
+    const imports = mods
+      .map((m) => `import { ${m}Router } from './${m}';`)
+      .join('\n');
+    const props = mods.map((m) => `  ${m}: ${m}Router,`).join('\n');
     const body = `// Minimal app router (placeholder) – switch to real tRPC when ready
 ${imports}
 export const appRouter = {
@@ -113,7 +154,9 @@ export type AppRouter = typeof appRouter;
   let changed = false;
 
   for (const m of mods) {
-    const importRel = target.includes(path.join('src','router')) ? `./${m}` : `../router/${m}`;
+    const importRel = target.includes(path.join('src', 'router'))
+      ? `./${m}`
+      : `../router/${m}`;
     if (!new RegExp(`\\b${m}Router\\b`).test(src)) {
       src = `import { ${m}Router } from '${importRel}';\n` + src;
       changed = true;
@@ -124,19 +167,29 @@ export type AppRouter = typeof appRouter;
   for (const m of mods) {
     if (!new RegExp(`${m}\\s*:\\s*${m}Router`).test(src)) {
       // try router({ ... })
-      const replaced = src.replace(/router\(\{\s*/m, match => {
+      const replaced = src.replace(/router\(\{\s*/m, (match) => {
         if (match) return match + `${m}: ${m}Router,\n`;
         return match;
       });
-      if (replaced !== src) { src = replaced; changed = true; continue; }
+      if (replaced !== src) {
+        src = replaced;
+        changed = true;
+        continue;
+      }
 
       // try plain object export
-      const replaced2 = src.replace(/(\{\s*)([^]*?)(\}\s*[;]?\s*$)/m, (all, a,b,c) => {
-        if (/\bappRouter\b/.test(src) && !new RegExp(`${m}\\s*:`).test(b))
-          return a + `${m}: ${m}Router,\n` + b + c;
-        return all;
-      });
-      if (replaced2 !== src) { src = replaced2; changed = true; }
+      const replaced2 = src.replace(
+        /(\{\s*)([^]*?)(\}\s*[;]?\s*$)/m,
+        (all, a, b, c) => {
+          if (/\bappRouter\b/.test(src) && !new RegExp(`${m}\\s*:`).test(b))
+            return a + `${m}: ${m}Router,\n` + b + c;
+          return all;
+        }
+      );
+      if (replaced2 !== src) {
+        src = replaced2;
+        changed = true;
+      }
     }
   }
 
@@ -153,26 +206,38 @@ function ensureRouterUnitTest(mod) {
   const dir = path.join(P.apiRouterDir, '__tests__');
   mkdirp(dir);
   const p = path.join(dir, `${mod}.spec.ts`);
-  if (exists(p)) { console.log(`= router spec present: ${mod}`); return; }
-  writeIfDiff(p, `describe('${mod} router', () => {
+  if (exists(p)) {
+    console.log(`= router spec present: ${mod}`);
+    return;
+  }
+  writeIfDiff(
+    p,
+    `describe('${mod} router', () => {
   it('exports ${mod}Router', async () => {
     const modFile = await import('../${mod}');
     expect(modFile.${mod}Router).toBeDefined();
   });
 });
-`);
+`
+  );
   console.log(`✓ router spec created: ${mod}`);
 }
 
 // 4) E2E placeholder (web/specs/<mod>.e2e.spec.ts)
 function ensureE2E(mod) {
   const p = path.join(P.webSpecsDir, `${mod}.e2e.spec.ts`);
-  if (exists(p)) { console.log(`= e2e placeholder present: ${mod}`); return; }
-  writeIfDiff(p, `// e2e placeholder for "${mod}" – move to web-e2e/ when real Playwright is wired
+  if (exists(p)) {
+    console.log(`= e2e placeholder present: ${mod}`);
+    return;
+  }
+  writeIfDiff(
+    p,
+    `// e2e placeholder for "${mod}" – move to web-e2e/ when real Playwright is wired
 describe('${mod} page (e2e placeholder)', () => {
   it('placeholder', () => expect(true).toBe(true));
 });
-`);
+`
+  );
   console.log(`✓ e2e placeholder created: ${mod}`);
 }
 
@@ -180,29 +245,40 @@ describe('${mod} page (e2e placeholder)', () => {
 function ensureWebPage(mod) {
   const dir = path.join(P.webAppDir, mod);
   const p = path.join(dir, 'page.tsx');
-  if (exists(p)) { console.log(`= page present: ${mod}`); return; }
+  if (exists(p)) {
+    console.log(`= page present: ${mod}`);
+    return;
+  }
   const title = cap(mod);
-  writeIfDiff(p, `export default function ${cap(mod)}Page() {
+  writeIfDiff(
+    p,
+    `export default function ${cap(mod)}Page() {
   return (
     <main>
       <h1>${title}</h1>
     </main>
   );
 }
-`);
+`
+  );
   console.log(`✓ page created: ${mod}`);
 }
 
 // 6) shared/types/<mod>.ts + export from index
 function ensureSharedTypes(mod) {
-  const baseDir = exists(P.sharedTypesSrcDir) ? P.sharedTypesSrcDir : P.sharedTypesDir;
+  const baseDir = exists(P.sharedTypesSrcDir)
+    ? P.sharedTypesSrcDir
+    : P.sharedTypesDir;
   const file = path.join(baseDir, `${mod}.ts`);
   if (!exists(file)) {
-    writeIfDiff(file, `// ${path.relative(ROOT, file)}
+    writeIfDiff(
+      file,
+      `// ${path.relative(ROOT, file)}
 export type ${cap(mod)}DTO = {
   id?: string;
 };
-`);
+`
+    );
     console.log(`✓ types created: ${path.relative(ROOT, file)}`);
   } else {
     console.log(`= types present: ${path.relative(ROOT, file)}`);
@@ -213,12 +289,16 @@ export type ${cap(mod)}DTO = {
     path.join(P.sharedTypesDir, 'index.ts'),
   ];
   const indexPath = indexCandidates.find(exists) || indexCandidates[0];
-  ensureLineInFile(indexPath, `export * from './${mod}'`, `export * from './${mod}'`);
+  ensureLineInFile(
+    indexPath,
+    `export * from './${mod}'`,
+    `export * from './${mod}'`
+  );
   console.log(`✓ ensured export in ${path.relative(ROOT, indexPath)}`);
 }
 
 // ---- run all ---------------------------------------------------------------
-(function main(){
+(function main() {
   console.log('--- fix-phase3-all: start ---');
 
   // Ensure dirs
@@ -228,7 +308,7 @@ export type ${cap(mod)}DTO = {
   mkdirp(P.sharedTypesDir);
 
   // Create routers + tests + pages + types
-  MODULES.forEach(m => {
+  MODULES.forEach((m) => {
     ensureModuleRouter(m);
     ensureRouterUnitTest(m);
     ensureE2E(m);

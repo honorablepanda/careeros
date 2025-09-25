@@ -4,11 +4,19 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = process.cwd();
-const read = (p) => fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '';
+const read = (p) => (fs.existsSync(p) ? fs.readFileSync(p, 'utf8') : '');
 
 const prismaPath = path.join(ROOT, 'prisma', 'schema.prisma');
-const routerPath = path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'routers', 'tracker.router.ts');
-const pagePath   = path.join(ROOT, 'web', 'src', 'app', 'tracker', 'page.tsx');
+const routerPath = path.join(
+  ROOT,
+  'apps',
+  'api',
+  'src',
+  'trpc',
+  'routers',
+  'tracker.router.ts'
+);
+const pagePath = path.join(ROOT, 'web', 'src', 'app', 'tracker', 'page.tsx');
 
 function parseApplicationFields(schema) {
   const out = new Set();
@@ -17,7 +25,8 @@ function parseApplicationFields(schema) {
   const body = schema.slice(start);
   const open = body.indexOf('{');
   if (open === -1) return out;
-  let i = open + 1, depth = 1;
+  let i = open + 1,
+    depth = 1;
   for (; i < body.length && depth > 0; i++) {
     const ch = body[i];
     if (ch === '{') depth++;
@@ -63,15 +72,15 @@ function diff(name, a, b) {
 
 const schema = read(prismaPath);
 const router = read(routerPath);
-const page   = read(pagePath);
+const page = read(pagePath);
 
 if (!schema) console.log('! missing prisma/schema.prisma');
 if (!router) console.log('! missing', routerPath);
-if (!page)   console.log('! missing', pagePath);
+if (!page) console.log('! missing', pagePath);
 
 const schemaFields = parseApplicationFields(schema);
-const routerKeys   = findRouterDataKeys(router);
-const pageKeys     = findPageUsage(page);
+const routerKeys = findRouterDataKeys(router);
+const pageKeys = findPageUsage(page);
 
 const diffs = [
   diff('Router writes vs Schema fields', routerKeys, schemaFields),
@@ -88,7 +97,9 @@ for (const d of diffs) {
   if (d.onlyA.length === 0 && d.onlyB.length === 0) {
     console.log(`✓ ${d.name}: OK`);
   } else {
-    if (d.onlyA.length) console.log(`✗ ${d.name}: only in A → ${d.onlyA.join(', ')}`);
-    if (d.onlyB.length) console.log(`✗ ${d.name}: only in B → ${d.onlyB.join(', ')}`);
+    if (d.onlyA.length)
+      console.log(`✗ ${d.name}: only in A → ${d.onlyA.join(', ')}`);
+    if (d.onlyB.length)
+      console.log(`✗ ${d.name}: only in B → ${d.onlyB.join(', ')}`);
   }
 }

@@ -12,16 +12,20 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = process.cwd();
-const W = p => path.join(ROOT, 'web', p);
+const W = (p) => path.join(ROOT, 'web', p);
 const trpcClientPath = W('src/trpc/index.ts');
-const providersPath  = W('src/app/providers.tsx');
-const layoutPath     = W('src/app/layout.tsx');
-const trackerPage    = W('src/app/tracker/page.tsx');
-const tsconfigPath   = fs.existsSync(W('tsconfig.json')) ? W('tsconfig.json') : W('tsconfig.app.json');
-const rootPkgPath    = path.join(ROOT, 'package.json');
+const providersPath = W('src/app/providers.tsx');
+const layoutPath = W('src/app/layout.tsx');
+const trackerPage = W('src/app/tracker/page.tsx');
+const tsconfigPath = fs.existsSync(W('tsconfig.json'))
+  ? W('tsconfig.json')
+  : W('tsconfig.app.json');
+const rootPkgPath = path.join(ROOT, 'package.json');
 
-function ensureDir(p){ fs.mkdirSync(path.dirname(p), { recursive: true }); }
-function writeIfChanged(p, content){
+function ensureDir(p) {
+  fs.mkdirSync(path.dirname(p), { recursive: true });
+}
+function writeIfChanged(p, content) {
   ensureDir(p);
   const exists = fs.existsSync(p);
   if (exists && fs.readFileSync(p, 'utf8') === content) return false;
@@ -29,7 +33,7 @@ function writeIfChanged(p, content){
   return true;
 }
 
-function upsertTrpcClient(){
+function upsertTrpcClient() {
   const content = `\
 'use client';
 
@@ -39,10 +43,14 @@ import type { AppRouter } from '../../../apps/api/src/router/root';
 export const trpc = createTRPCReact<AppRouter>();
 `;
   const changed = writeIfChanged(trpcClientPath, content);
-  console.log(changed ? `✓ wrote ${path.relative(ROOT, trpcClientPath)}` : `= up-to-date ${path.relative(ROOT, trpcClientPath)}`);
+  console.log(
+    changed
+      ? `✓ wrote ${path.relative(ROOT, trpcClientPath)}`
+      : `= up-to-date ${path.relative(ROOT, trpcClientPath)}`
+  );
 }
 
-function upsertProviders(){
+function upsertProviders() {
   const content = `\
 'use client';
 
@@ -73,10 +81,14 @@ export function Providers({ children }: { children: React.ReactNode }) {
 }
 `;
   const changed = writeIfChanged(providersPath, content);
-  console.log(changed ? `✓ wrote ${path.relative(ROOT, providersPath)}` : `= up-to-date ${path.relative(ROOT, providersPath)}`);
+  console.log(
+    changed
+      ? `✓ wrote ${path.relative(ROOT, providersPath)}`
+      : `= up-to-date ${path.relative(ROOT, providersPath)}`
+  );
 }
 
-function patchLayout(){
+function patchLayout() {
   if (!fs.existsSync(layoutPath)) {
     console.warn(`! missing ${path.relative(ROOT, layoutPath)} (skipping)`);
     return;
@@ -89,7 +101,10 @@ function patchLayout(){
   if (!/from\s+['"]\.\/providers['"]/.test(src)) {
     // insert after first import or at top
     if (/^import .+/m.test(src)) {
-      src = src.replace(/^import .+\n/, m => m + `import { Providers } from './providers';\n`);
+      src = src.replace(
+        /^import .+\n/,
+        (m) => m + `import { Providers } from './providers';\n`
+      );
     } else {
       src = `import { Providers } from './providers';\n` + src;
     }
@@ -105,21 +120,26 @@ function patchLayout(){
     // best-effort: wrap first occurrence of <body>...</body>
     src = src.replace(
       /<body>([\s\S]*?)<\/body>/,
-      (_m, inner) => `<body>\n        <Providers>${inner.trim()}</Providers>\n      </body>`
+      (_m, inner) =>
+        `<body>\n        <Providers>${inner.trim()}</Providers>\n      </body>`
     );
   }
 
   if (src !== before) {
     fs.writeFileSync(layoutPath, src, 'utf8');
-    console.log(`✓ updated ${path.relative(ROOT, layoutPath)} to wrap with <Providers>`);
+    console.log(
+      `✓ updated ${path.relative(ROOT, layoutPath)} to wrap with <Providers>`
+    );
   } else {
     console.log(`= up-to-date ${path.relative(ROOT, layoutPath)}`);
   }
 }
 
-function patchTrackerPage(){
+function patchTrackerPage() {
   if (!fs.existsSync(trackerPage)) {
-    console.log(`= tracker page not found (${path.relative(ROOT, trackerPage)}), skipping`);
+    console.log(
+      `= tracker page not found (${path.relative(ROOT, trackerPage)}), skipping`
+    );
     return;
   }
   const before = fs.readFileSync(trackerPage, 'utf8');
@@ -127,11 +147,17 @@ function patchTrackerPage(){
 
   // If there's an existing "import { trpc } from '...';", ensure it's from '@/trpc'
   if (/import\s*\{\s*trpc\s*\}\s*from\s*['"][^'"]+['"]/.test(src)) {
-    src = src.replace(/import\s*\{\s*trpc\s*\}\s*from\s*['"][^'"]+['"]/, `import { trpc } from '@/trpc'`);
+    src = src.replace(
+      /import\s*\{\s*trpc\s*\}\s*from\s*['"][^'"]+['"]/,
+      `import { trpc } from '@/trpc'`
+    );
   } else if (!/from\s+['"]@\/trpc['"]/.test(src)) {
     // Add an import near the top
     if (/^import .+/m.test(src)) {
-      src = src.replace(/^import .+\n/, m => m + `import { trpc } from '@/trpc';\n`);
+      src = src.replace(
+        /^import .+\n/,
+        (m) => m + `import { trpc } from '@/trpc';\n`
+      );
     } else {
       src = `import { trpc } from '@/trpc';\n` + src;
     }
@@ -139,15 +165,22 @@ function patchTrackerPage(){
 
   if (src !== before) {
     fs.writeFileSync(trackerPage, src, 'utf8');
-    console.log(`✓ ensured import { trpc } from '@/trpc' in ${path.relative(ROOT, trackerPage)}`);
+    console.log(
+      `✓ ensured import { trpc } from '@/trpc' in ${path.relative(
+        ROOT,
+        trackerPage
+      )}`
+    );
   } else {
     console.log(`= up-to-date ${path.relative(ROOT, trackerPage)}`);
   }
 }
 
-function upsertTsconfigPaths(){
+function upsertTsconfigPaths() {
   if (!tsconfigPath || !fs.existsSync(tsconfigPath)) {
-    console.warn('! web tsconfig not found (web/tsconfig.json or web/tsconfig.app.json), skipping');
+    console.warn(
+      '! web tsconfig not found (web/tsconfig.json or web/tsconfig.app.json), skipping'
+    );
     return;
   }
   const json = JSON.parse(fs.readFileSync(tsconfigPath, 'utf8'));
@@ -172,7 +205,7 @@ function upsertTsconfigPaths(){
   }
 }
 
-function ensureRootScript(){
+function ensureRootScript() {
   if (!fs.existsSync(rootPkgPath)) return;
   const pkg = JSON.parse(fs.readFileSync(rootPkgPath, 'utf8'));
   pkg.scripts = pkg.scripts || {};
@@ -185,7 +218,7 @@ function ensureRootScript(){
   }
 }
 
-(function main(){
+(function main() {
   console.log('--- wire-trpc-web ---');
   upsertTrpcClient();
   upsertProviders();

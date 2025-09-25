@@ -23,9 +23,23 @@ const apiPkgPath = path.join(apiDir, 'package.json');
 const rootPkgPath = path.join(root, 'package.json');
 const scansDir = path.join(root, 'scans');
 
-function log(msg) { console.log(msg); }
-function exists(p) { try { return fs.existsSync(p); } catch { return false; } }
-function readJSON(p) { try { return JSON.parse(fs.readFileSync(p, 'utf8')); } catch { return null; } }
+function log(msg) {
+  console.log(msg);
+}
+function exists(p) {
+  try {
+    return fs.existsSync(p);
+  } catch {
+    return false;
+  }
+}
+function readJSON(p) {
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return null;
+  }
+}
 function writeJSON(p, obj) {
   const current = exists(p) ? fs.readFileSync(p, 'utf8') : null;
   const next = JSON.stringify(obj, null, 2) + '\n';
@@ -70,37 +84,49 @@ function ensureApiPackage() {
   if (!exists(apiPkgPath)) {
     fs.mkdirSync(apiDir, { recursive: true });
     writeJSON(apiPkgPath, {
-      name: "@careeros/api",
-      version: "0.0.0",
+      name: '@careeros/api',
+      version: '0.0.0',
       private: true,
       scripts: {
-        "prisma": "prisma",
-        "prisma:migrate": "prisma migrate dev --schema ../../prisma/schema.prisma",
-        "prisma:generate": "prisma generate --schema ../../prisma/schema.prisma",
-        "prisma:format": "prisma format --schema ../../prisma/schema.prisma",
-        "prisma:validate": "prisma validate --schema ../../prisma/schema.prisma",
-        "prisma:reset": "prisma migrate reset --schema ../../prisma/schema.prisma --force",
-        "prisma:seed": "node ../../prisma/seed.cjs"
+        prisma: 'prisma',
+        'prisma:migrate':
+          'prisma migrate dev --schema ../../prisma/schema.prisma',
+        'prisma:generate':
+          'prisma generate --schema ../../prisma/schema.prisma',
+        'prisma:format': 'prisma format --schema ../../prisma/schema.prisma',
+        'prisma:validate':
+          'prisma validate --schema ../../prisma/schema.prisma',
+        'prisma:reset':
+          'prisma migrate reset --schema ../../prisma/schema.prisma --force',
+        'prisma:seed': 'node ../../prisma/seed.cjs',
       },
-      dependencies: { "@prisma/client": "^6.15.0" },
-      devDependencies: { "prisma": "^6.15.0" }
+      dependencies: { '@prisma/client': '^6.15.0' },
+      devDependencies: { prisma: '^6.15.0' },
     });
     log(`✓ Created apps/api/package.json`);
     return;
   }
   const pkg = readJSON(apiPkgPath) || {};
   pkg.scripts = Object.assign({}, pkg.scripts, {
-    "prisma": "prisma",
-    "prisma:migrate": "prisma migrate dev --schema ../../prisma/schema.prisma",
-    "prisma:generate": "prisma generate --schema ../../prisma/schema.prisma",
-    "prisma:format": "prisma format --schema ../../prisma/schema.prisma",
-    "prisma:validate": "prisma validate --schema ../../prisma/schema.prisma",
-    "prisma:reset": "prisma migrate reset --schema ../../prisma/schema.prisma --force",
-    "prisma:seed": "node ../../prisma/seed.cjs"
+    prisma: 'prisma',
+    'prisma:migrate': 'prisma migrate dev --schema ../../prisma/schema.prisma',
+    'prisma:generate': 'prisma generate --schema ../../prisma/schema.prisma',
+    'prisma:format': 'prisma format --schema ../../prisma/schema.prisma',
+    'prisma:validate': 'prisma validate --schema ../../prisma/schema.prisma',
+    'prisma:reset':
+      'prisma migrate reset --schema ../../prisma/schema.prisma --force',
+    'prisma:seed': 'node ../../prisma/seed.cjs',
   });
-  pkg.dependencies = Object.assign({ "@prisma/client": "^6.15.0" }, pkg.dependencies || {});
-  pkg.devDependencies = Object.assign({ "prisma": "^6.15.0" }, pkg.devDependencies || {});
-  if (writeJSON(apiPkgPath, pkg)) log(`✓ Updated apps/api/package.json scripts/deps`);
+  pkg.dependencies = Object.assign(
+    { '@prisma/client': '^6.15.0' },
+    pkg.dependencies || {}
+  );
+  pkg.devDependencies = Object.assign(
+    { prisma: '^6.15.0' },
+    pkg.devDependencies || {}
+  );
+  if (writeJSON(apiPkgPath, pkg))
+    log(`✓ Updated apps/api/package.json scripts/deps`);
   else log(`= apps/api/package.json OK`);
 }
 
@@ -128,11 +154,16 @@ main().finally(() => db.$disconnect());
 }
 
 function ensureRootScanScript() {
-  const rootPkg = readJSON(rootPkgPath) || { name: "@careeros/source", private: true, version: "0.0.0" };
+  const rootPkg = readJSON(rootPkgPath) || {
+    name: '@careeros/source',
+    private: true,
+    version: '0.0.0',
+  };
   rootPkg.scripts = Object.assign({}, rootPkg.scripts, {
-    "scan:final": "node tools/scripts/run-final-scan.cjs"
+    'scan:final': 'node tools/scripts/run-final-scan.cjs',
   });
-  if (writeJSON(rootPkgPath, rootPkg)) log(`✓ Upserted root package.json with scan:final`);
+  if (writeJSON(rootPkgPath, rootPkg))
+    log(`✓ Upserted root package.json with scan:final`);
   else log(`= root package.json scan:final OK`);
 }
 
@@ -217,7 +248,9 @@ async function main() {
   // First migration only if no migrations exist
   const migrationsDir = path.join(prismaDir, 'migrations');
   const needFirstMigration =
-    !exists(migrationsDir) || fs.readdirSync(migrationsDir).filter(n => !n.startsWith('.')).length === 0;
+    !exists(migrationsDir) ||
+    fs.readdirSync(migrationsDir).filter((n) => !n.startsWith('.')).length ===
+      0;
 
   if (needFirstMigration) {
     log('= No migrations found. Creating init migration...');
@@ -233,7 +266,9 @@ async function main() {
   if (exists(path.join(root, 'tools', 'scripts', 'run-final-scan.cjs'))) {
     run('node tools/scripts/run-final-scan.cjs');
   } else {
-    log('~ final-scan script missing (tools/scripts/run-final-scan.cjs). Skipping.');
+    log(
+      '~ final-scan script missing (tools/scripts/run-final-scan.cjs). Skipping.'
+    );
   }
   run('pnpm run test:web');
 

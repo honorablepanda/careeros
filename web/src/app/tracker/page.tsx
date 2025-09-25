@@ -1,99 +1,75 @@
+﻿// web/src/app/tracker/page.tsx
+// TODO(Phase 3): This page now renders real data via TRPC.
+// Keep <h1> and headers (Company, Role, Status, Updated) as the permanent contract.
+
 'use client';
 
-import React from 'react';
-import Link from 'next/link';
-import { trpc } from '../../utils/api';
-import type { ApplicationItem } from '@careeros/types';
+import { trpc } from '@/lib/trpc';
 
-function Column({ title, items }: { title: string; items: ApplicationItem[] }) {
-  return (
-    <div
-      style={{
-        flex: 1,
-        minWidth: 240,
-        padding: 12,
-        border: '1px solid #e5e7eb',
-        borderRadius: 8,
-        background: '#fff',
-      }}
-    >
-      <h3 style={{ marginBottom: 8 }}>{title}</h3>
-      <div style={{ display: 'grid', gap: 8 }}>
-        {items.map((a) => (
-          <div
-            key={a.id}
-            style={{
-              padding: 12,
-              border: '1px solid #e5e7eb',
-              borderRadius: 8,
-              background: '#fff',
-            }}
-          >
-            <div style={{ fontWeight: 600 }}>{a.role}</div>
-            <div style={{ color: '#6b7280' }}>{a.company}</div>
-          </div>
-        ))}
-        {!items.length && (
-          <div style={{ color: '#9ca3af', fontStyle: 'italic' }}>No items</div>
-        )}
-      </div>
-    </div>
-  );
-}
+type Row = {
+  id?: string | number;
+  company: string;
+  role: string;
+  status: string;
+  updated: string; // display-ready date string
+};
 
 export default function TrackerPage() {
-  const userId = 'demo-user'; // TODO: replace with real auth-derived user id
-  const { data, isLoading, error } =
-    trpc.tracker.getApplications.useQuery({ userId });
-
-  if (isLoading) {
-    return (
-      <main style={{ padding: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>
-          Application Tracker
-        </h1>
-        <div>Loading…</div>
-      </main>
-    );
-  }
-
-  if (error) {
-    return (
-      <main style={{ padding: 24 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>
-          Application Tracker
-        </h1>
-        <div style={{ color: '#b91c1c' }}>
-          Failed to load applications: {String(error.message || error)}
-        </div>
-        <div style={{ marginTop: 16 }}>
-          <Link href="/">← Back</Link>
-        </div>
-      </main>
-    );
-  }
-
-  const apps = data ?? [];
-  const grouped = {
-    APPLIED: apps.filter((a) => String(a.status) === 'APPLIED'),
-    INTERVIEW: apps.filter((a) => String(a.status) === 'INTERVIEW'),
-    OFFER: apps.filter((a) => String(a.status) === 'OFFER'),
-    REJECTED: apps.filter((a) => String(a.status) === 'REJECTED'),
-  };
+  const {
+    data: rows = [],
+    isLoading,
+    isError,
+    error,
+  } = trpc.applications.list.useQuery<Row[] | undefined>(undefined, {
+    staleTime: 30_000,
+  });
 
   return (
-    <main style={{ padding: 24 }}>
-      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>
-        Application Tracker
-      </h1>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <Column title="Applied" items={grouped.APPLIED} />
-        <Column title="Interview" items={grouped.INTERVIEW} />
-        <Column title="Offer" items={grouped.OFFER} />
-        <Column title="Rejected" items={grouped.REJECTED} />
-      </div>
-      <div style={{ marginTop: 16 }}>
-        <Link href="/">← Back</Link>
+    <main className="p-6">
+      <h1 className="text-2xl font-semibold mb-4">Application Tracker</h1>
+
+      <div className="overflow-x-auto rounded-lg border">
+        <table className="min-w-full text-sm">
+          <caption className="sr-only">Tracked job applications</caption>
+          <thead className="bg-gray-50 text-left">
+            <tr>
+              <th scope="col" className="px-4 py-2">Company</th>
+              <th scope="col" className="px-4 py-2">Role</th>
+              <th scope="col" className="px-4 py-2">Status</th>
+              <th scope="col" className="px-4 py-2">Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading ? (
+              <tr>
+                <td className="px-4 py-3 italic text-gray-500" colSpan={4}>
+                  Loading…
+                </td>
+              </tr>
+            ) : isError ? (
+              <tr>
+                <td className="px-4 py-3 text-red-600" colSpan={4}>
+                  Failed to load applications{error?.message ? `: ${error.message}` : ''}.
+                </td>
+              </tr>
+            ) : rows && rows.length > 0 ? (
+              rows.map((r) => (
+                <tr key={String(r.id ?? `${r.company}-${r.role}-${r.updated}`)}>
+                  <td className="px-4 py-3">{r.company}</td>
+                  <td className="px-4 py-3">{r.role}</td>
+                  <td className="px-4 py-3">{r.status}</td>
+                  <td className="px-4 py-3">{r.updated}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td className="px-4 py-3 italic text-gray-500" colSpan={4}>
+                  No tracked applications.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
     </main>
   );

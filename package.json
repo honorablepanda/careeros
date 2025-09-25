@@ -55,7 +55,10 @@
     "check:activity": "node tools/scripts/runtime-activity-check.cjs",
     "ci:check:activity": "node tools/scripts/ci-check-activity.cjs",
     "test:web:ui": "vitest --root web --config vitest.config.ts",
-    "fix:hydration": "node tools/scripts/ensure-body-suppressHydration.cjs"
+    "fix:hydration": "node tools/scripts/ensure-body-suppressHydration.cjs",
+    "ops:close-pr": "node tools/ops/close-pr-if-open.cjs",
+    "ops:protect:off": "node tools/ops/set-branch-protection.cjs off main",
+    "ops:protect:on": "node tools/ops/set-branch-protection.cjs on main \"CI / build_test\""
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

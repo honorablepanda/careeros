@@ -90,3 +90,5 @@ web/NUL
 NUL
 
 web/src/app/tracker/page.tsx.bak-*
+
+.github/workflows/*.bak

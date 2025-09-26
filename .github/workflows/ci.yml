@@ -6,7 +6,7 @@ on:
     types: [ opened, synchronize, reopened, ready_for_review ]
     paths:
       - '**'
-  pull_request_target:
+  pull_request:
     branches: [ main ]
     types: [ opened, synchronize, reopened, ready_for_review ]
   push:

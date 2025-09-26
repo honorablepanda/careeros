@@ -1,13 +1,20 @@
 name: Activity logging guard
 
 on:
-  pull_request:
   push:
     branches: [ main ]
+  pull_request:
+
+concurrency:
+  group: activity-guard-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check-activity:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -23,9 +30,8 @@ jobs:
         with:
           version: 9
 
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
+      - name: Install (workspace)
+        run: pnpm -w install --frozen-lockfile
 
-      # The runtime check doesn’t need a server or DB
       - name: Verify activity contract
         run: pnpm run check:activity

@@ -1,10 +1,10 @@
 name: CI
 
 on:
-  workflow_dispatch: {}
   push:
     branches: [ main ]
   pull_request:
+  workflow_dispatch: {}
 
 concurrency:
   group: ci-${{ github.ref }}
@@ -16,12 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      CI: 'true'
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -36,6 +40,12 @@ jobs:
 
       - name: Install (workspace)
         run: pnpm -w install --frozen-lockfile
+
+      - name: Prisma prepare
+        run: |
+          pnpm -F ./apps/api run prisma:format
+          pnpm -F ./apps/api run prisma:validate
+          pnpm -F ./apps/api run prisma:generate
 
       - name: Test API
         run: pnpm -w test:api

@@ -4,28 +4,44 @@ on:
   push:
     branches: [ main ]
   pull_request:
+  workflow_dispatch: {}
+
+concurrency:
+  group: activity-check-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   check-activity:
     runs-on: ubuntu-latest
+    permissions: { contents: read }
+    env:
+      CI: 'true'
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
 
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/careeros_ci
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      # ✅ Install pnpm first
+      - uses: pnpm/action-setup@v4
         with:
-          node-version: 20
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
           cache: 'pnpm'
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v3
-        with:
-          version: 9
 
       - name: Install (workspace)
         run: pnpm -w install --frozen-lockfile
+
+      - name: Prisma prepare
+        run: |
+          pnpm -F ./apps/api run prisma:format
+          pnpm -F ./apps/api run prisma:validate
+          pnpm -F ./apps/api run prisma:generate
 
       - name: Run runtime activity check
         run: pnpm run ci:check:activity

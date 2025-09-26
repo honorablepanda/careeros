@@ -1,47 +1,52 @@
 name: CI
 
 on:
-  pull_request:
-    branches: [ main ]
-    types: [opened, synchronize, reopened, ready_for_review]
   push:
     branches: [ main ]
+  pull_request:
   workflow_dispatch: {}
 
-permissions:
-  contents: read
-
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ci-${{ github.ref }}
   cancel-in-progress: true
-
-env:
-  CI: true
-  NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
   build_test:
     name: build_test
     runs-on: ubuntu-latest
+    permissions: { contents: read }
+    env:
+      CI: 'true'
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
+
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/careeros_ci
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+        with: { fetch-depth: 0 }
 
+      # ✅ Install pnpm first so setup-node (cache: pnpm) can find it
       - uses: pnpm/action-setup@v4
         with:
           version: 10
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
-          cache: pnpm
+          node-version: '22'
+          cache: 'pnpm'
 
-      - name: Install deps
-        run: pnpm install --frozen-lockfile
+      - name: Install (workspace)
+        run: pnpm -w install --frozen-lockfile
 
-      - name: API tests
+      - name: Prisma prepare
+        run: |
+          pnpm -F ./apps/api run prisma:format
+          pnpm -F ./apps/api run prisma:validate
+          pnpm -F ./apps/api run prisma:generate
+
+      - name: Test API
         run: pnpm -w test:api
 
-      - name: Web tests
+      - name: Test Web
         run: pnpm -w test:web

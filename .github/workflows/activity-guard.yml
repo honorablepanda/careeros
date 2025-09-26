@@ -1,6 +1,7 @@
 name: Activity logging guard
 
 on:
+  workflow_dispatch: {}
   push:
     branches: [ main ]
   pull_request:

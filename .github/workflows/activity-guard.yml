@@ -1,10 +1,10 @@
 name: Activity logging guard
 
 on:
-  workflow_dispatch: {}
   push:
     branches: [ main ]
   pull_request:
+  workflow_dispatch: {}
 
 concurrency:
   group: activity-guard-${{ github.ref }}
@@ -15,6 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    env:
+      CI: 'true'
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
 
     steps:
       - name: Checkout
@@ -33,6 +38,12 @@ jobs:
 
       - name: Install (workspace)
         run: pnpm -w install --frozen-lockfile
+
+      - name: Prisma prepare
+        run: |
+          pnpm -F ./apps/api run prisma:format
+          pnpm -F ./apps/api run prisma:validate
+          pnpm -F ./apps/api run prisma:generate
 
       - name: Verify activity contract
         run: pnpm run check:activity

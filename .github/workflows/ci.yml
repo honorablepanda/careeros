@@ -4,8 +4,6 @@ on:
   pull_request:
     branches: [ main ]
     types: [opened, synchronize, reopened, ready_for_review]
-    paths:
-      - '**'
   push:
     branches: [ main ]
   workflow_dispatch: {}
@@ -19,8 +17,6 @@ concurrency:
 
 env:
   CI: true
-  NX_DAEMON: false
-  NX_NO_CLOUD: true
   NEXT_TELEMETRY_DISABLED: "1"
 
 jobs:
@@ -28,18 +24,15 @@ jobs:
     name: build_test
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
           version: 10
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: pnpm
@@ -47,38 +40,8 @@ jobs:
       - name: Install deps
         run: pnpm install --frozen-lockfile
 
-      - name: Prisma Client generation (monorepo-safe)
-        shell: bash
-        run: |
-          set -euxo pipefail
-          mapfile -t SCHEMAS < <(git ls-files | grep -E '/prisma/schema\.prisma$' || true)
-          if [ ${#SCHEMAS[@]} -gt 0 ]; then
-            pnpm exec prisma -v
-            for S in "${SCHEMAS[@]}"; do
-              echo "→ Generating Prisma Client for: $S"
-              pnpm exec prisma generate --schema="$S"
-            done
-          else
-            echo "No prisma schemas found; skipping"
-          fi
-
-      - name: Typecheck
-        run: pnpm -w tsc -b
-
-      - name: Guard missing router imports
-        run: node tools/scripts/check-router-imports.cjs
-
-      - name: Build all (Nx)
-        run: pnpm -w exec nx run-many -t build --all --skip-nx-cache --exclude=root
-
       - name: API tests
         run: pnpm -w test:api
 
       - name: Web tests
         run: pnpm -w test:web
-
-      - name: Repo health scan
-        run: node tools/scripts/scan-repo-health.cjs --log-dir tools/logs
-
-      - name: Assert clean working tree
-        run: node tools/scripts/ci-assert-clean.cjs

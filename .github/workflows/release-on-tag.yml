@@ -3,12 +3,12 @@ name: release-on-tag
 on:
   push:
     tags:
-      - "v*"
+      - 'v*'
 
 permissions:
-  contents: write   # create/update releases
-  issues: write     # if your notes script opens issues (safe to keep)
+  contents: write
   actions: read
+  issues: write
 
 concurrency:
   group: release-on-tag-${{ github.ref }}
@@ -16,428 +16,57 @@ concurrency:
 
 jobs:
   release:
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    runs-on: ubuntu-latest
     env:
-      CI: true
-      # Quiet Nx + avoid daemon in CI
-      NX_DAEMON: "false"
-      NX_NO_CLOUD: "true"
-      # Silence Next.js telemetry
-      NEXT_TELEMETRY_DISABLED: "1"
-      # Handy tag var
+      CI: 'true'
+      NX_DAEMON: 'false'
+      NX_NO_CLOUD: 'true'
+      NEXT_TELEMETRY_DISABLED: '1'
       TAG: ${{ github.ref_name }}
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
-        with:
-          version: 10
+      - uses: pnpm/action-setup@v4
+        with: { version: 9 }
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+          cache: 'pnpm'
 
       - name: Install deps
         run: pnpm install --frozen-lockfile
-      - name: Prisma Client generation
-        shell: bash
-        run: |
-          set -euxo pipefail
-          # Find every prisma/schema.prisma in the repo
-          mapfile -t SCHEMAS < <(git ls-files | grep -E '/prisma/schema\.prisma
 
+      # Your one-liner that typechecks, builds, tests, and runs final scans
       - name: Build + Test + Final Scan
         run: pnpm run release:prep
-        timeout-minutes: 25
 
       - name: Upload scan artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: scans-${{ env.TAG }}
-          if-no-files-found: warn
-          retention-days: 7
           path: |
             scans/**
             tools/logs/**
-            web/.next/**
-
-      - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create / Update GitHub Release + Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
-          make_latest: true
-          files: |
-            scans/**/*.json
-            tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- | head -n1 || true)
-          if [ -n "$SCHEMA" ]; then
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          else
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          fi
-
-      - name: Build + Test + Final Scan
-        run: pnpm run release:prep
-        timeout-minutes: 25
-
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scans-${{ env.TAG }}
           if-no-files-found: warn
           retention-days: 7
-          path: |
-            scans/**
-            tools/logs/**
-            web/.next/**
 
       - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
+        run: node tools/scripts/gen-release-notes.cjs "${{ env.TAG }}" > RELEASE_NOTES.md
 
-      - name: Create / Update GitHub Release + Upload Assets
+      - name: Create/Update GitHub Release + Upload Assets
         uses: softprops/action-gh-release@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           tag_name: ${{ env.TAG }}
           name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
+          body_path: RELEASE_NOTES.md
           make_latest: true
+          prerelease: ${{ contains(github.ref_name, '-') }}
           files: |
             scans/**/*.json
             tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- | head -n1 || true)
-          fi
-          echo "Using schema: ${SCHEMA:-<default lookup failed>}"
-          pnpm exec prisma -v
-          # generate against discovered schema (if any)
-          if [ -n "${SCHEMA:-}" ]; then
-            pnpm exec prisma generate --schema="$SCHEMA"
-          else
-            pnpm exec prisma generate
-          fi
-          # sanity: ensure @prisma/client is resolvable
-          node -e "require.resolve('@prisma/client'); console.log('Prisma client OK')"
-
-      - name: Build + Test + Final Scan
-        run: pnpm run release:prep
-        timeout-minutes: 25
-
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scans-${{ env.TAG }}
-          if-no-files-found: warn
-          retention-days: 7
-          path: |
-            scans/**
-            tools/logs/**
-            web/.next/**
-
-      - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create / Update GitHub Release + Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
-          make_latest: true
-          files: |
-            scans/**/*.json
-            tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- | head -n1 || true)
-          if [ -n "$SCHEMA" ]; then
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          else
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          fi
-
-      - name: Build + Test + Final Scan
-        run: pnpm run release:prep
-        timeout-minutes: 25
-
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scans-${{ env.TAG }}
-          if-no-files-found: warn
-          retention-days: 7
-          path: |
-            scans/**
-            tools/logs/**
-            web/.next/**
-
-      - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create / Update GitHub Release + Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
-          make_latest: true
-          files: |
-            scans/**/*.json
-            tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- || true)
-          if [ ${#SCHEMAS[@]} -eq 0 ]; then
-            echo "No prisma/schema.prisma files found; skipping prisma generate"
-            exit 0
-          fi
-          pnpm --version
-          pnpm exec prisma -v
-          for S in "${SCHEMAS[@]}"; do
-            echo "→ Generating Prisma Client for: $S"
-            pnpm exec prisma generate --schema="$S"
-          done
-
-
-      - name: Build + Test + Final Scan
-        run: pnpm run release:prep
-        timeout-minutes: 25
-
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scans-${{ env.TAG }}
-          if-no-files-found: warn
-          retention-days: 7
-          path: |
-            scans/**
-            tools/logs/**
-            web/.next/**
-
-      - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create / Update GitHub Release + Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
-          make_latest: true
-          files: |
-            scans/**/*.json
-            tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- | head -n1 || true)
-          if [ -n "$SCHEMA" ]; then
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          else
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          fi
-
-      - name: Build + Test + Final Scan
-        run: pnpm run release:prep
-        timeout-minutes: 25
-
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scans-${{ env.TAG }}
-          if-no-files-found: warn
-          retention-days: 7
-          path: |
-            scans/**
-            tools/logs/**
-            web/.next/**
-
-      - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create / Update GitHub Release + Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
-          make_latest: true
-          files: |
-            scans/**/*.json
-            tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- | head -n1 || true)
-          fi
-          echo "Using schema: ${SCHEMA:-<default lookup failed>}"
-          pnpm exec prisma -v
-          # generate against discovered schema (if any)
-          if [ -n "${SCHEMA:-}" ]; then
-            pnpm exec prisma generate --schema="$SCHEMA"
-          else
-            pnpm exec prisma generate
-          fi
-          # sanity: ensure @prisma/client is resolvable
-          node -e "require.resolve('@prisma/client'); console.log('Prisma client OK')"
-
-      - name: Build + Test + Final Scan
-        run: pnpm run release:prep
-        timeout-minutes: 25
-
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scans-${{ env.TAG }}
-          if-no-files-found: warn
-          retention-days: 7
-          path: |
-            scans/**
-            tools/logs/**
-            web/.next/**
-
-      - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create / Update GitHub Release + Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
-          make_latest: true
-          files: |
-            scans/**/*.json
-            tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
- | head -n1 || true)
-          if [ -n "$SCHEMA" ]; then
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          else
-            pnpm exec prisma generate --schema=apps/api/prisma/schema.prisma
-          fi
-
-      - name: Build + Test + Final Scan
-        run: pnpm run release:prep
-        timeout-minutes: 25
-
-      - name: Upload scan artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: scans-${{ env.TAG }}
-          if-no-files-found: warn
-          retention-days: 7
-          path: |
-            scans/**
-            tools/logs/**
-            web/.next/**
-
-      - name: Generate release notes
-        id: notes
-        run: |
-          node tools/scripts/gen-release-notes.cjs > RELEASE_NOTES.md
-          echo "notes_path=RELEASE_NOTES.md" >> "$GITHUB_OUTPUT"
-
-      - name: Create / Update GitHub Release + Upload Assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ env.TAG }}
-          name: ${{ env.TAG }}
-          body_path: ${{ steps.notes.outputs.notes_path }}
-          make_latest: true
-          files: |
-            scans/**/*.json
-            tools/logs/**/*.json
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Verify release has expected assets
-        run: |
-          gh release view "$TAG" --json tagName,assets,createdAt
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -20,6 +20,7 @@ jobs:
       NX_NO_CLOUD: 'true'
       NEXT_TELEMETRY_DISABLED: '1'
 
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/careeros_ci
     steps:
       - uses: actions/checkout@v4
 

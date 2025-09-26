@@ -13,8 +13,7 @@ concurrency:
 jobs:
   activity:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
+    permissions: { contents: read }
     env:
       CI: 'true'
       NX_DAEMON: 'false'
@@ -22,19 +21,16 @@ jobs:
       NEXT_TELEMETRY_DISABLED: '1'
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: actions/setup-node@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'pnpm'
 
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 10
 
       - name: Install (workspace)
         run: pnpm -w install --frozen-lockfile

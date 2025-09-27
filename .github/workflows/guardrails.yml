@@ -34,6 +34,17 @@ jobs:
         run: pnpm -w run check:prisma
 
       - name: Type check
+      - name: Generate Prisma Client
+        run: |
+          set -euo pipefail
+          mapfile -t SCHEMAS < <(git ls-files -z | tr \0\ \n\ | grep -E "/prisma/schema\.prisma$" || true)
+          if [ ${#SCHEMAS[@]} -eq 0 ]; then
+            echo "No Prisma schemas found"; exit 1
+          fi
+          for s in "${SCHEMAS[@]}"; do
+            echo "Generating for $s"
+            pnpm -w exec prisma generate --schema="$s"
+          done
         run: pnpm -w run check:types
 
       - name: Unit tests (API/Web)

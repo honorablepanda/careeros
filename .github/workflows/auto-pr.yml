@@ -1,0 +1,67 @@
+name: Auto PR + Automerge
+
+on:
+  push:
+    branches:
+      - chore/**
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  open-and-automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create PR if missing
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const head = context.ref.replace('refs/heads/', '');
+            const base = 'main';
+
+            // Try to find an open PR first
+            let prs = await github.rest.pulls.list({ owner, repo, head: `${owner}:${head}`, base, state: 'open' });
+            let pr = prs.data[0];
+
+            // If not found, create one (handle "already exists" race)
+            if (!pr) {
+              try {
+                const create = await github.rest.pulls.create({
+                  owner, repo, head, base,
+                  title: `Auto PR: ${head}`,
+                  body: 'Automated PR. Auto-merge will happen after checks (and approval if required).'
+                });
+                pr = create.data;
+              } catch (e) {
+                // If creation failed because one already exists, re-list to get it
+                prs = await github.rest.pulls.list({ owner, repo, head: `${owner}:${head}`, base, state: 'open' });
+                pr = prs.data[0];
+                if (!pr) throw e;
+              }
+            }
+
+            core.setOutput('number', String(pr.number));
+
+      # Optional: approve using a bot PAT so auto-merge can be enabled immediately.
+      # Create a classic PAT with 'repo' scope on a bot account and store it as
+      # Actions secret: PR_APPROVER_TOKEN
+      - name: Auto-approve PR (optional)
+        if: ${{ secrets.PR_APPROVER_TOKEN != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.PR_APPROVER_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          gh pr review "$PR_NUMBER" --approve --repo "$GITHUB_REPOSITORY" || true
+
+      - name: Enable auto-merge (squash)
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          pull-request-number: ${{ steps.pr.outputs.number }}
+          merge-method: squash
+        # Don’t fail the workflow if auto-merge can’t be enabled yet (e.g. needs approval)
+        continue-on-error: true

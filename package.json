@@ -58,7 +58,13 @@
     "fix:hydration": "node tools/scripts/ensure-body-suppressHydration.cjs",
     "ops:close-pr": "node tools/ops/close-pr-if-open.cjs",
     "ops:protect:off": "node tools/ops/set-branch-protection.cjs off main",
-    "ops:protect:on": "node tools/ops/set-branch-protection.cjs on main \"CI / build_test\""
+    "ops:protect:on": "node tools/ops/set-branch-protection.cjs on main \"CI / build_test\"",
+    "check:aliases": "node tools/scripts/check-aliases.cjs",
+    "check:prisma": "node tools/scripts/check-prisma.cjs",
+    "check:no-stubs": "node tools/scripts/check-no-stubs.cjs",
+    "check:types": "pnpm -w tsc -b",
+    "check:test": "pnpm -w test:api && pnpm -w test:web",
+    "check:guardrails": "pnpm -w run check:aliases && pnpm -w run check:prisma && pnpm -w run check:types && pnpm -w run check:test && pnpm -w run check:no-stubs"
   },
   "devDependencies": {
     "@eslint/compat": "^1.1.1",

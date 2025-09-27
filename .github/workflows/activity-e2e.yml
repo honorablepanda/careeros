@@ -25,6 +25,9 @@ jobs:
 
       - name: Install
         run: pnpm -w install
+      
+      - name: Generate Prisma Client
+        run: pnpm -w exec prisma generate --schema=apps/api/prisma/schema.prisma
 
       # Always run on PRs (dev mode)
       - name: Activity CI (dev)

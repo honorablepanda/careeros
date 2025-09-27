@@ -1,15 +1,37 @@
-* text=auto
-*.ts text eol=lf
-*.tsx text eol=lf
-*.js text eol=lf
-*.mjs text eol=lf
-*.cjs text eol=lf
-*.json text eol=lf
-*.yml text eol=lf
-*.yaml text eol=lf
-* text=auto eol=lf
-*.bat eol=crlf
-*.cmd eol=crlf
-*.ps1 eol=crlf
+# Keep this file LF so Git never warns about it
+.gitattributes text eol=lf
 
-.husky/** text eol=lf
+# Default: normalize text files to LF in the repo
+*               text=auto eol=lf
+
+# Windows-only script types keep CRLF on checkout (overrides the default)
+*.bat           text eol=crlf
+*.cmd           text eol=crlf
+*.ps1           text eol=crlf
+
+# Shell & Husky hook scripts must be LF (Unix shebang friendly)
+*.sh            text eol=lf
+.husky/*        text eol=lf
+
+# Common source & config files as LF for clean diffs/CI stability
+*.ts            text eol=lf
+*.tsx           text eol=lf
+*.js            text eol=lf
+*.jsx           text eol=lf
+*.mjs           text eol=lf
+*.cjs           text eol=lf
+*.json          text eol=lf
+*.yml           text eol=lf
+*.yaml          text eol=lf
+*.md            text eol=lf
+
+# Binaries / assets: never normalize line endings
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
+*.ico           binary
+*.wasm          binary
+
+# SVG can contain mixed/newline-sensitive payloads; keep as-is
+*.svg           -text

@@ -1,0 +1,46 @@
+name: Auto PR + Automerge
+
+on:
+  push:
+    branches:
+      - chore/**   # any chore/* branch
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  open-and-automerge:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Create a PR into main if one doesn't exist for this branch
+      - name: Create PR if missing
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const {owner, repo} = context.repo;
+            const head = context.ref.replace('refs/heads/','');
+            const base = 'main';
+            const prs = await github.request('GET /repos/{owner}/{repo}/pulls', {
+              owner, repo, head: `${owner}:${head}`, base, state: 'open'
+            });
+            let pr = prs.data[0];
+            if (!pr) {
+              const create = await github.request('POST /repos/{owner}/{repo}/pulls', {
+                owner, repo, head, base,
+                title: `Auto PR: ${head}`,
+                body: 'Automated PR. Auto-merge is enabled when required checks pass.'
+              });
+              pr = create.data;
+            }
+            core.setOutput('number', pr.number);
+
+      # Turn on GitHub's native auto-merge (squash). It will merge itself after required checks pass.
+      - name: Enable auto-merge (squash)
+        uses: peter-evans/enable-pull-request-automerge@v3
+        with:
+          pull-request-number: ${{ steps.pr.outputs.number }}
+          merge-method: squash

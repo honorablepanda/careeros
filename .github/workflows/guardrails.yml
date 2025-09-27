@@ -1,0 +1,43 @@
+name: Guardrails
+
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+
+concurrency:
+  group: guardrails-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  guardrails:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'pnpm'
+
+      - name: Install
+        run: pnpm -w install
+
+      - name: Alias check
+        run: pnpm -w run check:aliases
+
+      - name: Prisma format/validate
+        run: pnpm -w run check:prisma
+
+      - name: Type check
+        run: pnpm -w run check:types
+
+      - name: Unit tests (API/Web)
+        run: pnpm -w run check:test
+
+      - name: No stubs
+        run: pnpm -w run check:no-stubs

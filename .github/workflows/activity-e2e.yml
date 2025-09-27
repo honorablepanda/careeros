@@ -1,0 +1,20 @@
+name: Activity E2E
+on:
+  pull_request:
+  push: { branches: [ main ] }
+concurrency: { group: activity-e2e-${{ github.ref }}, cancel-in-progress: true }
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with: { version: 10 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: 'pnpm' }
+      - name: Install
+        run: pnpm -w install
+      - name: Activity CI (dev)
+        run: pnpm -w run ci:web
+      - name: Activity CI (prod)
+        run: pnpm -w run ci:web:prod

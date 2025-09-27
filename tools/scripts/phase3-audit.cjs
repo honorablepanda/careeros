@@ -5,18 +5,18 @@
  * What it checks:
  *  1) Prisma schema presence + basic models (Tracker/Activity if present)
  *  2) apps/api Prisma scripts (format/validate/migrate/generate)
- *  3) Prisma singleton correctness (libs/shared/prisma/src/prisma.ts)
- *  4) tsconfig.base.json path aliases (shared prisma/trpc + routers/*)
+ *  3) Prisma singleton correctness (accepts libs/shared/... or shared/...)
+ *  4) tsconfig.base.json path aliases (accepts @careeros/* and @careeros/shared/* styles)
  *  5) Local API tRPC runtime files (apps/api/src/trpc/{context,trpc,root}.ts)
  *  6) Routers import ../trpc (not @careeros/shared/trpc or @careeros/trpc)
- *  7) Jest config sanity (no .mjs in extensionsToTreatAsEsm; either TRPC mapper or allowlist)
+ *  7) Jest config sanity (skipped if Vitest config present for API)
  *  8) Web /tracker page present (optional)
  *  9) (optional with --run) Run prisma format/validate, tsc -b, nx run api:test
  *
  * Usage:
  *   node tools/scripts/phase3-audit.cjs           # read-only audit
  *   node tools/scripts/phase3-audit.cjs --fix     # auto-patch safe items
- *   node tools/scripts/phase3-audit.cjs --run     # run commands (format/validate/tsc/tests)
+ *   node tools/scripts/phase3-audit.cjs --run     # run prisma format/validate, tsc -b, api:test
  *   node tools/scripts/phase3-audit.cjs --fix --run
  */
 
@@ -24,8 +24,8 @@ const fs = require('fs');
 const cp = require('child_process');
 const path = require('path');
 
-const FIX = process.argv.includes('--fix');
-const RUN = process.argv.includes('--run');
+const FIX  = process.argv.includes('--fix');
+const RUN  = process.argv.includes('--run');
 const HELP = process.argv.includes('-h') || process.argv.includes('--help');
 const ROOT = process.cwd();
 
@@ -38,10 +38,6 @@ Usage:
   node tools/scripts/phase3-audit.cjs --fix     # auto-patch safe items
   node tools/scripts/phase3-audit.cjs --run     # run prisma format/validate, tsc -b, api:test
   node tools/scripts/phase3-audit.cjs --fix --run
-
-Flags:
-  --fix   Patch safe items (aliases, Prisma scripts, prisma singleton, barrel)
-  --run   Execute sanity commands (format/validate/tsc/tests)
 `);
   process.exit(0);
 }
@@ -55,19 +51,29 @@ function bad(s)  { console.log('❌ ' + s); }
 function readJSON(p) { return JSON.parse(fs.readFileSync(p, 'utf8')); }
 function exists(p)   { return fs.existsSync(p); }
 
+const SKIP_JEST = exists(path.join(ROOT, 'apps', 'api', 'vitest.config.ts'));
+
 const paths = {
   prismaSchema: path.join(ROOT, 'prisma', 'schema.prisma'),
   apiPkg: path.join(ROOT, 'apps', 'api', 'package.json'),
   tsbase: path.join(ROOT, 'tsconfig.base.json'),
-  prismaTs: path.join(ROOT, 'libs', 'shared', 'prisma', 'src', 'prisma.ts'),
-  prismaIndex: path.join(ROOT, 'libs', 'shared', 'prisma', 'src', 'index.ts'),
-  trpcDir: path.join(ROOT, 'apps', 'api', 'src', 'trpc'),
-  trpcContext: path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'context.ts'),
-  trpcTrpc: path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'trpc.ts'),
-  trpcRoot: path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'root.ts'),
-  routersDir: path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'routers'),
-  jestBridge: path.join(ROOT, 'tools', 'jest-trpc-bridge.cjs'),
-  apiJest: path.join(ROOT, 'apps', 'api', 'jest.config.ts'),
+
+  // Accept both locations for the prisma singleton
+  prismaTsLibs:   path.join(ROOT, 'libs', 'shared', 'prisma', 'src', 'prisma.ts'),
+  prismaIndexLibs:path.join(ROOT, 'libs', 'shared', 'prisma', 'src', 'index.ts'),
+  prismaTsShared: path.join(ROOT, 'shared', 'prisma', 'src', 'prisma.ts'),
+  prismaIndexShared: path.join(ROOT, 'shared', 'prisma', 'src', 'index.ts'),
+
+  trpcDir:      path.join(ROOT, 'apps', 'api', 'src', 'trpc'),
+  trpcContext:  path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'context.ts'),
+  trpcTrpc:     path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'trpc.ts'),
+  trpcRoot:     path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'root.ts'),
+  routersDir1:  path.join(ROOT, 'apps', 'api', 'src', 'trpc', 'routers'),
+  routersDir2:  path.join(ROOT, 'apps', 'api', 'src', 'router'), // some repos use this
+
+  jestBridge:   path.join(ROOT, 'tools', 'jest-trpc-bridge.cjs'),
+  apiJest:      path.join(ROOT, 'apps', 'api', 'jest.config.ts'),
+
   webTrackerPage: path.join(ROOT, 'web', 'src', 'app', 'tracker', 'page.tsx'),
 };
 
@@ -142,18 +148,27 @@ if (exists(paths.apiPkg)) {
 }
 
 /* =======================================================================================
- * 3) Prisma singleton correctness
+ * 3) Prisma singleton correctness (accept both locations)
  * =======================================================================================
  */
-console.log('\n== Prisma singleton (libs/shared/prisma) ==');
-if (exists(paths.prismaTs)) {
-  const s = fs.readFileSync(paths.prismaTs, 'utf8');
-  const hasSingleton = /new PrismaClient\(/.test(s) && /globalForPrisma/.test(s);
-  const noFakeUser  = !/Prisma\.User\b/.test(s); // invalid pattern seen before
-  const good = hasSingleton && noFakeUser;
+console.log('\n== Prisma singleton (shared/prisma or libs/shared/prisma) ==');
 
-  add('prisma.ts', good ? 'ok' : 'warn', good ? 'singleton OK' : 'rewrite recommended (no Prisma.User; use singleton)');
-  if (!good && FIX) {
+function checkPrismaFile(pth) {
+  if (!exists(pth)) return { present:false, good:false };
+  const s = fs.readFileSync(pth, 'utf8');
+  const hasSingleton = /new PrismaClient\(/.test(s) && /globalForPrisma/.test(s);
+  const noFakeUser  = !/Prisma\.User\b/.test(s); // guard against past typo
+  return { present:true, good:(hasSingleton && noFakeUser) };
+}
+
+const libCheck    = checkPrismaFile(paths.prismaTsLibs);
+const sharedCheck = checkPrismaFile(paths.prismaTsShared);
+
+if (libCheck.present || sharedCheck.present) {
+  const where = (libCheck.present ? rel(paths.prismaTsLibs) : rel(paths.prismaTsShared));
+  const isGood = (libCheck.present && libCheck.good) || (sharedCheck.present && sharedCheck.good);
+  add('prisma.ts', isGood ? 'ok' : 'warn', isGood ? `singleton OK (${where})` : `rewrite recommended (${where})`);
+  if (!isGood && FIX) {
     const tpl = `import { PrismaClient, Prisma } from '@prisma/client';
 
 const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
@@ -170,20 +185,45 @@ if (process.env.NODE_ENV !== 'production') {
 
 export type { Prisma };
 `;
-    fs.writeFileSync(paths.prismaTs, tpl, 'utf8');
-    ok('patched libs/shared/prisma/src/prisma.ts');
-  }
-  if (!exists(paths.prismaIndex) && FIX) {
-    fs.writeFileSync(paths.prismaIndex, "export * from './prisma';\n", 'utf8');
-    ok('wrote libs/shared/prisma/src/index.ts');
+    const target = libCheck.present ? paths.prismaTsLibs : (sharedCheck.present ? paths.prismaTsShared : paths.prismaTsLibs);
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, tpl, 'utf8');
+    const idx = target.endsWith('libs/shared/prisma/src/prisma.ts') ? paths.prismaIndexLibs : paths.prismaIndexShared;
+    fs.mkdirSync(path.dirname(idx), { recursive: true });
+    if (!exists(idx)) fs.writeFileSync(idx, "export * from './prisma';\n", 'utf8');
+    ok(`patched ${rel(target)}`);
   }
 } else {
-  warn(`${rel(paths.prismaTs)} missing`);
+  warn('no prisma singleton found (shared/ or libs/shared/)');
   add('prisma.ts', 'warn', 'missing (will still pass if not used)');
+  if (FIX) {
+    const target = paths.prismaTsLibs;
+    const tpl = `import { PrismaClient, Prisma } from '@prisma/client';
+
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+
+export const prisma: PrismaClient =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForPrisma.prisma = prisma;
+}
+
+export type { Prisma };
+`;
+    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.writeFileSync(target, tpl, 'utf8');
+    fs.mkdirSync(path.dirname(paths.prismaIndexLibs), { recursive: true });
+    fs.writeFileSync(paths.prismaIndexLibs, "export * from './prisma';\n", 'utf8');
+    ok(`created ${rel(target)} + index.ts`);
+  }
 }
 
 /* =======================================================================================
- * 4) tsconfig.base.json aliases
+ * 4) tsconfig.base.json aliases (accept both styles; ensure both if --fix)
  * =======================================================================================
  */
 console.log('\n== tsconfig.base.json aliases ==');
@@ -193,22 +233,45 @@ if (exists(paths.tsbase)) {
   base.compilerOptions.paths ||= {};
   const p = base.compilerOptions.paths;
 
-  const want = {
-    '@careeros/shared/prisma': ['libs/shared/prisma/src/index.ts'],
-    '@careeros/shared/trpc':   ['libs/shared/trpc/src/index.ts'],
-    '@careeros/shared/trpc/*': ['libs/shared/trpc/src/*'],
-    '@careeros/routers/*':     ['apps/api/src/trpc/routers/*'],
-  };
+  // detect existing roots
+  const hasSharedRoot = exists(paths.prismaIndexShared);
+  const hasLibsRoot   = exists(paths.prismaIndexLibs);
 
-  const missing = Object.entries(want).filter(([k, v]) => JSON.stringify(p[k] || []) !== JSON.stringify(v));
-  if (missing.length === 0) {
+  // choose a preferred mapping root
+  const preferredPrismaIndex = hasSharedRoot ? 'shared/prisma/src/index.ts'
+                           : (hasLibsRoot   ? 'libs/shared/prisma/src/index.ts'
+                                            : 'shared/prisma/src/index.ts');
+  const preferredTrpcIndex   = exists(path.join(ROOT,'shared','trpc','src','index.ts'))
+                           ? 'shared/trpc/src/index.ts'
+                           : 'libs/shared/trpc/src/index.ts';
+
+  const wantAny = [
+    ['@careeros/prisma', [preferredPrismaIndex]],
+    ['@careeros/trpc',   [preferredTrpcIndex]],
+    ['@careeros/types',  ['libs/types/src/index.ts']],
+    ['@careeros/api',    ['apps/api/src/trpc/root.ts']],
+    ['@careeros/routers/*', ['apps/api/src/router/*']],
+  ];
+  const wantCompat = [
+    ['@careeros/shared/prisma', [preferredPrismaIndex]],
+    ['@careeros/shared/trpc',   [preferredTrpcIndex]],
+    ['@careeros/shared/trpc/*', [preferredTrpcIndex.replace('/index.ts','/*')]],
+  ];
+
+  function diff(list) {
+    return list.filter(([k, v]) => JSON.stringify(p[k] || []) !== JSON.stringify(v));
+  }
+  const missingAny   = diff(wantAny);
+  const missingCompat= diff(wantCompat);
+
+  if (missingAny.length === 0 && missingCompat.length === 0) {
     ok('aliases present');
     add('aliases', 'ok', 'paths OK');
   } else {
     warn('aliases incomplete');
     add('aliases', 'warn', 'incomplete');
-    if ( FIX ) {
-      for (const [k, v] of Object.entries(want)) p[k] = v;
+    if (FIX) {
+      for (const [k,v] of [...wantAny, ...wantCompat]) p[k] = v;
       fs.writeFileSync(paths.tsbase, JSON.stringify(base, null, 2) + '\n', 'utf8');
       ok('patched tsconfig.base.json paths');
     }
@@ -239,51 +302,50 @@ if (missingTrpc.length === 0) {
  */
 console.log('\n== Router imports sanity ==');
 let misImports = 0;
-if (exists(paths.routersDir)) {
-  (function walk(dir) {
-    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
-      const p = path.join(dir, e.name);
-      if (e.isDirectory()) { walk(p); continue; }
-      if (!/\.(ts|tsx)$/.test(e.name)) continue;
-      const s = fs.readFileSync(p, 'utf8');
-      if (/from\s+['"]@careeros\/(?:shared\/)?trpc['"]/.test(s)) {
-        misImports++;
-        console.log('   ↪ needs rewrite: ' + rel(p));
-      }
+function scanRouterDir(dir) {
+  if (!exists(dir)) return;
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    const pth = path.join(dir, e.name);
+    if (e.isDirectory()) { scanRouterDir(pth); continue; }
+    if (!/\.(ts|tsx)$/.test(e.name)) continue;
+    const s = fs.readFileSync(pth, 'utf8');
+    if (/from\s+['"]@careeros\/(?:shared\/)?trpc['"]/.test(s)) {
+      misImports++;
+      console.log('   ↪ needs rewrite: ' + rel(pth));
     }
-  })(paths.routersDir);
-
-  add('routers:imports', misImports === 0 ? 'ok' : 'warn', misImports === 0 ? 'all good' : `${misImports} file(s) import from shared alias`);
-} else {
-  warn('routers dir not found (skipped)');
-  add('routers:imports', 'warn', 'skipped');
+  }
 }
+scanRouterDir(paths.routersDir1);
+scanRouterDir(paths.routersDir2);
+add('routers:imports', misImports === 0 ? 'ok' : 'warn', misImports === 0 ? 'all good' : `${misImports} file(s) import from shared alias`);
 
 /* =======================================================================================
- * 7) Jest config sanity (bridge or allowlist, and no .mjs trap)
+ * 7) Jest config sanity (skipped if Vitest config present)
  * =======================================================================================
  */
-console.log('\n== Jest config sanity ==');
-const hasBridge = exists(paths.jestBridge);
-add('jest:bridge', hasBridge ? 'ok' : 'warn', hasBridge ? 'bridge present' : 'bridge missing (allowlist is also fine)');
+if (!SKIP_JEST) {
+  console.log('\n== Jest config sanity ==');
+  const hasBridge = exists(paths.jestBridge);
+  add('jest:bridge', hasBridge ? 'ok' : 'warn', hasBridge ? 'bridge present' : 'bridge missing (allowlist is also fine)');
 
-if (exists(paths.apiJest)) {
-  const s = fs.readFileSync(paths.apiJest, 'utf8');
+  if (exists(paths.apiJest)) {
+    const s = fs.readFileSync(paths.apiJest, 'utf8');
 
-  // .mjs in extensionsToTreatAsEsm → Jest warns/fails in recent versions
-  const badMjs = /extensionsToTreatAsEsm\s*:\s*\[[^\]]*['"]\.mjs['"]/.test(s);
+    // .mjs in extensionsToTreatAsEsm → Jest warns/fails in recent versions
+    const badMjs = /extensionsToTreatAsEsm\s*:\s*\[[^\]]*['"]\.mjs['"]/.test(s);
 
-  // Either: moduleNameMapper mapping @trpc/server to a local bridge, OR allowlist @trpc|tslib in transformIgnorePatterns
-  const hasMapper   = /moduleNameMapper\s*:\s*{[^}]*['"]\^@trpc\/server\$['"]\s*:\s*['"][^'"]*jest-trpc-bridge\.cjs['"]/.test(s);
-  const allowlistRe = /transformIgnorePatterns\s*:\s*\[\s*['"]node_modules\/\(\?\!\(\?:@trpc\|tslib\)\)\//;
-  const hasAllow    = allowlistRe.test(s);
+    // Either: moduleNameMapper mapping @trpc/server to a local bridge, OR allowlist @trpc|tslib
+    const hasMapper   = /moduleNameMapper\s*:\s*{[^}]*['"]\^@trpc\/server\$['"]\s*:\s*['"][^'"]*jest-trpc-bridge\.cjs['"]/.test(s);
+    const allowlistRe = /transformIgnorePatterns\s*:\s*\[\s*['"]node_modules\/\(\?\!\(\?:@trpc\|tslib\)\)\//;
+    const hasAllow    = allowlistRe.test(s);
 
-  add('jest:.mjs', badMjs ? 'fail' : 'ok', badMjs ? '.mjs listed in extensionsToTreatAsEsm — remove it' : 'no .mjs ESM trap');
-  add('jest:trpc', (hasMapper || hasAllow) ? 'ok' : 'warn',
-      (hasMapper || hasAllow) ? 'mapper/allowlist present' : 'consider adding mapper or allowlist for @trpc|tslib');
-} else {
-  warn('apps/api/jest.config.ts missing');
-  add('jest:api-config', 'warn', 'missing');
+    add('jest:.mjs', badMjs ? 'fail' : 'ok', badMjs ? '.mjs listed in extensionsToTreatAsEsm — remove it' : 'no .mjs ESM trap');
+    add('jest:trpc', (hasMapper || hasAllow) ? 'ok' : 'warn',
+        (hasMapper || hasAllow) ? 'mapper/allowlist present' : 'consider adding mapper or allowlist for @trpc|tslib');
+  } else {
+    warn('apps/api/jest.config.ts missing');
+    add('jest:api-config', 'warn', 'missing');
+  }
 }
 
 /* =======================================================================================

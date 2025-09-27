@@ -30,15 +30,6 @@
       "@careeros/api": [
         "apps/api/src/trpc/root.ts"
       ],
-      "@careeros/shared/prisma": [
-        "shared/prisma/src/index.ts"
-      ],
-      "@careeros/shared/trpc": [
-        "shared/trpc/src/index.ts"
-      ],
-      "@careeros/shared/trpc/*": [
-        "shared/trpc/src/*"
-      ],
       "@careeros/routers/*": [
         "apps/api/src/router/*"
       ]

@@ -11,26 +11,30 @@ concurrency:
 jobs:
   e2e:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v3
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
         with:
           version: 10
 
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
           cache: pnpm
 
       - name: Install
         run: pnpm -w install
-      
+
       - name: Generate Prisma Client
-        run: pnpm -w exec prisma generate --schema=apps/api/prisma/schema.prisma
+        run: pnpm -w run generate:prisma
 
       # Always run on PRs (dev mode)
       - name: Activity CI (dev)
+        if: ${{ github.event_name == 'pull_request' }}
         run: pnpm -w run ci:web
 
       # Only run on pushes to main (prod mode)

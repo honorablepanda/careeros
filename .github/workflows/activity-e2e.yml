@@ -2,20 +2,25 @@ name: Activity E2E
 
 on:
   pull_request:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 concurrency:
-  group: activity-e2e-${{ github.ref }}
+  group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        shell: bash
+        working-directory: .
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          # Intentionally no sparse-checkout: we want the whole repo so apps/api/** is present
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -25,50 +30,57 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: 20
+          cache: pnpm
 
       - name: Install
         run: pnpm -w install --frozen-lockfile
 
-      # Validate schema early (optional, but useful)
+      - name: Discover Prisma schema (and export PRISMA_SCHEMA)
+        id: discover-schema
+        run: |
+          set -euo pipefail
+          echo "CWD=$(pwd)"
+          echo "Workspace=$GITHUB_WORKSPACE"
+          echo "Repo tree (top-level):"; ls -la
+          SCHEMA="$(find . -maxdepth 6 -type f -path '*/prisma/schema.prisma' | head -n1 || true)"
+          if [ -z "${SCHEMA:-}" ]; then
+            echo "::error ::No prisma/schema.prisma found in repo"
+            echo "Schemas I can find (none expected below):"
+            find . -maxdepth 6 -type f -name schema.prisma -print || true
+            exit 1
+          fi
+          echo "Using schema: $SCHEMA"
+          echo "PRISMA_SCHEMA=$SCHEMA" >> "$GITHUB_ENV"
+
       - name: Prisma format/validate
         run: |
-          pnpm -w exec prisma format --schema=apps/api/prisma/schema.prisma
-          pnpm -w exec prisma validate --schema=apps/api/prisma/schema.prisma
+          pnpm -w exec prisma format --schema="$PRISMA_SCHEMA"
+          pnpm -w exec prisma validate --schema="$PRISMA_SCHEMA"
 
-      # ✅ Generate BEFORE build so TS has @prisma/client available
       - name: Generate Prisma Client
-        run: pnpm -w run generate:prisma
+        run: pnpm -w exec prisma generate --schema="$PRISMA_SCHEMA"
 
-      - name: Build
-        run: pnpm -w build
+      - name: Build (recursive)
+        run: pnpm -r --if-present run build
 
-      # Playwright is common in E2E; keep if you use it (harmless otherwise)
-      - name: Install Playwright (if used)
-        run: pnpm -w exec playwright install --with-deps || true
+      - name: Install Playwright browsers
+        run: pnpm -w exec playwright install --with-deps
 
-      # Debug to confirm cwd & paths
       - name: Debug CWD and prisma path
         run: |
-          echo "CWD=$(pwd)"
-          ls -la
-          ls -la apps/api/prisma || true
+          pwd; ls -la
+          echo "PRISMA_SCHEMA=$PRISMA_SCHEMA"
 
-      # Run E2E from repo root so relative --schema paths resolve
       - name: Run E2E
-        working-directory: ${{ github.workspace }}
-        env:
-          PRISMA_SCHEMA: apps/api/prisma/schema.prisma
-        run: pnpm -w run e2e
+        run: pnpm -w exec playwright test
 
       - name: Upload Playwright traces (if any)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trace
-          if-no-files-found: ignore
-          retention-days: 7
           path: |
-            playwright-report/**
-            **/playwright/**/trace.zip
+            **/test-results/**/trace.zip
+            **/test-results/**/trace/*.zip
+          if-no-files-found: ignore

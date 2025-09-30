@@ -1,4 +1,5 @@
 name: Activity E2E
+
 on:
   pull_request:
   push:
@@ -11,33 +12,62 @@ concurrency:
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
         with:
-          version: 10
+          version: 9
 
-      - name: Setup Node.js
+      - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version: '20'
+          cache: 'pnpm'
 
       - name: Install
-        run: pnpm -w install
+        run: pnpm -w install --frozen-lockfile
 
+      - name: Build
+        run: pnpm -w build
+
+      # Optional, but keeps prisma tidy & catches obvious schema issues early
+      - name: Prisma format/validate
+        run: |
+          pnpm -w exec prisma format --schema=apps/api/prisma/schema.prisma
+          pnpm -w exec prisma validate --schema=apps/api/prisma/schema.prisma
+
+      # Generate Prisma Client(s) for all schemas in the monorepo
+      # (uses the script you added: "generate:prisma": "node tools/scripts/prisma-generate-all.cjs")
       - name: Generate Prisma Client
         run: pnpm -w run generate:prisma
 
-      # Always run on PRs (dev mode)
-      - name: Activity CI (dev)
-        if: ${{ github.event_name == 'pull_request' }}
-        run: pnpm -w run ci:web
+      # Debug to confirm we’re at the git root and the prisma path exists
+      - name: Debug CWD and prisma path
+        run: |
+          echo "CWD=$(pwd)"
+          ls -la
+          ls -la apps/api/prisma || true
 
-      # Only run on pushes to main (prod mode)
-      - name: Activity CI (prod)
-        if: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/main') }}
-        run: pnpm -w run ci:web:prod
+      # Force E2E to run from the repository root so relative --schema paths resolve
+      - name: Run E2E
+        working-directory: ${{ github.workspace }}
+        env:
+          # Safety net in case any script reads this to resolve schema
+          PRISMA_SCHEMA: apps/api/prisma/schema.prisma
+        run: pnpm -w run e2e
+
+      # Optional: keep Playwright output if available
+      - name: Upload Playwright traces (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trace
+          if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            playwright-report/**
+            **/playwright/**/trace.zip

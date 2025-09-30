@@ -31,36 +31,37 @@ jobs:
       - name: Install
         run: pnpm -w install --frozen-lockfile
 
-      - name: Build
-        run: pnpm -w build
-
-      # Optional, but keeps prisma tidy & catches obvious schema issues early
+      # Validate schema early (optional, but useful)
       - name: Prisma format/validate
         run: |
           pnpm -w exec prisma format --schema=apps/api/prisma/schema.prisma
           pnpm -w exec prisma validate --schema=apps/api/prisma/schema.prisma
 
-      # Generate Prisma Client(s) for all schemas in the monorepo
-      # (uses the script you added: "generate:prisma": "node tools/scripts/prisma-generate-all.cjs")
+      # ✅ Generate BEFORE build so TS has @prisma/client available
       - name: Generate Prisma Client
         run: pnpm -w run generate:prisma
 
-      # Debug to confirm we’re at the git root and the prisma path exists
+      - name: Build
+        run: pnpm -w build
+
+      # Playwright is common in E2E; keep if you use it (harmless otherwise)
+      - name: Install Playwright (if used)
+        run: pnpm -w exec playwright install --with-deps || true
+
+      # Debug to confirm cwd & paths
       - name: Debug CWD and prisma path
         run: |
           echo "CWD=$(pwd)"
           ls -la
           ls -la apps/api/prisma || true
 
-      # Force E2E to run from the repository root so relative --schema paths resolve
+      # Run E2E from repo root so relative --schema paths resolve
       - name: Run E2E
         working-directory: ${{ github.workspace }}
         env:
-          # Safety net in case any script reads this to resolve schema
           PRISMA_SCHEMA: apps/api/prisma/schema.prisma
         run: pnpm -w run e2e
 
-      # Optional: keep Playwright output if available
       - name: Upload Playwright traces (if any)
         if: always()
         uses: actions/upload-artifact@v4

@@ -2,25 +2,22 @@ name: Activity E2E
 
 on:
   pull_request:
-  workflow_dispatch:
+  push:
+    branches: [ main ]
 
 concurrency:
-  group: e2e-${{ github.ref }}
+  group: activity-e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   e2e:
+    name: e2e
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-        working-directory: .
+    timeout-minutes: 30
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          # Intentionally no sparse-checkout: we want the whole repo so apps/api/** is present
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v3
@@ -34,80 +31,71 @@ jobs:
           cache: pnpm
 
       - name: Install
+        run: pnpm -w install --no-frozen-lockfile
 
-      # >>> PRISMA-AUTO-GEN:BEGIN
+      # ---- Prisma: discover & validate/generate for all schemas (non-fatal if none) ----
       - name: Prisma format/validate (all schemas)
+        shell: bash
         run: |
           set -euo pipefail
           mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
           if [ ${#SCHEMAS[@]} -eq 0 ]; then
-            echo "::notice ::No prisma/schema.prisma found; skipping Prisma steps"
+            echo "::notice ::No prisma/schema.prisma found; skipping Prisma format/validate"
             exit 0
           fi
           for s in "${SCHEMAS[@]}"; do
-            echo "Validating $s"
+            echo "Formatting & validating $s"
             pnpm -w exec prisma format --schema="$s"
             pnpm -w exec prisma validate --schema="$s"
           done
 
       - name: Generate Prisma Client (all schemas)
+        shell: bash
         run: |
           set -euo pipefail
           mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
           if [ ${#SCHEMAS[@]} -eq 0 ]; then
-            echo "No prisma schemas; nothing to generate"
+            echo "::notice ::No prisma/schema.prisma found; skipping Prisma generate"
             exit 0
           fi
-          node tools/scripts/prisma-generate-all.cjs
-      # <<< PRISMA-AUTO-GEN:END
+          for s in "${SCHEMAS[@]}"; do
+            echo "Generating client for $s"
+            pnpm -w exec prisma generate --schema="$s"
+          done
 
-        run: pnpm -w install --frozen-lockfile
+      # ---- Build only the web app (don’t traverse the whole repo) ----
+      - name: Build web
+        working-directory: web
+        run: pnpm run build
 
-      - name: Discover Prisma schema (and export PRISMA_SCHEMA)
-        id: discover-schema
-        run: |
-          set -euo pipefail
-          echo "CWD=$(pwd)"
-          echo "Workspace=$GITHUB_WORKSPACE"
-          echo "Repo tree (top-level):"; ls -la
-          SCHEMA="$(find . -maxdepth 6 -type f -path '*/prisma/schema.prisma' | head -n1 || true)"
-          if [ -z "${SCHEMA:-}" ]; then
-            echo "::error ::No prisma/schema.prisma found in repo"
-            echo "Schemas I can find (none expected below):"
-            find . -maxdepth 6 -type f -name schema.prisma -print || true
-            exit 1
-          fi
-          echo "Using schema: $SCHEMA"
-          echo "PRISMA_SCHEMA=$SCHEMA" >> "$GITHUB_ENV"
+      # ---- Playwright (browsers) ----
+      - name: Install Playwright (browsers)
+        working-directory: web
+        run: pnpm exec playwright install --with-deps
 
-      - name: Prisma format/validate
-        run: |
-          pnpm -w exec prisma format --schema="$PRISMA_SCHEMA"
-          pnpm -w exec prisma validate --schema="$PRISMA_SCHEMA"
+      # If your Playwright config uses a dev server, you can start it here
+      # and wait for it, then run tests. Otherwise, tests can start the server.
+      # - name: Start web app
+      #   working-directory: web
+      #   run: |
+      #     pnpm run start &>/dev/null &
+      # - name: Wait for app
+      #   run: npx wait-on http://localhost:3000
 
-      - name: Generate Prisma Client
-        run: pnpm -w exec prisma generate --schema="$PRISMA_SCHEMA"
-
-      - name: Build (recursive)
-        run: pnpm -r --if-present run build
-
-      - name: Install Playwright browsers
-        run: pnpm -w exec playwright install --with-deps
-
-      - name: Debug CWD and prisma path
-        run: |
-          pwd; ls -la
-          echo "PRISMA_SCHEMA=$PRISMA_SCHEMA"
-
+      # ---- Run E2E from web/ only (prevents Playwright from seeing repo-wide specs) ----
       - name: Run E2E
-        run: pnpm -w exec playwright test
+        working-directory: web
+        run: pnpm exec playwright test --config=playwright.config.ts
 
-      - name: Upload Playwright traces (if any)
+      # ---- Upload Playwright artifacts (always) ----
+      - name: Upload Playwright artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: trace
-          path: |
-            **/test-results/**/trace.zip
-            **/test-results/**/trace/*.zip
+          name: playwright-artifacts
           if-no-files-found: ignore
+          retention-days: 7
+          path: |
+            web/playwright-report
+            web/test-results
+            web/playwright/.cache

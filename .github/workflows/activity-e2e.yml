@@ -34,6 +34,33 @@ jobs:
           cache: pnpm
 
       - name: Install
+
+      # >>> PRISMA-AUTO-GEN:BEGIN
+      - name: Prisma format/validate (all schemas)
+        run: |
+          set -euo pipefail
+          mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
+          if [ ${#SCHEMAS[@]} -eq 0 ]; then
+            echo "::notice ::No prisma/schema.prisma found; skipping Prisma steps"
+            exit 0
+          fi
+          for s in "${SCHEMAS[@]}"; do
+            echo "Validating $s"
+            pnpm -w exec prisma format --schema="$s"
+            pnpm -w exec prisma validate --schema="$s"
+          done
+
+      - name: Generate Prisma Client (all schemas)
+        run: |
+          set -euo pipefail
+          mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
+          if [ ${#SCHEMAS[@]} -eq 0 ]; then
+            echo "No prisma schemas; nothing to generate"
+            exit 0
+          fi
+          node tools/scripts/prisma-generate-all.cjs
+      # <<< PRISMA-AUTO-GEN:END
+
         run: pnpm -w install --frozen-lockfile
 
       - name: Discover Prisma schema (and export PRISMA_SCHEMA)

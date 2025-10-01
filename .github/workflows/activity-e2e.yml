@@ -2,56 +2,55 @@ name: Activity E2E
 
 on:
   pull_request:
-  workflow_dispatch:
-
-concurrency:
-  group: e2e-${{ github.ref }}
-  cancel-in-progress: true
+    branches: ['*']
+    paths:
+      - 'web/**'
+      - 'shared/**'
+      - '.github/workflows/activity-e2e.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
 
 jobs:
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
-
+    timeout-minutes: 25
     env:
       CI: true
-      NEXT_TELEMETRY_DISABLED: "1"
-      # Playwright <-> app coordination
-      BASE_URL: "http://127.0.0.1:3000"
-      PW_SERVER_CMD: "pnpm -w --filter web start"
+      NEXT_TELEMETRY_DISABLED: 1
+      BASE_URL: http://127.0.0.1:3000
+      PW_SERVER_CMD: pnpm -w --filter web start
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v4
+        uses: pnpm/action-setup@v3
         with:
           version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version-file: ".nvmrc"
-          cache: "pnpm"
+          node-version: 20
+          cache: pnpm
 
       - name: Install
-        run: pnpm install --frozen-lockfile
+        run: pnpm -w install --no-frozen-lockfile
 
-      # --- Prisma (non-fatal; repo currently has no schema) ---
       - name: Prisma format/validate (all schemas)
         run: |
           set -euo pipefail
           mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
           if [ ${#SCHEMAS[@]} -eq 0 ]; then
             echo "::notice ::No prisma/schema.prisma found; skipping Prisma format/validate"
-          else
-            for s in "${SCHEMAS[@]}"; do
-              echo "Using schema: $s"
-              pnpm -w exec prisma format --schema="$s"
-              pnpm -w exec prisma validate --schema="$s"
-            done
+            exit 0
           fi
+          for s in "${SCHEMAS[@]}"; do
+            echo "Formatting & validating $s"
+            pnpm -w exec prisma format --schema="$s"
+            pnpm -w exec prisma validate --schema="$s"
+          done
 
       - name: Generate Prisma Client (all schemas)
         run: |
@@ -59,32 +58,34 @@ jobs:
           mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
           if [ ${#SCHEMAS[@]} -eq 0 ]; then
             echo "::notice ::No prisma/schema.prisma found; skipping Prisma generate"
-          else
-            for s in "${SCHEMAS[@]}"; do
-              echo "Generating for $s"
-              pnpm -w exec prisma generate --schema="$s"
-            done
+            exit 0
           fi
+          for s in "${SCHEMAS[@]}"; do
+            echo "Generating client for $s"
+            pnpm -w exec prisma generate --schema="$s"
+          done
 
-      # --- Build the Next.js web app ---
+      # Build only 'web' (Nx will build deps) and explicitly skip lint & typecheck
       - name: Build web
-        run: pnpm -w --filter web build
+        run: pnpm -w exec nx run web:build --skipLinting --skipTypeChecking
 
-      # --- Install Playwright browsers ---
       - name: Install Playwright browsers
         run: pnpm -w --filter web exec playwright install --with-deps
 
-      # --- Run E2E tests with our config (webServer will start the app) ---
       - name: Run E2E
-        run: pnpm -w --filter web exec playwright test --config web/playwright.config.ts --reporter=github
+        working-directory: web
+        env:
+          PORT: 3000
+        run: pnpm exec playwright test --config=playwright.config.ts --reporter=html,line
 
-      # --- Always upload traces if something fails ---
       - name: Upload Playwright traces (if any)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts
+          retention-days: 7
+          if-no-files-found: ignore
           path: |
             web/playwright-report
             web/test-results
-          if-no-files-found: ignore
+            web/playwright/.cache

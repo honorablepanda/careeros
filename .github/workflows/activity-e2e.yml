@@ -1,0 +1,91 @@
+name: Activity E2E
+
+on:
+  pull_request:
+    branches: ['*']
+    paths:
+      - 'web/**'
+      - 'shared/**'
+      - '.github/workflows/activity-e2e.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      CI: true
+      NEXT_TELEMETRY_DISABLED: 1
+      BASE_URL: http://127.0.0.1:3000
+      PW_SERVER_CMD: pnpm -w --filter web start
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v3
+        with:
+          version: 9
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install
+        run: pnpm -w install --no-frozen-lockfile
+
+      - name: Prisma format/validate (all schemas)
+        run: |
+          set -euo pipefail
+          mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
+          if [ ${#SCHEMAS[@]} -eq 0 ]; then
+            echo "::notice ::No prisma/schema.prisma found; skipping Prisma format/validate"
+            exit 0
+          fi
+          for s in "${SCHEMAS[@]}"; do
+            echo "Formatting & validating $s"
+            pnpm -w exec prisma format --schema="$s"
+            pnpm -w exec prisma validate --schema="$s"
+          done
+
+      - name: Generate Prisma Client (all schemas)
+        run: |
+          set -euo pipefail
+          mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
+          if [ ${#SCHEMAS[@]} -eq 0 ]; then
+            echo "::notice ::No prisma/schema.prisma found; skipping Prisma generate"
+            exit 0
+          fi
+          for s in "${SCHEMAS[@]}"; do
+            echo "Generating client for $s"
+            pnpm -w exec prisma generate --schema="$s"
+          done
+
+      # Build only 'web' (Nx will build deps) and explicitly skip lint & typecheck
+      - name: Build web
+        run: pnpm -w exec nx run web:build --skipLinting --skipTypeChecking
+
+      - name: Install Playwright browsers
+        run: pnpm -w --filter web exec playwright install --with-deps
+
+      - name: Run E2E
+        working-directory: web
+        env:
+          PORT: 3000
+        run: pnpm exec playwright test --config=playwright.config.ts --reporter=html,line
+
+      - name: Upload Playwright traces (if any)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          retention-days: 7
+          if-no-files-found: ignore
+          path: |
+            web/playwright-report
+            web/test-results
+            web/playwright/.cache

@@ -2,100 +2,89 @@ name: Activity E2E
 
 on:
   pull_request:
-  push:
-    branches: [ main ]
+  workflow_dispatch:
 
 concurrency:
-  group: activity-e2e-${{ github.ref }}
+  group: e2e-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
   e2e:
-    name: e2e
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 20
+
+    env:
+      CI: true
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Playwright <-> app coordination
+      BASE_URL: "http://127.0.0.1:3000"
+      PW_SERVER_CMD: "pnpm -w --filter web start"
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
       - name: Setup pnpm
-        uses: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v4
         with:
           version: 9
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
-          cache: pnpm
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
 
       - name: Install
-        run: pnpm -w install --no-frozen-lockfile
+        run: pnpm install --frozen-lockfile
 
-      # ---- Prisma: discover & validate/generate for all schemas (non-fatal if none) ----
+      # --- Prisma (non-fatal; repo currently has no schema) ---
       - name: Prisma format/validate (all schemas)
-        shell: bash
         run: |
           set -euo pipefail
           mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
           if [ ${#SCHEMAS[@]} -eq 0 ]; then
             echo "::notice ::No prisma/schema.prisma found; skipping Prisma format/validate"
-            exit 0
+          else
+            for s in "${SCHEMAS[@]}"; do
+              echo "Using schema: $s"
+              pnpm -w exec prisma format --schema="$s"
+              pnpm -w exec prisma validate --schema="$s"
+            done
           fi
-          for s in "${SCHEMAS[@]}"; do
-            echo "Formatting & validating $s"
-            pnpm -w exec prisma format --schema="$s"
-            pnpm -w exec prisma validate --schema="$s"
-          done
 
       - name: Generate Prisma Client (all schemas)
-        shell: bash
         run: |
           set -euo pipefail
           mapfile -t SCHEMAS < <(git ls-files -z | tr '\0' '\n' | grep -E "/prisma/schema\.prisma$" || true)
           if [ ${#SCHEMAS[@]} -eq 0 ]; then
             echo "::notice ::No prisma/schema.prisma found; skipping Prisma generate"
-            exit 0
+          else
+            for s in "${SCHEMAS[@]}"; do
+              echo "Generating for $s"
+              pnpm -w exec prisma generate --schema="$s"
+            done
           fi
-          for s in "${SCHEMAS[@]}"; do
-            echo "Generating client for $s"
-            pnpm -w exec prisma generate --schema="$s"
-          done
 
-      # ---- Build only the web app (don’t traverse the whole repo) ----
+      # --- Build the Next.js web app ---
       - name: Build web
-        working-directory: web
-        run: pnpm run build
+        run: pnpm -w --filter web build
 
-      # ---- Playwright (browsers) ----
-      - name: Install Playwright (browsers)
-        working-directory: web
-        run: pnpm exec playwright install --with-deps
+      # --- Install Playwright browsers ---
+      - name: Install Playwright browsers
+        run: pnpm -w --filter web exec playwright install --with-deps
 
-      # If your Playwright config uses a dev server, you can start it here
-      # and wait for it, then run tests. Otherwise, tests can start the server.
-      # - name: Start web app
-      #   working-directory: web
-      #   run: |
-      #     pnpm run start &>/dev/null &
-      # - name: Wait for app
-      #   run: npx wait-on http://localhost:3000
-
-      # ---- Run E2E from web/ only (prevents Playwright from seeing repo-wide specs) ----
+      # --- Run E2E tests with our config (webServer will start the app) ---
       - name: Run E2E
-        working-directory: web
-        run: pnpm exec playwright test --config=playwright.config.ts
+        run: pnpm -w --filter web exec playwright test --config web/playwright.config.ts --reporter=github
 
-      # ---- Upload Playwright artifacts (always) ----
-      - name: Upload Playwright artifacts
+      # --- Always upload traces if something fails ---
+      - name: Upload Playwright traces (if any)
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: playwright-artifacts
-          if-no-files-found: ignore
-          retention-days: 7
           path: |
             web/playwright-report
             web/test-results
-            web/playwright/.cache
+          if-no-files-found: ignore

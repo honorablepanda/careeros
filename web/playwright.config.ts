@@ -1,21 +1,28 @@
+// web/playwright.config.ts
 import { defineConfig, devices } from '@playwright/test';
+
+const BASE_URL = process.env.BASE_URL || 'http://127.0.0.1:3000';
+const PW_SERVER_CMD = process.env.PW_SERVER_CMD || 'pnpm -w --filter web start';
 
 export default defineConfig({
   testDir: './e2e',
-  // Only run files that end with .e2e.spec.ts so unit specs are ignored
-  testMatch: ['**/*.e2e.spec.ts'],
+  testMatch: /.*\.e2e\.spec\.ts$/,
   fullyParallel: true,
-  reporter: [['list'], ['github']],
+  timeout: 30_000,
   use: {
+    baseURL: BASE_URL,
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
-    baseURL: process.env.PLAYWRIGHT_BASE_URL || 'http://localhost:3000',
+  },
+  webServer: {
+    command: PW_SERVER_CMD,         // Playwright will start your app
+    url: BASE_URL,                  // and wait until it's reachable
+    reuseExistingServer: !process.env.CI,
+    timeout: 120_000,
   },
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
+  reporter: [['github'], ['html', { open: 'never' }]],
 });
